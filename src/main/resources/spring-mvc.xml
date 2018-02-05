@@ -93,7 +93,8 @@
         </mvc:interceptor>
     </mvc:interceptors>
 
-    <task:annotation-driven /> <!-- 定时器开关-->
+    <!-- 定时器开关-->
+    <!--<task:annotation-driven />-->
 
     <bean id="refundResultQueryTask" class="com.tibbers.zhonghui.scan.RefundScanBuilder"></bean>
 

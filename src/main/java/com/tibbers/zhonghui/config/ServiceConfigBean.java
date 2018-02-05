@@ -23,6 +23,17 @@ public class ServiceConfigBean {
     @Value("#{prop.refundcertsPathPrefix}")
     private String refundcertsPathPrefix;
 
+    @Value("#{prop.refundScanSwitch}")
+    private String refundScanSwitch;
+
+    public String getRefundScanSwitch() {
+        return refundScanSwitch;
+    }
+
+    public void setRefundScanSwitch(String refundScanSwitch) {
+        this.refundScanSwitch = refundScanSwitch;
+    }
+
     public String getRefundcertsPathPrefix() {
         return refundcertsPathPrefix;
     }
