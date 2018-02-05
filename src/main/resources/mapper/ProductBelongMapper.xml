@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tibbers.zhonghui.dao.IProductBelongDao">
+
+    <resultMap id="SingleRelation" type="com.tibbers.zhonghui.model.ProductBelong">
+        <id column="addressid" jdbcType="VARCHAR" property="addressid"/>
+        <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
+        <result column="salestate" jdbcType="VARCHAR" property="salestate"/>
+        <result column="remaindernum" jdbcType="INTEGER" property="remaindernum"/>
+    </resultMap>
+
+
+    <insert id="insertSingleRelation" parameterType="com.tibbers.zhonghui.model.ProductBelong">
+        insert into tproductbelong values(#{addressid},#{productid},#{accountid},#{salestate},#{remaindernum})
+    </insert>
+
+
+    <update id="updateProductState" parameterType="com.tibbers.zhonghui.model.ProductBelong">
+        update tproductbelong set salestate = #{salestate} where productid = #{productid}
+    </update>
+</mapper>

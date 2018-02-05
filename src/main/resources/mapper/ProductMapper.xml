@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tibbers.zhonghui.dao.IProductDao">
+
+    <resultMap id="ProductResult" type="com.tibbers.zhonghui.model.Product">
+        <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="unitprice" jdbcType="VARCHAR" property="unitprice"/>
+        <result column="productname" jdbcType="VARCHAR" property="productname"/>
+        <result column="note" jdbcType="VARCHAR" property="note"/>
+        <result column="itemid" jdbcType="VARCHAR" property="itemid"/>
+        <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
+        <result column="color" jdbcType="VARCHAR" property="color"/>
+        <result column="valuescore" jdbcType="INTEGER" property="valuescore"/>
+        <result column="productgrade" jdbcType="VARCHAR" property="productgrade"/>
+        <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
+        <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
+    </resultMap>
+
+    <insert id="insertSingleProduct" parameterType="com.tibbers.zhonghui.model.Product">
+        insert into tproduct ( productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,reverse1,reverse2)
+        values(#{productid},#{unitprice},#{productname},#{note},#{itemid},#{imagepath},#{color},#{valuescore},#{productgrade},#{reverse1},#{reverse2})
+    </insert>
+
+    <insert id="insertBatchProduct" parameterType="java.util.List">
+        insert into tproduct ( productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,reverse1,reverse2) values
+        <foreach collection="productList" item="item" separator="," index="index">
+            (#{item.productid},#{item.unitprice},#{item.productname},#{item.note},#{item.itemid},#{item.imagepath},#{item.color},#{item.valuescore},#{item.productgrade},#{item.reverse1},#{item.reverse2})
+        </foreach>
+    </insert>
+
+    <update id="uploadImage" parameterType="com.tibbers.zhonghui.model.Product">
+        update tproduct set imagepath = #{imagepath} where productid = #{productid}
+    </update>
+
+    <select id="queryByProductId" parameterType="java.lang.String" resultMap="ProductResult">
+        select productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,reverse1,reverse2 from tproduct where productid = #{_parameter}
+    </select>
+
+    <select id="queryProductByPage" parameterType="com.tibbers.zhonghui.model.common.Pager" resultMap="ProductResult">
+        select  productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,reverse1,reverse2 from tproduct limit  #{startLine},#{offset}
+    </select>
+
+    <select id="queryByProductStates" parameterType="java.util.Map" resultMap="ProductResult">
+        select  productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,reverse1,reverse2 from tproduct where productid in (select productid from tproductbelong
+        <where>
+            <if test="states.length != 0">
+                salestate in (
+                <foreach collection="states" index="index" item="item" separator=",">
+                    #{item}
+                </foreach>
+                )
+            </if>
+        </where>
+        group by productid)
+        <if test="pager != null">
+            limit #{pager.startLine},#{pager.offset}
+        </if>
+    </select>
+
+</mapper>

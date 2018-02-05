@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+    PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-config.dtd">
+
+<configuration>
+
+    <!--但凡是涉及到mybatis里面的文件的路径，都是基于resources文件夹的，
+    但是java.io的api的路径，都是基于项目的根目录，暨从src开始-->
+    <!--
+    <settings>
+        <setting name="useGeneratedKeys" value="false"/>
+        <setting name="useColumnLabel" value="true"/>
+    </settings>
+
+    <typeAliases>
+        <typeAlias alias="UserAlias" type="org.apache.ibatis.submitted.complex_property.User"/>
+    </typeAliases>
+    -->
+    
+    <!--<plugins>
+        <plugin interceptor="com.wq.mvc.demo.interceptor.InterceptorPager"/>
+    </plugins>-->
+    
+    <environments default="development">
+        <environment id="development">
+            <transactionManager type="JDBC">
+                <property name="" value=""/>
+            </transactionManager>
+            <dataSource type="POOLED">
+                <property name="driver" value="com.mysql.jdbc.Driver"/>
+                <property name="url" value="jdbc:mysql://localhost:3306/zhonghui?useUnicode=true&amp;characterEncoding=UTF8"/>
+                <property name="username" value="root"/>
+                <property name="password" value="zhonghui"/>
+            </dataSource>
+        </environment>
+    </environments>
+
+    <mappers>
+
+        <mapper resource="mapper/SystemParameterMapper.xml"/>
+        <mapper resource="mapper/ProductMapper.xml"/>
+        <mapper resource="mapper/ShoppingCarMapper.xml"/>
+    </mappers>
+
+</configuration>

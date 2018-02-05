@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8"/><meta http-equiv="Access-Control-Allow-Origin" content="*" />
+    <title>Title</title>
+</head>
+<script src="jquery.js"></script>
+<script>
+    function ajaxDemo() {
+        var data = '[{"caption":"bbba","categoryid":"004000","description":"的哈撒旦法·佛二号","itemname":"代收付","reverse":""},{"caption":"bbba","categoryid":"004000","description":"发布后","itemname":"三地警方","reverse":""},{"caption":"bbba","categoryid":"004000","description":"广泛弄hi哦","itemname":"sjedf757","reverse":""}]';
+        $.ajax({
+            url : "http://localhost:8080/zhonghui/sysparam/createItem4Category",
+            data : {
+                itemList : data
+            },
+            type : "post",
+            success : function (json) {
+                alert(json);
+            },
+            error : function () {
+                alert("与服务器连接失败，请稍后重试");
+            }
+        });
+    }
+
+
+    function addProduct() {
+        var number = (Math.random() * 1000000);
+        var data = '{"color":"红色","imagepath":"","itemid":"001001","productgrade":"甜","productid":"","productname":"西瓜'+number+'","unitprice":"123.1","valuescore":12}';
+        $.ajax({
+            url : "http://localhost:8080/zhonghui/product/insertSingleProduct",
+            data : {
+                productInfo : data
+            },
+            type : "post",
+            success : function (json) {
+                alert(JSON.stringify(json));
+            },
+            error : function () {
+                alert("与服务器连接失败，请稍后重试");
+            }
+        });
+    }
+
+    function queryOne() {
+        $.ajax({
+            url : "/zhonghui/product/queryByProductId",
+            data : {
+                productid : "100000"
+            },
+            type : "post",
+            dataType : "json",
+            success : function (json) {
+
+                alert(JSON.stringify(json));
+            },
+            error : function () {
+                alert("与服务器连接失败，请稍后重试");
+            }
+        });
+    }
+
+    function queryOne() {
+        $.ajax({
+            url : "/zhonghui/product/queryByProductId",
+            data : {
+                productid : "100000"
+            },
+            type : "post",
+            dataType : "json",
+            success : function (json) {
+                $("#realid").html(JSON.stringify(json));
+                alert(JSON.stringify(json));
+            },
+            error : function () {
+                alert("与服务器连接失败，请稍后重试");
+            }
+        });
+    }
+
+    function registerAccount() {
+        $.ajax({
+            url : "/zhonghui/accountservice/registerAccount",
+            data : {
+                personInfo : '{"address":"sdfnoh","age":19,"bindQQ":"3754934875","personid":"","personname":"iedofno剥","phone":"34759701244","reverse1":"","reverse2":"","reverse3":"","sex":"男"}',
+                accountInfo : '{"accoBalance":"340","accountid":"","bindphone":"37453475034","custtype":"00468667","imagepath":"","isvip":"0","personid":"","score":""}'
+            },
+            type : "post",
+            dataType : "json",
+            success : function (json) {
+                $("#realid").html(JSON.stringify(json));
+                alert(JSON.stringify(json));
+            },
+            error : function () {
+                alert("与服务器连接失败，请稍后重试");
+            }
+        });
+    }
+
+    function updateAccountInfo() {
+        $.ajax({
+            url : "/zhonghui/accountservice/updateAccountInfo",
+            data : {
+                accountinfo : '{"accoBalance":"1234567","accountid":"210e512c68497189","bindphone":"37586085034","custtype":"","imagepath":"","isvip":"0","personid":"","score":""}'
+            },
+            type : "post",
+            dataType : "json",
+            success : function (json) {
+                $("#realid").html(JSON.stringify(json));
+                alert(JSON.stringify(json));
+            },
+            error : function () {
+                alert("与服务器连接失败，请稍后重试");
+            }
+        });
+    }
+
+    function updatePersonalInfo() {
+        $.ajax({
+            url : "/zhonghui/accountservice/updatePersonalInfo",
+            data : {
+                personinfo : '{"address":"和地方工会","age":45,"bindQQ":"","personid":"bb47c7d250204458","personname":"俄会让我i","phone":"","reverse1":"","reverse2":"","reverse3":"","sex":""}'
+            },
+            type : "post",
+            dataType : "json",
+            success : function (json) {
+                $("#realid").html(JSON.stringify(json));
+                alert(JSON.stringify(json));
+            },
+            error : function () {
+                alert("与服务器连接失败，请稍后重试");
+            }
+        });
+    }
+
+    function addNewShopcar() {
+        var data = '{"accountid":"210e512c68497189","adddatetime":"20180923023413","deleteflag":"1","modifydatetime":"","number":1,"productid":"7c25e01bdb896763","reverse1":"","reverse2":"","addressid":"dfhehrt4580820b"}';
+        $.ajax({
+            url : "/zhonghui/shoppingcar/addItem2ShopCar",
+            data : {
+                shopcar : data
+            },
+            type : "post",
+            dataType : "json",
+            success : function (json) {
+                $("#realid").html(JSON.stringify(json));
+                alert(JSON.stringify(json));
+            },
+            error : function () {
+                alert("与服务器连接失败，请稍后重试");
+            }
+        });
+    }
+
+    function updateShopcarInfo() {
+        var data = '{"accountid":"","adddatetime":"","deleteflag":"1","modifydatetime":"","number":-1,"productid":"","reverse1":"","reverse2":"","addressid":"d214770c61424464"}';
+        $.ajax({
+            url : "/zhonghui/shoppingcar/updateGoodsInShopCar",
+            data : {
+                updateShopCar : data
+            },
+            type : "post",
+            dataType : "json",
+            success : function (json) {
+                $("#realid").html(JSON.stringify(json));
+                alert(JSON.stringify(json));
+            },
+            error : function () {
+                alert("与服务器连接失败，请稍后重试");
+            }
+        });
+    }
+
+    function addreceiveAddress() {
+        var data = '{"accountid":"210e512c68497189","addressmore":"dnfgorifgb农函大bfgeur","area":"北农二","city":"金华市","contactphone":"18369872045","postcode":"345393","province":"董事发表您省","receivename":"王强1234","street":"白杨街道"}';
+        $.ajax({
+            url : "/zhonghui/receiveAddress/addOneReceiveAddress",
+            data : {
+                addressinfo : data,
+                isdefault : ""
+            },
+            type : "post",
+            dataType : "json",
+            success : function (json) {
+                $("#realid").html(JSON.stringify(json));
+                alert(JSON.stringify(json));
+            },
+            error : function () {
+                alert("与服务器连接失败，请稍后重试");
+            }
+        });
+    }
+
+
+    function updateReceiveAddress() {
+        var data = '{"addressid":"9715b40426152260","addressmore":"不丢包","area":"北农二","city":"金华市","contactphone":"18369872045","postcode":"345393","province":"董事发表您省","receivename":"王强1234","street":"白杨街道"}';
+        $.ajax({
+            url : "/zhonghui/receiveAddress/updateReceiveAddress",
+            data : {
+                addressinfo : data
+            },
+            type : "post",
+            dataType : "json",
+            success : function (json) {
+                $("#realid").html(JSON.stringify(json));
+                alert(JSON.stringify(json));
+            },
+            error : function () {
+                alert("与服务器连接失败，请稍后重试");
+            }
+        });
+    }
+
+</script>
+<body>
+    <button id="test" value="测试" onclick="ajaxDemo()">测试</button>
+    <hr/>
+    <h1>先新增product，然后文件上传</h1>
+    <button id="addProduct" onclick="addProduct()">新增Product</button>
+    <label >生成的产品序列id[<span id="realid"></span>]</label>
+    <form action="/zhonghui/accountservice/uploadAccountImage" method="post" enctype="multipart/form-data">
+        <label>文件上传</label><input type="file" name="upload" id="upload"><br>
+        <input type="hidden" value="210e512c68497189" id="accountid" name="accountid">
+        <input type="submit" value="done">
+    </form>
+    <hr>
+
+    <h1>注册新用户</h1>
+    <button id="registerAccount" onclick="registerAccount()">注册新用户</button>
+
+    <h1>更新账户信息</h1>
+    <button id="updateAccountInfo" onclick="updateAccountInfo()">更新账户信息</button>
+
+    <h1>更新账户信息</h1>
+    <button id="updatePersonalInfo" onclick="updatePersonalInfo()">更新个人资料信息</button>
+
+    <h1>新增购物车明细信息</h1>
+    <button id="addNewShopcar" onclick="addNewShopcar()">新增购物车明细信息</button>
+
+    <h1>修改购物车明细信息</h1>
+    <button id="updateShopcarInfo" onclick="updateShopcarInfo()">修改购物车明细信息</button>
+
+    <h1>新增收货地址</h1>
+    <button id="addreceiveAddress" onclick="addreceiveAddress()">新增收货地址</button>
+
+    <h1>更新收货地址</h1>
+    <button id="updateReceiveAddress" onclick="updateReceiveAddress()">更新收货地址</button>
+</body>
+</html>

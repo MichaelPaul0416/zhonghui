@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tibbers.zhonghui.dao.ISysParamDao">
+
+    <resultMap id="SysParamResult" type="com.tibbers.zhonghui.model.SysParam">
+        <result column="categoryid" jdbcType="VARCHAR" property="categoryid"/>
+        <result column="itemid" jdbcType="VARCHAR" property="itemid"/>
+        <result column="itemname" jdbcType="VARCHAR" property="itemname"/>
+        <result column="caption" jdbcType="VARCHAR" property="caption"/>
+        <result column="description" jdbcType="VARCHAR" property="description"/>
+        <result column="reverse" jdbcType="VARCHAR" property="reverse"/>
+    </resultMap>
+
+    <select id="loadSysConfig2Cache" resultMap="SysParamResult">
+        select categoryid,itemid,itemname,description,reverse from tsysparameter where deleteflag != '1'
+    </select>
+
+    <select id="queryAllType" resultType="java.lang.String">
+        select caption from tsysparameter where deleteflag != '1' group by caption
+    </select>
+
+    <select id="queryConfigByType" resultMap="SysParamResult" parameterType="java.lang.String">
+        select categoryid,itemid,itemname,caption,description,reverse from tsysparameter where caption = #{_parameter} and deleteflag != '1'
+    </select>
+
+    <select id="queryConfigByCategoryId" resultMap="SysParamResult" parameterType="java.lang.String">
+        select categoryid,itemid,itemname,caption,description,reverse from tsysparameter where categoryid = #{_parameter} and itemid != '#' anda deleteflag != '1'
+    </select>
+
+
+    <update id="deleteCategoryItem" parameterType="com.tibbers.zhonghui.model.SysParam">
+        update tsysparameter set deleteflag = '1' where categoryid = #{categoryid} and itemid = #{itemid}
+    </update>
+
+    <update id="updateCategoryItem" parameterType="com.tibbers.zhonghui.model.SysParam">
+        update tsysparameter set itemname = #{itemname},description = #{description} where categoryid = #{categoryid} and itemid = #{itemid}
+    </update>
+    <!--对于系统参数的配置修改的话，需要实时更新到缓存中-->
+    <!--新建一个大类-->
+    <insert id="createSysCategory" parameterType="com.tibbers.zhonghui.model.SysParam">
+        insert into tsysparameter (categoryid,itemid,itemname,caption,description,reverse) values (#{categoryid},#{itemid},#{itemname},#{caption},#{description},#{reverse});
+    </insert>
+
+    <!--新建一个大类下面的明细-->
+    <insert id="createItem4Category" useGeneratedKeys="true" parameterType="java.util.List">
+        insert into tsysparameter (categoryid,itemid,itemname,caption,description,reverse) VALUES
+        <foreach collection="list" item="item" index="index" separator="," >
+            (#{item.categoryid},#{item.itemid},#{item.itemname},#{item.caption},#{item.description},#{item.reverse})
+        </foreach>
+    </insert>
+
+</mapper>

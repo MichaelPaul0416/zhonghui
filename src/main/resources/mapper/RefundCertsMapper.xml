@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tibbers.zhonghui.dao.IRefundCertsDao">
+
+    <resultMap id="RefundCertResult" type="java.util.Map">
+        <result column="addressid" jdbcType="VARCHAR" property="addressid"/>
+        <result column="refundserailid" jdbcType="VARCHAR" property="refundserailid"/>
+        <result column="certphotoid" jdbcType="VARCHAR" property="certphotoid"/>
+        <result column="certphotopath" jdbcType="VARCHAR" property="certphotopath"/>
+        <result column="uploaddatetime" jdbcType="VARCHAR" property="uploaddatetime"/>
+        <result column="deleteflag" jdbcType="VARCHAR" property="deleteflag"/>
+        <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
+        <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
+    </resultMap>
+
+
+    <insert id="insertCertOrBatch" parameterType="java.util.List">
+        insert into trefundcerts values(
+        <foreach collection="list" item="item" index="index" separator=",">
+            #{item.serialid},#{item.refundserailid},#{certphotoid},#{certphotopath},#{uploaddatetime},#{deleteflag},#{reverse1},#{reverse2}
+        </foreach>
+        )
+    </insert>
+
+    <select id="queryCertsByPager" parameterType="java.util.Map" resultMap="RefundCertResult">
+        select * from trefundcerts where 1 = 1
+        <if test="refundcert != null">
+            <if test="refundcert.refundserialid != null and !&quot;&quot;.equals(refundcert.refundserialid)">and refundserialid = #{refundcert.refundserialid} </if>
+            <if test="refundcert.deleteflag != null and !&quot;&quot;.equals(refundcert.deleteflag)">and deleteflag = #{refundcert.deleteflag} </if>
+            <if test="refundcert.reverse1 != null">and reverse1 = #{refundcert.reverse1} </if>
+            <if test="refundcert.reverse2 != nul ">and reverse2 = #{refundcert.reverse2} </if>
+        </if>
+        <if test="pager != null">limit #{pager.startLine},#{pager.offset}</if>
+    </select>
+</mapper>

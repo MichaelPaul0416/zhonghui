@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--增，查，改-->
+<mapper namespace="com.tibbers.zhonghui.dao.IOrdersDao">
+    <resultMap id="OrderResult" type="java.util.Map">
+        <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
+        <result column="accountname" jdbcType="VARCHAR" property="accountname"/>
+        <result column="orderid" jdbcType="VARCHAR" property="orderid"/>
+        <result column="createdatetime" jdbcType="VARCHAR" property="createdatetime"/>
+        <result column="orderstate" jdbcType="VARCHAR" property="orderstate"/>
+        <result column="isvalid" jdbcType="VARCHAR" property="isvalid"/>
+        <result column="expressno" jdbcType="VARCHAR" property="expressno"/>
+        <result column="donedatetime" jdbcType="VARCHAR" property="donedatetime"/>
+        <result column="freetransport" jdbcType="VARCHAR" property="freetransport"/>
+        <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
+        <result column="note" jdbcType="VARCHAR" property="note"/>
+        <result column="amount" property="amount" jdbcType="VARCHAR"/>
+        <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
+        <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
+    </resultMap>
+
+    <!--新增订单表记录-->
+    <insert id="insertSingelOrder" parameterType="com.tibbers.zhonghui.model.Orders">
+        insert into torders values(#{addressid},#{accountid},#{orderid},#{createdatetime},#{orderstate},#{isvalid},#{expressno},#{donedatetime},#{freetransport},#{transportfee},#{note},#{amount},#{reverse1},#{reverse2})
+    </insert>
+
+    <update id="updatePartOrderMsg" parameterType="com.tibbers.zhonghui.model.Orders">
+        update torders set
+        <if test="orderstate != null and !&quot;&quot;.equals(orderstate)"> orderstate = #{orderstate}, </if>
+        <if test="isvalid != null and !&quot;&quot;.equals(isvalid)"> isvalid = #{isvalid}, </if>
+        <if test="expressno != null and !&quot;&quot;.equals(expressno)"> expressno = #{expressno}, </if>
+        <if test="donedatetime != null and !&quot;&quot;.equals(donedatetime)"> donedatetime = #{donedatetime}, </if>
+        <if test="transportfee != null and !&quot;&quot;.equals(transportfee)"> transportfee = #{transportfee}, </if>
+        <if test="reverse1 != null "> reverse1 = #{reverse1}, </if>
+        <if test="reverse2 != null "> reverse2 = #{reverse2} </if>
+        where orderid = #{orderid}
+    </update>
+
+
+    <!--Orders,Account,Pager-->
+    <select id="queryOrdersByPager" parameterType="java.util.Map" resultMap="OrderResult">
+        select t1.accountid,t2.accountname,t1.orderid,t1.createdatetime,t1.orderstate,t1.isvalid,t1.expressno,t1.donedatetime,t1.freetransport,t1.transportfee,t1.note,t1.amount,t1.reverse1.t1.reverse2
+        from torders t1,taccount t2 where t1.accountid = t2.accountid
+        <if test="orders != null">
+            <if test="orders.accountid != null and !&quot;&quot;.equals(orders.accountid)">and t1.accountid = #{orders.accountid}</if>
+            <if test="account!= null and and account.accountname != null and !&quot;&quot;.equals(account.accountname)">and t2.accountname like '%' #{account.accountname} '%'</if>
+            <if test="orders.orderid != null and !&quot;&quot;.equals(orders.accountname)">and t1.orderid = #{orders.orderid} </if>
+            <if test="orders.orderstate != null and !&quot;&quot;.equals(orders.orderstate)">and t1.orderstate = #{orders.orderstate} </if>
+            <if test="orders.isvalid != null and !&quot;&quot;.equals(orders.isvalid)">and t1.isvalid = #{orders.isvalid} </if>
+            <if test="orders.expressno != null and !&quot;&quot;.equals(orders.expressno)">and t1.expressno = #{orders.expressno} </if>
+            <if test="orders.freetransport != null and !&quot;&quot;.equals(orders.freetransport)">and t1.freetransport = #{orders.freetransport} </if>
+            <if test="orders.note != null and !&quot;&quot;.equals(orders.note)">and t1.note like '%' #{orders.note} '%' </if>
+            <if test="orders.reverse1 != null ">and t1.reverse1 like '%' #{orders.reverse1} '%' </if>
+            <if test="orders.reverse2 != null ">and t1.reverse2 like '%' #{orders.reverse2} '%' </if>
+        </if>
+        order by t1.createdatetime desc,t1.donedatetime desc
+        <if test="pager != null">
+            limit #{pager.startLine},#{offset}
+        </if>
+    </select>
+</mapper>

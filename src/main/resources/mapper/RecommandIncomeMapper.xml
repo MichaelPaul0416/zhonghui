@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tibbers.zhonghui.dao.IRecommandIncomeDao">
+    <resultMap id="RecommandIncome" type="java.util.Map">
+        <result column="incomeserialno" jdbcType="VARCHAR" property="incomeserialno"/>
+        <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
+        <!--<result column="accountname" jdbcType="VARCHAR" property="accountname"/>-->
+        <result column="comefrom" jdbcType="VARCHAR" property="comefrom"/>
+        <!--<result column="comefromname" jdbcType="VARCHAR" property="comefromname"/>-->
+        <result column="income" jdbcType="VARCHAR" property="income"/>
+        <result column="incomedatetime" jdbcType="VARCHAR" property="incomedatetime"/>
+        <result column="alreadydone" jdbcType="VARCHAR" property="alreadydone"/>
+        <result column="descrption" jdbcType="VARCHAR" property="descrption"/>
+        <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
+        <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
+    </resultMap>
+
+    <insert id="insertRecommandIncomeOrBatch" parameterType="java.util.List">
+        insert into trecommandincome VALUES
+        <foreach collection="list" index="index" item="item" separator=",">
+            (#{item.incomeserialno},#{item.accountid},#{item.comefrom},#{item.income},#{item.incomedatetime},#{item.alreadydone},#{item.descrption},#{item.reverse1},#{item.reverse2})
+        </foreach>
+    </insert>
+
+    <select id="queryRecommandIncomeByPager" parameterType="java.util.Map" resultMap="RecommandIncome">
+        select t1.incomeserialno,t1.accountid,t1.comefrom,t1.income,t1.incomedatetime,t1.alreadydone,t1.description,t1.reverse1,t1.reverse2
+        from trecommandincome t1
+        where 1 = 1
+        <if test="income != null">
+            <if test="income.incomeserialno != null and !&quot;!quot;.equals(income.incomeserialno)">and t1.incomeserialno = #{income.incomeserialno} </if>
+            <if test="income.accountid != null and !&quot;!quot;.equals(income.accountid)">and t1.accountid = #{income.accountid} </if>
+            <if test="income.comefrom != null and !&quot;!quot;.equals(income.comefrom)">and t1.comefrom = #{income.comefrom} </if>
+            <if test="income.descrption != null and !&quot;!quot;.equals(income.descrption)">and t1.descrption like '%' #{income.descrption} '%' </if>
+            <if test="income.alreadydone != null and !&quot;!quot;.equals(income.alreadydone)">and t1.alreadydone = #{income.alreadydone} '%' </if>
+            <if test="income.reverse1 != null "> and t1.reverse1 = #{income.reverse1}</if>
+            <if test="income.reverse2 != null "> and t1.reverse2 = #{income.reverse2}</if>
+        </if>
+        <if test="pager != null">limit #{pager.startLine},#{pager.offset}</if>
+    </select>
+
+    <update id="updateIncomeSerial" parameterType="com.tibbers.zhonghui.model.RecommandIncome">
+        update trecommandincome set incomedatetime = #{incomedatetime},alreadydone = #{alreadydone},description = #{description} where incomeserialno = #{incomeserialno}
+    </update>
+</mapper>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tibbers.zhonghui.dao.IReceiveAddressDao">
+
+    <resultMap id="ReceiveAddressResult" type="com.tibbers.zhonghui.model.ReceiveAddress">
+        <id column="addressid" property="addressid" jdbcType="VARCHAR"/>
+        <result column="accountid" property="accountid" jdbcType="VARCHAR"/>
+        <result column="receivename" property="receivename" jdbcType="VARCHAR"/>
+        <result column="contactphone" property="contactphone" jdbcType="VARCHAR"/>
+        <result column="postcode" property="postcode" jdbcType="VARCHAR"/>
+        <result column="province" property="province" jdbcType="VARCHAR"/>
+        <result column="city" property="city" jdbcType="VARCHAR"/>
+        <result column="area" property="area" jdbcType="VARCHAR"/>
+        <result column="street" property="street" jdbcType="VARCHAR"/>
+        <result column="addressmore" property="addressmore" jdbcType="VARCHAR"/>
+        <result column="totaladdress" property="totaladdress" jdbcType="VARCHAR"/>
+        <result column="deleteflag" property="deleteflag" jdbcType="VARCHAR"/>
+        <result column="defaultaddress" property="defaultaddress" jdbcType="VARCHAR"/>
+        <result column="reverse" property="reverse" jdbcType="VARCHAR"/>
+        <result column="accountname" property="accountname" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <insert id="addOneReceiveAddress" parameterType="com.tibbers.zhonghui.model.ReceiveAddress">
+        insert into treceiveaddress values(#{addressid},#{accountid},#{receivename},#{contactphone},#{postcode},#{province},#{city},#{area},#{street},#{addressmore},#{totaladdress},#{deleteflag},#{defaultaddress},#{reverse})
+    </insert>
+
+    <select id="checkAndFindDefaultAddress" parameterType="java.lang.String" resultMap="ReceiveAddressResult">
+        select addressid,accountid,defaultaddress from treceiveaddress where accountid = #{_parameter} and defaultaddress = '1' and deleteflag = '0'
+    </select>
+
+
+    <!--新写一个接口，用来删除收货地址-->
+    <update id="updateReceiveAddress" parameterType="com.tibbers.zhonghui.model.ReceiveAddress">
+        update treceiveaddress set
+        <if test="receivename != null and !&quot;&quot;.equals(receivename)">receivename = #{receivename} , </if>
+        <if test="contactphone != null and !&quot;&quot;.equals(contactphone)">contactphone = #{contactphone} , </if>
+        <if test="postcode != null and !&quot;&quot;.equals(postcode)">postcode = #{postcode} , </if>
+        <if test="province != null and !&quot;&quot;.equals(province)">province = #{province} , </if>
+        <if test="city != null and !&quot;&quot;.equals(city)">city = #{city} , </if>
+        <if test="area != null and !&quot;&quot;.equals(area)">area = #{area} , </if>
+        <if test="street != null and !&quot;&quot;.equals(street)">street = #{street} , </if>
+        <if test="addressmore != null and !&quot;&quot;.equals(addressmore)">addressmore = #{addressmore} , </if>
+        <if test="totaladdress != null and !&quot;&quot;.equals(totaladdress)">totaladdress = #{totaladdress} , </if>
+        <if test="defaultaddress != null and !&quot;&quot;.equals(defaultaddress)">defaultaddress = #{defaultaddress} , </if>
+        <if test="reverse != null ">reverse = #{reverse}  </if>
+        where addressid = #{addressid} and deleteflag = '0'
+    </update>
+
+    <update id="deleteReceiveAddress" parameterType="java.lang.String">
+        update treceiveaddress set deleteflag = '1' where addressid = #{_parameter}
+    </update>
+
+    <select id="queryAddressByPager" parameterType="java.util.Map" resultMap="ReceiveAddressResult">
+        select t1.*,t2.accountname from treceiveaddress t1,taccount t2
+        where t1.accountid = t2.accountid and t1.deleteflag = '0' and t1.accountid = #{receiveaddress.accountid}
+        order by t1.defaultaddress DESC
+        <if test="pager != null">limit #{pager.startLine},#{pager.offset}</if>
+    </select>
+</mapper>

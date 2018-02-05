@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tibbers.zhonghui.dao.IRecommandDao">
+
+    <resultMap id="RecommandResult" type="com.tibbers.zhonghui.model.Recommand">
+        <result column="addressid" jdbcType="VARCHAR" property="addressid"/>
+        <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
+        <result column="recommander" jdbcType="VARCHAR" property="recommander"/>
+        <result column="recommanddate" jdbcType="VARCHAR" property="recommanddate"/>
+        <result column="recommandtime" jdbcType="VARCHAR" property="recommandtime"/>
+        <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
+        <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
+    </resultMap>
+
+    <insert id="insertRecommand" parameterType="com.tibbers.zhonghui.model.Recommand">
+        insert into trecommand values (#{addressid},#{accountid},#{recommander},#{recommanddate},#{recommandtime},#{reverse1},#{reverse2})
+    </insert>
+
+    <select id="queryRecommandByPager" parameterType="java.util.Map" resultMap="RecommandResult">
+        select * from trecommand
+        <if test="pager != null">
+            limit #{pager.startLine},#{pager.offset}
+        </if>
+    </select>
+
+</mapper>

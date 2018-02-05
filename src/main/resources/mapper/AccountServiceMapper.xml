@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tibbers.zhonghui.dao.IAccountServiceDao">
+    <resultMap id="AccountResult" type="com.tibbers.zhonghui.model.Account">
+        <id column="accountid" jdbcType="VARCHAR" property="accountid"/>
+        <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="accountname" jdbcType="VARCHAR" property="accountname"/>
+        <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
+        <result column="bindphone" jdbcType="VARCHAR" property="bindphone"/>
+        <result column="score" jdbcType="VARCHAR" property="score"/>
+        <result column="isvip" jdbcType="VARCHAR" property="isvip"/>
+        <result column="custtype" jdbcType="VARCHAR" property="custtype"/>
+        <result column="accobalance" jdbcType="VARCHAR" property="accobalance"/>
+        <result column="reverse" jdbcType="VARCHAR" property="reverse"/>
+    </resultMap>
+
+
+    <insert id="registerPersonInfo" parameterType="com.tibbers.zhonghui.model.Person">
+        insert into tperson values (#{personid},#{personname},#{sex},#{age},#{phone},#{address},#{bindQQ},#{reverse1},#{reverse2},#{reverse3})
+    </insert>
+
+    <insert id="registerAccountInfo" parameterType="com.tibbers.zhonghui.model.Account">
+        insert into taccount values (#{accountid},#{personid},#{accountname},#{imagepath},#{bindphone},#{score},#{isvip},#{custtype},#{accobalance})
+    </insert>
+
+    <update id="updateAccountInfo" parameterType="com.tibbers.zhonghui.model.Account">
+        update taccount set
+        <if test="accountname != null and !&quot;&quot;.equals(accountname.trim())"> accountname = #{accountname} ,</if>
+        <if test="imagepath != null and !&quot;&quot;.equals(imagepath.trim())"> imagepath = #{imagepath} ,</if>
+        <if test="bindphone != null and !&quot;&quot;.equals(bindphone.trim())"> bindphone = #{bindphone} ,</if>
+        <if test="score != null and !&quot;&quot;.equals(score.trim())"> score= #{score} ,</if>
+        <if test="isvip != null and !&quot;&quot;.equals(isvip.trim())"> isvip = #{isvip} ,</if>
+        <if test="accobalance != null and !&quot;&quot;.equals(accobalance.trim())"> accobalance = #{accobalance},</if>
+        <if test="reverse != null"> reverse = #{reverse} </if>
+        where accountid = #{accountid}
+    </update>
+
+    <update id="updatePersonalInfo" parameterType="com.tibbers.zhonghui.model.Person">
+        update tperson set
+        <if test="personname != null and !&quot;&quot;.equals(personname.trim())"> personname= #{personname} ,</if>
+        <if test="sex != null and !&quot;&quot;.equals(sex.trim())"> sex= #{sex} ,</if>
+        <if test="age != 0"> age= #{age} ,</if>
+        <if test="phone != null and !&quot;&quot;.equals(phone.trim())"> phone= #{phone} ,</if>
+        <if test="address != null and !&quot;&quot;.equals(address.trim())"> address= #{address} ,</if>
+        <if test="bindQQ != null and !&quot;&quot;.equals(bindQQ.trim())"> bindQQ= #{bindQQ} ,</if>
+        <if test="reverse1 != null"> reverse1 = #{reverse1}, </if>
+        <if test="reverse2 != null"> reverse2 = #{reverse2}, </if>
+        <if test="reverse3 != null"> reverse3 = #{reverse3} </if>
+        where personid = #{personid}
+    </update>
+
+    <select id="queryByAccountid" parameterType="java.lang.String" resultMap="AccountResult">
+        select * from taccount where accountid = #{_parameter}
+    </select>
+</mapper>

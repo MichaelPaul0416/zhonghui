@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tibbers.zhonghui.dao.IShoppingCarDao">
+
+    <resultMap id="ShopCarResult" type="com.tibbers.zhonghui.model.ShoppingCar">
+        <id column="addressid" jdbcType="VARCHAR" property="addressid"/>
+        <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
+        <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="number" jdbcType="INTEGER" property="number"/>
+        <result column="adddatetime" jdbcType="VARCHAR" property="adddatetime"/>
+        <result column="modifydatetime" jdbcType="VARCHAR" property="modifydatetime"/>
+        <result column="deleteflag" jdbcType="VARCHAR" property="deletefalg"/>
+        <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
+        <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
+    </resultMap>
+
+
+    <resultMap id="ShopCarShowResult" type="java.util.Map">
+        <result column="addressid" jdbcType="VARCHAR" property="addressid"/>
+        <result column="number" jdbcType="VARCHAR" property="number"/>
+        <result column="unitprice" jdbcType="VARCHAR" property="unitprice"/>
+        <result column="productname" jdbcType="VARCHAR" property="productname"/>
+        <result column="color" jdbcType="VARCHAR" property="color"/>
+        <result column="productgrade" jdbcType="VARCHAR" property="productgrade"/>
+        <result column="valuescore" jdbcType="VARCHAR" property="valuescore"/>
+        <result column="itemname" jdbcType="VARCHAR" property="itemname"/>
+        <result column="salestate" jdbcType="VARCHAR" property="salestate"/>
+    </resultMap>
+    <insert id="addItem2ShopCar" parameterType="com.tibbers.zhonghui.model.ShoppingCar">
+        insert into tshopcar values(#{addressid},#{accountid},#{productid},#{number},#{adddatetime},#{modifydatetime},#{deleteflag},#{reverse1},#{reverse2})
+    </insert>
+    
+    <update id="removeFromShopCar" parameterType="com.tibbers.zhonghui.model.ShoppingCar">
+        update tshopcar set deleteflag = #{deleteflag} where addressid = #{addressid}
+    </update>
+
+    <update id="removeBatchFromShopCar" parameterType="java.util.List">
+        update tshopcar set deleteflag = '0' where serialid in (
+        <foreach collection="list" index="index" item="item" separator=",">
+            #{item.serialid}
+        </foreach>
+        ) and deleteflag != '0'
+    </update>
+
+    <!--number的数量如果为0的话[和前端约定，此时传小于0的数字]就相当于把它从购物车中移除-->
+    <update id="updateGoodsInShopCar" parameterType="com.tibbers.zhonghui.model.ShoppingCar">
+        update tshopcar set
+        <if test="number > 0">number = #{number},</if>
+        <if test="modifydatetime != null and !&quot;&quot;.equals(modifydatetime)">modifydatetime = #{modifydatetime},</if>
+        <if test="reverse1 != null">reverse1 = #{reverse1},</if>
+        <if test="reverse2 != null">reverse2 = #{reverse2}</if>
+        where addressid = #{addressid}
+    </update>
+    
+    <select id="queryListByPager" parameterType="java.util.Map" resultMap="ShopCarShowResult">
+      select t1.addressid,t1.number,t2.unitprice,t2.productname,t2.color,t2.productgrade,t2.valuescore,t3.itemname,t4.salestate
+        from tshopcar t1,tproduct t2,tsysparameter t3,tproductbelong t4
+        where t1.productid = t2.productid and t2.itemid = t3.itemid and t2.productid = t4.productid
+        and t1.accountid = #{accountid} and t4.salestate = #{salestate}
+        <if test="pager != null">
+            limit #{pager.startLine},#{pager.offset}
+        </if>
+    </select>
+
+    <select id="queryListBySerialid" parameterType="java.util.List" resultMap="ShopCarResult">
+        select * from tshopcar where serialid in(
+        <foreach collection="list" index="index" item="ietm" separator=",">
+            #{_parameter}
+        </foreach>
+        )
+        and deleteflag = '1'
+    </select>
+</mapper>

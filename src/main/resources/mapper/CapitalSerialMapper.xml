@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--增，查-->
+<mapper namespace="com.tibbers.zhonghui.dao.ICapitalSerialDao">
+    <resultMap id="CapitalSerial" type="java.util.Map">
+        <result column="emcapitalserial" jdbcType="VARCHAR" property="emcapitalserial"/>
+        <result column="thirdpartserial" jdbcType="VARCHAR" property="thirdpartserial"/>
+        <result column="orderid" jdbcType="VARCHAR" property="orderid"/>
+        <result column="capitaldatetime" jdbcType="VARCHAR" property="capitaldatetime"/>
+        <result column="state" jdbcType="VARCHAR" property="state"/>
+        <result column="thirdpartmsg" jdbcType="VARCHAR" property="thirdpartmsg"/>
+        <result column="capitaldirect" jdbcType="VARCHAR" property="capitaldirect"/>
+        <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
+        <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
+    </resultMap>
+
+    <insert id="insertCapitalSerialOrBatch" parameterType="java.util.List">
+        insert into  tcapitalserial values
+        <foreach collection="list" index="index" item="item" separator=",">
+            (#{item.emcapitalserial},#{item.thirdpartserial},#{item.orderid},#{item.capitaldatetime},#{item.state},#{item.thirdpartmsg},#{item.capitaldirect},#{item.reverse1},#{item.reverse2})
+        </foreach>
+    </insert>
+
+    <select id="queryCapitalSerialByPager" parameterType="java.util.Map" resultMap="CapitalSerial">
+        select * from tcapitalserial where 1 = 1
+        <if test="capital != null">
+            <if test="capital.emcapitalserial != null and !&quot;&quot;.equals(capital.emcapitalserial)"> and emcapitalserial = #{capital.emcapitalserial}</if>
+            <if test="capital.thirdpartserial != null and !&quot;&quot;.equals(capital.thirdpartserial)"> and thirdpartserial = #{capital.thirdpartserial}</if>
+            <if test="capital.orderid != null and !&quot;&quot;.equals(capital.orderid)"> and orderid = #{capital.orderid}</if>
+            <if test="capital.state != null and !&quot;&quot;.equals(capital.state)"> and state = #{capital.state}</if>
+            <if test="capital.capitaldirect != null and !&quot;&quot;.equals(capital.capitaldirect)"> and capitaldirect = #{capital.capitaldirect}</if>
+            <if test="capital.reverse1 != null "> and reverse1 = #{capital.reverse1}</if>
+            <if test="capital.reverse2 != null "> and reverse2 = #{capital.reverse2}</if>
+        </if>
+        <if test="pager != null">limit #{pager.startLine},#{pager.offset}</if>
+    </select>
+    
+    <update id="updateCapitalSerialInfo" parameterType="com.tibbers.zhonghui.model.CapitalSerial">
+        update tcapitalserial set state = #{state},thirdpartmsg = #{thirdpartmsg},capitaldatetime = #{capitaldatetime} where orderid = #{orderid}
+    </update>
+</mapper>
