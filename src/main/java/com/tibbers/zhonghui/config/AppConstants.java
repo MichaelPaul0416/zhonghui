@@ -28,7 +28,7 @@ public class AppConstants {
 
     public static final String WXAPP_LOGIN_URL = "https://api.weixin.qq.com/sns/jscode2session";
 
-    public static final String TRADE_TYPE = "APP";
+    public static final String TRADE_TYPE = "JSAPI";
 
     public static final String ATTACH = "众惠商城购物";
 

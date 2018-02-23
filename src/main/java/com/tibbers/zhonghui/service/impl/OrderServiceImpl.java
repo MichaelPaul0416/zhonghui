@@ -106,7 +106,12 @@ public class OrderServiceImpl implements IOrderService {
                     }
                     //更新订单表
                     ordersDao.insertSingelOrder(orders);
-                    logger.info(String.format("客户[%s]的订单生成成功[%s]",orders));
+                    logger.info(String.format("客户[%s]的订单生成成功[%s]",orders.getAccountid(),orders));
+                    for(OrderItems orderItems : orderItemsList){
+                        orderItems.setSerialid(StringUtil.serialId());
+                        orderItems.setOrderid(orders.getOrderid());
+                        orderItems.setReverse1(orders.getAddressid());
+                    }
                     logger.info(String.format("即将开始生成订单[%s]的订单明细[%s]",orders.getOrderid(),orderItemsList));
 
                     //更新订单明细
@@ -119,30 +124,32 @@ public class OrderServiceImpl implements IOrderService {
                         Map<String,OrderItems> shoppingCarMap = new HashMap<>();
                         List<String> shopcarids = new ArrayList<>();
                         for(OrderItems orderItems : orderItemsList){
-                            orderItems.setSerialid(StringUtil.generateUUID());
-                            orderItems.setOrderid(orders.getOrderid());
+//                            orderItems.setSerialid(StringUtil.generateUUID());
+//                            orderItems.setOrderid(orders.getOrderid());
                             if(!StringUtils.isEmpty(orderItems.getShopcarid())){
                                 shopcarids.add(orderItems.getShopcarid());
                                 shoppingCarMap.put(orderItems.getShopcarid(),orderItems);
                             }
                         }
-                        logger.info(String.format("更新购物车中的明细记录"));
-                        List<ShoppingCar> shoppingCarList = shoppingCarDao.queryListBySerialid(shopcarids);
-                        List<ShoppingCar> batchRemoveList = new ArrayList<>();
-                        for(ShoppingCar shoppingCar : shoppingCarList){
-                            OrderItems orderItems = shoppingCarMap.get(shoppingCar.getSerialid());
-                            if(shoppingCar.getNumber() == orderItems.getPronumber()) {//如果订单明细的商品数量=购物车中商品数量，则从购物车中删除该明细，否则只是数量减少
-                                batchRemoveList.add(shoppingCar);
-                            }else{
-                                shoppingCar.setNumber(shoppingCar.getNumber() - orderItems.getPronumber());
-                                shoppingCar.setModifydatetime(StringUtil.currentDateTime());
-                                logger.info(String.format("更新购物车明细信息[%s]",shoppingCar));
-                                shoppingCarDao.updateGoodsInShopCar(shoppingCar);
+                        if(shopcarids.size() > 0) {
+                            logger.info(String.format("更新购物车中的明细记录"));
+                            List<ShoppingCar> shoppingCarList = shoppingCarDao.queryListBySerialid(shopcarids);
+                            List<ShoppingCar> batchRemoveList = new ArrayList<>();
+                            for (ShoppingCar shoppingCar : shoppingCarList) {
+                                OrderItems orderItems = shoppingCarMap.get(shoppingCar.getSerialid());
+                                if (shoppingCar.getNumber() == orderItems.getPronumber()) {//如果订单明细的商品数量=购物车中商品数量，则从购物车中删除该明细，否则只是数量减少
+                                    batchRemoveList.add(shoppingCar);
+                                } else {
+                                    shoppingCar.setNumber(shoppingCar.getNumber() - orderItems.getPronumber());
+                                    shoppingCar.setModifydatetime(StringUtil.currentDateTime());
+                                    logger.info(String.format("更新购物车明细信息[%s]", shoppingCar));
+                                    shoppingCarDao.updateGoodsInShopCar(shoppingCar);
+                                }
                             }
-                        }
-                        if(batchRemoveList.size() > 0){
-                            logger.info(String.format("将下列购物车明细[%s]删除",batchRemoveList));
-                            shoppingCarDao.removeBatchFromShopCar(batchRemoveList);
+                            if (batchRemoveList.size() > 0) {
+                                logger.info(String.format("将下列购物车明细[%s]删除", batchRemoveList));
+                                shoppingCarDao.removeBatchFromShopCar(batchRemoveList);
+                            }
                         }
                         //预支付流水生成
                         logger.info(String.format("根据微信预支付号[%s]生成一条支付流水",payResult.getPrepay_id()));
@@ -198,6 +205,7 @@ public class OrderServiceImpl implements IOrderService {
             throw new APIException("调用微信鉴权接口异常：" + e.getMessage());
         }
         catch (Exception e){
+            logger.error(e.getMessage(),e);
             throw new APIException(e.getCause().getMessage());
         }
 

@@ -11,10 +11,11 @@ public class OrderItems {
     private String productid;
     private int pronumber;
     private String shopcarid;
-    private int dicount;
+    private int discount;
     private String note;
-    private String reverse1;
+    private String reverse1;//这个属性值用来作为订单明细的收货地址，具体到某一条明细的收货地址
     private String reverse2;
+
 
     @Override
     public String toString() {
@@ -24,7 +25,7 @@ public class OrderItems {
                 ", productid='" + productid + '\'' +
                 ", pronumber=" + pronumber +
                 ", shopcarid='" + shopcarid + '\'' +
-                ", dicount=" + dicount +
+                ", discount=" + discount +
                 ", note='" + note + '\'' +
                 ", reverse1='" + reverse1 + '\'' +
                 ", reverse2='" + reverse2 + '\'' +
@@ -71,12 +72,12 @@ public class OrderItems {
         this.pronumber = pronumber;
     }
 
-    public int getDicount() {
-        return dicount;
+    public int getDiscount() {
+        return discount;
     }
 
-    public void setDicount(int dicount) {
-        this.dicount = dicount;
+    public void setDiscount(int discount) {
+        this.discount = discount;
     }
 
     public String getNote() {

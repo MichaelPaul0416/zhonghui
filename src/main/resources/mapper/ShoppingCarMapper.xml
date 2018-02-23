@@ -11,7 +11,7 @@
         <result column="number" jdbcType="INTEGER" property="number"/>
         <result column="adddatetime" jdbcType="VARCHAR" property="adddatetime"/>
         <result column="modifydatetime" jdbcType="VARCHAR" property="modifydatetime"/>
-        <result column="deleteflag" jdbcType="VARCHAR" property="deletefalg"/>
+        <result column="deleteflag" jdbcType="VARCHAR" property="deleteflag"/>
         <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
         <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
     </resultMap>
@@ -51,7 +51,7 @@
         <if test="modifydatetime != null and !&quot;&quot;.equals(modifydatetime)">modifydatetime = #{modifydatetime},</if>
         <if test="reverse1 != null">reverse1 = #{reverse1},</if>
         <if test="reverse2 != null">reverse2 = #{reverse2}</if>
-        where addressid = #{addressid}
+        where serialid = #{serialid}
     </update>
     
     <select id="queryListByPager" parameterType="java.util.Map" resultMap="ShopCarShowResult">
@@ -66,8 +66,8 @@
 
     <select id="queryListBySerialid" parameterType="java.util.List" resultMap="ShopCarResult">
         select * from tshopcar where serialid in(
-        <foreach collection="list" index="index" item="ietm" separator=",">
-            #{_parameter}
+        <foreach collection="list" index="index" item="item" separator=",">
+            #{item}
         </foreach>
         )
         and deleteflag = '1'
