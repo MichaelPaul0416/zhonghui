@@ -26,10 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
 import javax.persistence.criteria.Order;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author: Paul
@@ -206,7 +203,13 @@ public class OrderServiceImpl implements IOrderService {
         }
         catch (Exception e){
             logger.error(e.getMessage(),e);
-            throw new APIException(e.getCause().getMessage());
+            if(e instanceof WxPayException){
+                WxPayException exception = (WxPayException) e;
+                String info = String.format("微信返回错误代码[%s],错误描述[%s]",exception.getReturnCode(),exception.getReturnMsg());
+                throw new APIException(info);
+            }else{
+                throw new APIException(e.getCause().getMessage());
+            }
         }
 
     }
@@ -287,8 +290,8 @@ public class OrderServiceImpl implements IOrderService {
         Orders orderQuery = new Orders();
         orderQuery.setOrderid(orderid);
         map.put("orders",orderQuery);
-        List<Orders> targetOrders = ordersDao.queryOrdersByPager(map);
-        String accountid = targetOrders.get(0).getAccountid();
+        List<Map<String,String>> targetOrders = ordersDao.queryOrdersByPager(map);
+        String accountid = targetOrders.get(0).get("accountid");
 
         Account account = new Account();
         account.setAccountid(accountid);
@@ -341,7 +344,7 @@ public class OrderServiceImpl implements IOrderService {
         request.setTradeType(AppConstants.TRADE_TYPE);
         request.setSignType(AppConstants.SIGN_TYPE_MD5);
 
-        Map<String,String> urlparams = new HashMap<>();
+        Map<String,String> urlparams = new TreeMap<>();
         urlparams.put("appid",request.getAppid());
         urlparams.put("attach",request.getAttach());
         urlparams.put("body",request.getBody());
@@ -354,9 +357,10 @@ public class OrderServiceImpl implements IOrderService {
         urlparams.put("spbill_create_ip",request.getSpbillCreateIp());
         urlparams.put("total_fee",String.valueOf(request.getTotalFee()));
         urlparams.put("trade_type",request.getTradeType());
-        urlparams.put("key",wxPayConfiguration.getMchKey());
 
         String contactParams = EncryptUtil.contactParams(urlparams);
+        contactParams += "key=" + wxPayConfiguration.getMchKey();
+        logger.info(String.format("param[%s]",contactParams));
         request.setSign(EncryptUtil.encodeMD5String(contactParams));
 
         return  request;

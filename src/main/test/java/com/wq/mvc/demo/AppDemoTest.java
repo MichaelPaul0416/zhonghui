@@ -184,12 +184,32 @@ public class AppDemoTest {
         OrderItems orderItems = new OrderItems();
         orderItems.setProductid("7c25e01bdb896763");
         orderItems.setPronumber(1);
-        orderItems.setDicount(0);
+        orderItems.setDiscount(0);
         orderItems.setNote("备注123");
         orderItems.setReverse1("");
         list.add(orderItems);
 
         System.out.println(JSONObject.toJSON(list));
+    }
+
+    @Test
+    public void refund(){
+        Refund refund = new Refund();
+        refund.setAccountid("hi373b450480v834");
+        refund.setOrderid("20180221141610c5f0f0ce86962386");
+        refund.setProductid("7c25e01bdb896763");
+        refund.setAmount("1");
+        refund.setItemid("002003");
+        refund.setDetail("我要退款");
+
+        System.out.println(JSONObject.toJSON(refund));
+    }
+
+    @Test
+    public void subString(){
+        String str = "nonce_str=ad4f9ded44dc4d96a5493e57db4063c5&refund_desc=我要退款&out_trade_no=20180221141610c5f0f0ce86962386&out_refund_no=20180225182619488978a1cd732831&appid=wxb4b01bcd56f57b44&total_fee=1&refund_fee=100&mch_id=1498864162&sign_type=MD5&key=2ab9071b06b9f739b950ddb41db2690d&";
+        StringBuilder builder = new StringBuilder(str);
+        System.out.println(builder.substring(0,str.length() - 1 ));
     }
 }
 

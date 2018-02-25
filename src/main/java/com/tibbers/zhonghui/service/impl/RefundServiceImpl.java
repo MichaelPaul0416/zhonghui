@@ -63,6 +63,9 @@ public class RefundServiceImpl implements IRefundService {
     @Autowired
     private IRefundCertsDao refundCertsDao;
 
+    @Autowired
+    private WxPayConfiguration wxPayConfiguration;
+
 
     @Override
     public Map<String,Object> refundApply(MultipartFile[] files, String refundSerial) {
@@ -131,7 +134,9 @@ public class RefundServiceImpl implements IRefundService {
                 resultMap.put("returnmsg",refundResult.getReturnMsg());
             }
         } catch (WxPayException e) {
-            throw new APIException(e.getMessage());
+            logger.error(e.getMessage(),e);
+            String info = String.format("微信返回错误代码[%s],错误描述[%s]",e.getReturnCode(),e.getReturnMsg());
+            throw new APIException(info);
         } catch (IOException e) {
             throw new APIException(e.getCause().getMessage());
         }
@@ -180,7 +185,8 @@ public class RefundServiceImpl implements IRefundService {
         Orders orders = new Orders();
         orders.setOrderid(refund.getOrderid());
         params.put("orders",orders);
-        List<Orders> queryOrders = ordersDao.queryOrdersByPager(params);
+        params.put("account",null);
+        List<Map<String,String>> queryOrders = ordersDao.queryOrdersByPager(params);
 
         if(queryOrders.size() == 0){
             throw new APIException(String.format("数据库中未查询到订单[%s]",refund.getOrderid()));
@@ -188,22 +194,26 @@ public class RefundServiceImpl implements IRefundService {
             throw new APIException(String.format("数据库中订单[%s]重复，实际数量为[%s]笔,请联系管理员",refund.getOrderid(),queryOrders.size()));
         }
 
-        String amount = queryOrders.get(0).getAmount();
+        String amount = queryOrders.get(0).get("amount");
         refundRequest.setTotalFee((int)(StringUtil.formatStr2Dobule(amount) * 100));
         refundRequest.setRefundFee((int)(StringUtil.formatStr2Dobule(refund.getAmount()) * 100));
         refundRequest.setRefundDesc(refund.getDetail());
 
-        refundRequest.setSignType(AppConstants.SIGN_TYPE_MD5);
+//        refundRequest.setSignType(AppConstants.SIGN_TYPE_MD5);
         Map<String,String> urlparams = new HashMap<>();
         urlparams.put("appid",refundRequest.getAppid());
         urlparams.put("mch_id",refundRequest.getMchId());
         urlparams.put("nonce_str",refundRequest.getNonceStr());
         urlparams.put("out_trade_no",refundRequest.getOutTradeNo());
+        urlparams.put("out_refund_no",refundRequest.getOutRefundNo());
         urlparams.put("total_fee",String.valueOf(refundRequest.getTotalFee()));
         urlparams.put("refund_fee",String.valueOf(refundRequest.getRefundFee()));
         urlparams.put("refund_desc",refundRequest.getRefundDesc());
+//        urlparams.put("sign_type",refundRequest.getSignType());
+//        urlparams.put("key",wxPayConfiguration.getMchKey());
 
         String sign = EncryptUtil.contactParams(urlparams);
+        sign += "key=" + configuration.getMchKey();
         refundRequest.setSign(EncryptUtil.encodeMD5String(sign));
 
         return refundRequest;

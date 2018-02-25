@@ -44,7 +44,7 @@ public class RefundController {
         APIResponse apiResponse;
         Response response;
 
-        if(!StringUtil.argsEmpty(new String[]{refundSerial})){
+        if(StringUtil.argsEmpty(new String[]{refundSerial})){
             try {
                 Map<String, Object> resultMap = refundService.refundApply(file, refundSerial);
                 response = new Response(true, resultMap);
@@ -59,7 +59,7 @@ public class RefundController {
             apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
         }
 
-        return (String) JSONObject.toJSON(apiResponse);
+        return String.valueOf(JSONObject.toJSON(apiResponse));
     }
 
     @RequestMapping("/refundNotifyResult")

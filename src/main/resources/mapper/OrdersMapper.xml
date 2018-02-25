@@ -41,12 +41,12 @@
 
     <!--Orders,Account,Pager-->
     <select id="queryOrdersByPager" parameterType="java.util.Map" resultMap="OrderResult">
-        select t1.accountid,t2.accountname,t1.orderid,t1.createdatetime,t1.orderstate,t1.isvalid,t1.expressno,t1.donedatetime,t1.freetransport,t1.transportfee,t1.note,t1.amount,t1.reverse1.t1.reverse2
+        select t1.accountid,t2.accountname,t1.orderid,t1.createdatetime,t1.orderstate,t1.isvalid,t1.expressno,t1.donedatetime,t1.freetransport,t1.transportfee,t1.note,t1.amount,t1.reverse1,t1.reverse2
         from torders t1,taccount t2 where t1.accountid = t2.accountid
         <if test="orders != null">
             <if test="orders.accountid != null and !&quot;&quot;.equals(orders.accountid)">and t1.accountid = #{orders.accountid}</if>
-            <if test="account!= null and and account.accountname != null and !&quot;&quot;.equals(account.accountname)">and t2.accountname like '%' #{account.accountname} '%'</if>
-            <if test="orders.orderid != null and !&quot;&quot;.equals(orders.accountname)">and t1.orderid = #{orders.orderid} </if>
+            <if test="account != null and  account.accountname != null and !&quot;&quot;.equals(account.accountname)">and t2.accountname like '%' #{account.accountname} '%'</if>
+            <if test="orders.orderid != null and !&quot;&quot;.equals(orders.orderid)">and t1.orderid = #{orders.orderid} </if>
             <if test="orders.orderstate != null and !&quot;&quot;.equals(orders.orderstate)">and t1.orderstate = #{orders.orderstate} </if>
             <if test="orders.isvalid != null and !&quot;&quot;.equals(orders.isvalid)">and t1.isvalid = #{orders.isvalid} </if>
             <if test="orders.expressno != null and !&quot;&quot;.equals(orders.expressno)">and t1.expressno = #{orders.expressno} </if>
