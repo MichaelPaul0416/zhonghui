@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!--增，查，改-->
+<mapper namespace="com.tibbers.zhonghui.dao.IAdministratorDao">
+    <resultMap id="AdminResult" type="com.tibbers.zhonghui.model.Administrator">
+        <result column="adminid" jdbcType="VARCHAR" property="adminid"/>
+        <result column="adminname" jdbcType="VARCHAR" property="adminname"/>
+        <result column="adminpassword" jdbcType="VARCHAR" property="adminname"/>
+        <result column="createdatetime" jdbcType="VARCHAR" property="createdatetime"/>
+        <result column="lastmodifydatetime" jdbcType="VARCHAR" property="lastmodifydatetime"/>
+        <result column="identitytype" jdbcType="VARCHAR" property="identitytype"/>
+        <result column="isvalid" jdbcType="VARCHAR" property="isvalid"/>
+        <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
+        <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
+    </resultMap>
+
+    <insert id="createSingleAdmin" parameterType="com.tibbers.zhonghui.model.Administrator">
+        insert into tadministrator values(#{serialid},#{adminid},#{adminname},#{adminpassword},#{createdatetime},#{lastmodifydatetime},#{identitytype},#{isvalid},#{reverse1},#{reverse2})
+    </insert>
+
+    <update id="deleteAdmin" parameterType="com.tibbers.zhonghui.model.Administrator">
+        update tadministrator set isvalid = #{isvalid} where adminid = #{adminid}
+    </update>
+
+    <update id="updateInfoAdmin" parameterType="com.tibbers.zhonghui.model.Administrator">
+        UPDATE  tadministrator set
+         <if test="adminpassword != null and !&quot;&quot;.equals(adminpassword)">adminpassword = #{adminpassword} , </if>
+         <if test="lastmodifydatetime != null and !&quot;&quot;.equals(lastmodifydatetime)">lastmodifydatetime = #{lastmodifydatetime} , </if>
+         <if test="reverse1 != null ">reverse1 = #{reverse1} , </if>
+         <if test="reverse1 != null ">reverse2 = #{reverse2} </if>
+        where adminid = #{adminid}
+    </update>
+    
+    <select id="queryAdmin" parameterType="com.tibbers.zhonghui.model.Administrator" resultMap="AdminResult">
+        select adminid,adminname,adminpassword,createdatetime,lastmodifydatetime,identitytype,isvalid,reverse1,reverse2 from tadministrator
+        where adminid = #{adminid} and isvalid = '1'
+    </select>
+
+    <select id="queryAllAdmin" resultMap="AdminResult">
+        select adminid,adminname,adminpassword,createdatetime,lastmodifydatetime,identitytype,isvalid,reverse1,reverse2 from tadministrator where isvalid = '1'
+    </select>
+
+</mapper>

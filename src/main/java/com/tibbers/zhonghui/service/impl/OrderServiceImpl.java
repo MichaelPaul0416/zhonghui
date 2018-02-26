@@ -205,7 +205,13 @@ public class OrderServiceImpl implements IOrderService {
             logger.error(e.getMessage(),e);
             if(e instanceof WxPayException){
                 WxPayException exception = (WxPayException) e;
-                String info = String.format("微信返回错误代码[%s],错误描述[%s]",exception.getReturnCode(),exception.getReturnMsg());
+                logger.error(e.getMessage(),e);
+                String errorcode = exception.getReturnCode(),errormsg = exception.getReturnMsg();
+                if(org.apache.commons.lang3.StringUtils.isNoneEmpty(exception.getErrCode())){
+                    errorcode = exception.getErrCode();
+                    errormsg = exception.getErrCodeDes();
+                }
+                String info = String.format("微信返回错误代码[%s],错误描述[%s]",errorcode,errormsg);
                 throw new APIException(info);
             }else{
                 throw new APIException(e.getCause().getMessage());

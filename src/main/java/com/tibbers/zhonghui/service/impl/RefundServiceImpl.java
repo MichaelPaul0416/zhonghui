@@ -21,6 +21,7 @@ import com.tibbers.zhonghui.service.IRefundService;
 import com.tibbers.zhonghui.utils.EncryptUtil;
 import com.tibbers.zhonghui.utils.StringUtil;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -29,10 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author: Paul
@@ -135,7 +133,12 @@ public class RefundServiceImpl implements IRefundService {
             }
         } catch (WxPayException e) {
             logger.error(e.getMessage(),e);
-            String info = String.format("微信返回错误代码[%s],错误描述[%s]",e.getReturnCode(),e.getReturnMsg());
+            String errorcode = e.getReturnCode(),errormsg = e.getReturnMsg();
+            if(StringUtils.isNoneEmpty(e.getErrCode())){
+                errorcode = e.getErrCode();
+                errormsg = e.getErrCodeDes();
+            }
+            String info = String.format("微信返回错误代码[%s],错误描述[%s]",errorcode,errormsg);
             throw new APIException(info);
         } catch (IOException e) {
             throw new APIException(e.getCause().getMessage());
@@ -195,12 +198,15 @@ public class RefundServiceImpl implements IRefundService {
         }
 
         String amount = queryOrders.get(0).get("amount");
-        refundRequest.setTotalFee((int)(StringUtil.formatStr2Dobule(amount) * 100));
+        if(!amount.equals(refund.getAmount())){
+            throw new APIException(String.format("订单[%s]金额与退款流水金额[%s]不一致",amount,refund.getAmount()));
+        }
+        refundRequest.setTotalFee((int)(StringUtil.formatStr2Dobule(refund.getAmount()) * 100));
         refundRequest.setRefundFee((int)(StringUtil.formatStr2Dobule(refund.getAmount()) * 100));
         refundRequest.setRefundDesc(refund.getDetail());
 
 //        refundRequest.setSignType(AppConstants.SIGN_TYPE_MD5);
-        Map<String,String> urlparams = new HashMap<>();
+        Map<String,String> urlparams = new TreeMap<>();
         urlparams.put("appid",refundRequest.getAppid());
         urlparams.put("mch_id",refundRequest.getMchId());
         urlparams.put("nonce_str",refundRequest.getNonceStr());
