@@ -28,13 +28,14 @@ public class AdministratorServiceImpl implements IAdministratorService {
 
 
     @Override
-    public void createSingleAdmin(String adminInfo) {
+    public String createSingleAdmin(String adminInfo) {
         try {
             Administrator administrator = JSONObject.parseObject(adminInfo, Administrator.class);
             String password = MD5Utils.string2MD5(administrator.getAdminpassword());
             administrator.setAdminpassword(password);
             logger.info(String.format("插入的管理员信息[%s]",administrator));
             administratorDao.createSingleAdmin(administrator);
+            return administrator.getAdminid();
         }catch (Exception e){
             logger.error(e.getMessage(),e);
             throw new APIException(e);
@@ -68,10 +69,9 @@ public class AdministratorServiceImpl implements IAdministratorService {
     }
 
     @Override
-    public boolean loginAdmin(String loginJson) {
-        boolean login = false;
+    public boolean loginAdmin(Administrator administrator) {
+        boolean login;
         try{
-            Administrator administrator = JSONObject.parseObject(loginJson,Administrator.class);
             String psd = administrator.getAdminpassword();
             Administrator query = administratorDao.queryAdmin(administrator);
             logger.info(String.format("查询adminid[%s]的信息为[%s]",administrator.getAdminid(),query));
@@ -82,5 +82,16 @@ public class AdministratorServiceImpl implements IAdministratorService {
             throw new APIException("登录异常，异常信息["+e.getCause().getMessage()+"]");
         }
         return login;
+    }
+
+    @Override
+    public Administrator queryAdmin(Administrator administrator) {
+        try{
+            administrator = administratorDao.queryAdmin(administrator);
+            return administrator;
+        }catch (Exception e){
+            logger.error(e.getMessage(),e);
+            throw new APIException(e);
+        }
     }
 }

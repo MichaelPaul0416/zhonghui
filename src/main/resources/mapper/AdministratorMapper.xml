@@ -35,7 +35,7 @@
     
     <select id="queryAdmin" parameterType="com.tibbers.zhonghui.model.Administrator" resultMap="AdminResult">
         select adminid,adminname,adminpassword,createdatetime,lastmodifydatetime,identitytype,isvalid,reverse1,reverse2 from tadministrator
-        where adminid = #{adminid} and isvalid = '1'
+        where adminid = #{adminid} or adminname = #{adminname} and isvalid = '1'
     </select>
 
     <select id="queryAllAdmin" resultMap="AdminResult">

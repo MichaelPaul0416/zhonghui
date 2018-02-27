@@ -10,7 +10,7 @@ import java.util.List;
  * @description:
  */
 public interface IAdministratorService {
-    void createSingleAdmin(String adminInfo);
+    String createSingleAdmin(String adminInfo);
 
     void deleteAdmin(String adminid);
 
@@ -18,5 +18,7 @@ public interface IAdministratorService {
 
     void updateInfoAdmin(String updateAdmin);
 
-    boolean loginAdmin(String loginJson);
+    boolean loginAdmin(Administrator admin);
+
+    Administrator queryAdmin(Administrator administrator);
 }
