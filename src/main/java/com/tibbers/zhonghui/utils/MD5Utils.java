@@ -58,7 +58,7 @@ public class MD5Utils {
 
     // 测试主函数
     public static void main(String args[]) {
-        String s = new String("tangfuqiang");
+        String s = new String("123456");
         System.out.println("原始：" + s);
         System.out.println("MD5后：" + string2MD5(s));
 //        System.out.println("加密的：" + convertMD5(s));

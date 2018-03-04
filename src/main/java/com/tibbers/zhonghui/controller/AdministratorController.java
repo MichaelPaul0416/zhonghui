@@ -122,6 +122,9 @@ public class AdministratorController {
             try {
                 Map<String, List<Administrator>> map = new HashMap<>();
                 List<Administrator> list = administratorService.queryAdmins();
+                for(Administrator admin : list){
+                    admin.setAdminpassword("");
+                }
                 map.put("all", list);
                 response = new Response(true, map);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE, response);
@@ -151,6 +154,7 @@ public class AdministratorController {
                 Administrator administrator = new Administrator();
                 administrator.setAdminid(adminid);
                 administrator = administratorService.queryAdmin(administrator);
+                administrator.setAdminpassword("");
                 Map<String,Administrator> map = new HashMap<>();
                 map.put("admin",administrator);
                 response = new Response(true,map);
@@ -170,11 +174,11 @@ public class AdministratorController {
 
     @RequestMapping("/adminLogin")
     @ResponseBody
-    public String adminLogin(String actionAdminid,String adminname,String password){
+    public String adminLogin(String adminname,String password){
         APIResponse apiResponse ;
         Response response;
 
-        if(StringUtil.argsEmpty(new String[]{actionAdminid,adminname,password})){
+        if(StringUtil.argsEmpty(new String[]{adminname,password})){
             try{
                 Administrator administrator = new Administrator();
                 administrator.setAdminname(adminname);
@@ -198,7 +202,7 @@ public class AdministratorController {
                 apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
             }
         }else {
-            response = new Response(false,"actionAdminid,登录账户信息不能为空");
+            response = new Response(false,"登录账户信息不能为空");
             apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
         }
 

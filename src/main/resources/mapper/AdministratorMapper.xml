@@ -7,7 +7,7 @@
     <resultMap id="AdminResult" type="com.tibbers.zhonghui.model.Administrator">
         <result column="adminid" jdbcType="VARCHAR" property="adminid"/>
         <result column="adminname" jdbcType="VARCHAR" property="adminname"/>
-        <result column="adminpassword" jdbcType="VARCHAR" property="adminname"/>
+        <result column="adminpassword" jdbcType="VARCHAR" property="adminpassword"/>
         <result column="createdatetime" jdbcType="VARCHAR" property="createdatetime"/>
         <result column="lastmodifydatetime" jdbcType="VARCHAR" property="lastmodifydatetime"/>
         <result column="identitytype" jdbcType="VARCHAR" property="identitytype"/>

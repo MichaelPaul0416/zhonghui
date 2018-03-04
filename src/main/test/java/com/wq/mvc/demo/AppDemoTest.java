@@ -3,6 +3,7 @@ package com.wq.mvc.demo;
 import com.alibaba.fastjson.JSONObject;
 import com.tibbers.zhonghui.model.*;
 import com.tibbers.zhonghui.model.common.Pager;
+import com.tibbers.zhonghui.utils.MD5Utils;
 import com.tibbers.zhonghui.utils.StringUtil;
 import org.apache.ibatis.io.Resources;
 import org.apache.ibatis.session.SqlSession;
@@ -210,6 +211,24 @@ public class AppDemoTest {
         String str = "nonce_str=ad4f9ded44dc4d96a5493e57db4063c5&refund_desc=我要退款&out_trade_no=20180221141610c5f0f0ce86962386&out_refund_no=20180225182619488978a1cd732831&appid=wxb4b01bcd56f57b44&total_fee=1&refund_fee=100&mch_id=1498864162&sign_type=MD5&key=2ab9071b06b9f739b950ddb41db2690d&";
         StringBuilder builder = new StringBuilder(str);
         System.out.println(builder.substring(0,str.length() - 1 ));
+    }
+
+    @Test
+    public void addAdmin(){
+        Administrator administrator = new Administrator();
+        administrator.setAdminid(StringUtil.generateUUID());
+        administrator.setAdminname("Paul");
+        String password = "123456";
+        String encrypt = MD5Utils.string2MD5(password);
+        administrator.setAdminpassword(encrypt);
+        administrator.setCreatedatetime(StringUtil.currentDateTime());
+        administrator.setSerialid(StringUtil.serialId());
+        administrator.setIdentitytype("0");
+        administrator.setIsvalid("1");
+        administrator.setReverse1("");
+        administrator.setReverse2("");
+
+        System.out.println(JSONObject.toJSON(administrator));
     }
 }
 

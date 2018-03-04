@@ -1,11 +1,13 @@
 package com.tibbers.zhonghui.model;
 
+import java.io.Serializable;
+
 /**
  * @author: Paul
  * @time:2018/2/26 22:11
  * @description:
  */
-public class Administrator {
+public class Administrator implements Serializable{
     private String serialid;
     private String adminid;
     private String adminname;

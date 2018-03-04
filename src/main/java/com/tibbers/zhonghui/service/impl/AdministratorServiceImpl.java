@@ -75,8 +75,8 @@ public class AdministratorServiceImpl implements IAdministratorService {
             String psd = administrator.getAdminpassword();
             Administrator query = administratorDao.queryAdmin(administrator);
             logger.info(String.format("查询adminid[%s]的信息为[%s]",administrator.getAdminid(),query));
-            String store = MD5Utils.convertFromMD5(query.getAdminpassword());
-            login = psd.equals(store);
+            String store = MD5Utils.string2MD5(administrator.getAdminpassword());
+            login = query.getAdminpassword().equals(store);
         }catch (Exception e){
             logger.error(e.getMessage(),e);
             throw new APIException("登录异常，异常信息["+e.getCause().getMessage()+"]");
