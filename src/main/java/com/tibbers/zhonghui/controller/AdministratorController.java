@@ -1,10 +1,12 @@
 package com.tibbers.zhonghui.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sun.istack.internal.Nullable;
 import com.tibbers.zhonghui.annotation.TokenListen;
 import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.model.Administrator;
 import com.tibbers.zhonghui.model.common.APIResponse;
+import com.tibbers.zhonghui.model.common.Pager;
 import com.tibbers.zhonghui.model.common.Response;
 import com.tibbers.zhonghui.service.IAdministratorService;
 import com.tibbers.zhonghui.utils.CacheUtil;
@@ -204,6 +206,31 @@ public class AdministratorController {
         }else {
             response = new Response(false,"登录账户信息不能为空");
             apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
+    }
+
+    @RequestMapping("/queryAccountTrades")
+    @ResponseBody
+    public String queryAccountTrades(String accountid, @Nullable String startLine,@Nullable String offset){
+        APIResponse apiResponse;
+        Response response;
+
+        if(!StringUtil.isEmpty(accountid)){
+            try{
+                Pager pager = new Pager(Integer.parseInt(startLine),Integer.parseInt(offset));
+                Map<String,List<Map<String,String>>> results = administratorService.queryAccountTradeDetails(accountid,pager);
+                response = new Response(true,results);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getCause().getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            }
+        }else {
+            response = new Response(false,"查询的账户accountid不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
         }
 
         return JSONObject.toJSONString(apiResponse);

@@ -231,5 +231,18 @@ public class AccountServiceImpl implements IAccountService {
         return queryResults;
     }
 
+    @Override
+    public List<Account> queryAccounts(String termid, Pager pager) {
+        Map<String,Object> param = new HashMap<>();
+        Account account = new Account();
+        account.setCusttype(termid);
+        param.put("account",account);
+        param.put("pager",pager);
+
+        List<Account> accounts = accountServiceDao.queryAccounts(param);
+        logger.info(String.format("查询到账户信息[%s]",accounts));
+        return accounts;
+    }
+
 
 }

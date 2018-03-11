@@ -213,4 +213,29 @@ public class AccountServiceController {
 
         return JSONObject.toJSONString(apiResponse);
     }
+
+    @RequestMapping("/adminQueryAccounts")
+    @ResponseBody
+    public String adminQueryAccounts(String termid,@Nullable String startLine,@Nullable String offset){
+        APIResponse apiResponse ;
+        Response response;
+
+        if(!StringUtil.isEmpty(termid)){
+            try{
+                Pager pager = new Pager(Integer.parseInt(startLine),Integer.parseInt(offset));
+                List<Account> accounts = accountService.queryAccounts(termid,pager);
+                response = new Response(true,accounts);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getCause().getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            }
+        }else {
+            response = new Response(false,"查询的账户类型termid不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
+    }
 }

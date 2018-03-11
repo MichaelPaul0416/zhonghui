@@ -58,12 +58,12 @@ public class AuditingProsController {
 
     @RequestMapping("/auditProductApply")
     @ResponseBody
-    public String auditProductApply(String serialid,String auditor,String auditstate){
+    public String auditProductApply(String serialid,String auditor,String auditstate,String rejectreason){
         APIResponse apiResponse ;
         Response response;
         if(!StringUtil.isEmpty(serialid) && !StringUtil.isEmpty(auditor) && !StringUtil.isEmpty(auditstate)){
             try{
-                auditingProsService.auditProductApply(auditor,auditstate,serialid);
+                auditingProsService.auditProductApply(auditor,auditstate,serialid, rejectreason);
                 response = new Response(true,"修改审核状态成功");
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
             }catch (APIException e){

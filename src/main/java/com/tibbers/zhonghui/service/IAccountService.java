@@ -25,4 +25,6 @@ public interface IAccountService {
     Account queryByAccountid(String accountid);
 
     Map<String, List<Map<String, Object>>> queryAccountTrades(String accountid, Pager pager);
+
+    List<Account> queryAccounts(String termid,Pager pager);
 }

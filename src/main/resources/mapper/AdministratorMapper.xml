@@ -16,6 +16,16 @@
         <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
     </resultMap>
 
+    <resultMap id="saleRecord" type="java.util.Map">
+        <result column="orderid" jdbcType="VARCHAR" property="orderid"/>
+        <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="pronumber" jdbcType="VARCHAR" property="pronumber"/>
+        <result column="discount" jdbcType="VARCHAR" property="discount"/>
+        <result column="note" jdbcType="VARCHAR" property="note"/>
+        <result column="productname" jdbcType="VARCHAR" property="productname"/>
+        <result column="unitprice" jdbcType="VARCHAR" property="unitprice"/>
+    </resultMap>
+
     <insert id="createSingleAdmin" parameterType="com.tibbers.zhonghui.model.Administrator">
         insert into tadministrator values(#{serialid},#{adminid},#{adminname},#{adminpassword},#{createdatetime},#{lastmodifydatetime},#{identitytype},#{isvalid},#{reverse1},#{reverse2})
     </insert>
@@ -42,4 +52,10 @@
         select adminid,adminname,adminpassword,createdatetime,lastmodifydatetime,identitytype,isvalid,reverse1,reverse2 from tadministrator where isvalid = '1'
     </select>
 
+    <select id="queryVIPSaleRecords" parameterType="java.util.Map" resultMap="saleRecord">
+        select t1.orderid,t1.productid,t1.pronumber,t1.discount,t1.note,t3.productname,t3.unitprice from torderitem t1 ,torders t2 ,tproduct t3
+        where t1.orderid = t2.orderid  and t1.productid = t3.productid
+        and t3.productid in (select productid from tproductbelong where accountid = #{account.accountid} )
+        <if test="pager != null">limit #{pager.startLine},#{pager.offset}</if>
+    </select>
 </mapper>

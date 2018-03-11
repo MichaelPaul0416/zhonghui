@@ -1,8 +1,10 @@
 package com.tibbers.zhonghui.service;
 
 import com.tibbers.zhonghui.model.Administrator;
+import com.tibbers.zhonghui.model.common.Pager;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Paul
@@ -21,4 +23,6 @@ public interface IAdministratorService {
     boolean loginAdmin(Administrator admin);
 
     Administrator queryAdmin(Administrator administrator);
+
+    Map<String, List<Map<String, String>>> queryAccountTradeDetails(String accountid, Pager pager);
 }

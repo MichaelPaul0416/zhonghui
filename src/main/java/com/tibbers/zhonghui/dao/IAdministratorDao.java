@@ -4,6 +4,7 @@ import com.tibbers.zhonghui.model.Administrator;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Paul
@@ -22,4 +23,6 @@ public interface IAdministratorDao {
     List<Administrator> queryAllAdmin();
 
     void updateInfoAdmin(Administrator administrator);
+
+    List<Map<String, String>> queryVIPSaleRecords(Map<String,Object> param);
 }

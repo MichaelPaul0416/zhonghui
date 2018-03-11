@@ -13,7 +13,7 @@ import java.util.Map;
 public interface IAuditingProsService {
     void applyAudit4Product(String productid);
 
-    void auditProductApply(String auditor,String auditstate,String serialid);
+    void auditProductApply(String auditor, String auditstate, String serialid, String rejectreason);
 
     List<Map<String,String>> querySerialByAuditState(String auditstate, Pager pager);
 }

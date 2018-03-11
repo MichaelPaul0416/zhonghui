@@ -2,16 +2,24 @@ package com.tibbers.zhonghui.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
 import com.tibbers.zhonghui.config.APIException;
+import com.tibbers.zhonghui.dao.IAccountServiceDao;
 import com.tibbers.zhonghui.dao.IAdministratorDao;
+import com.tibbers.zhonghui.dao.IOrdersDao;
+import com.tibbers.zhonghui.model.Account;
 import com.tibbers.zhonghui.model.Administrator;
+import com.tibbers.zhonghui.model.Orders;
+import com.tibbers.zhonghui.model.common.Pager;
 import com.tibbers.zhonghui.service.IAdministratorService;
 import com.tibbers.zhonghui.utils.MD5Utils;
+import com.tibbers.zhonghui.utils.StringUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Paul
@@ -25,6 +33,12 @@ public class AdministratorServiceImpl implements IAdministratorService {
 
     @Autowired
     private IAdministratorDao administratorDao;
+
+    @Autowired
+    private IAccountServiceDao accountServiceDao;
+
+    @Autowired
+    private IOrdersDao ordersDao;
 
 
     @Override
@@ -93,5 +107,40 @@ public class AdministratorServiceImpl implements IAdministratorService {
             logger.error(e.getMessage(),e);
             throw new APIException(e);
         }
+    }
+
+    @Override
+    public Map<String, List<Map<String, String>>> queryAccountTradeDetails(String accountid, Pager pager) {
+        logger.info(String.format("开始查询[%s]的基本用户信息",accountid));
+        Account account = accountServiceDao.queryByAccountid(accountid);
+        if(account != null && !StringUtil.isEmpty(account.getAccountname())){
+            Map<String,List<Map<String,String>>> accountTrades = new HashMap<>();
+            Map<String,Object> param = new HashMap<>();
+            if("1".equals(account.getIsvip())){//vip用户
+                param.put("account",param);
+                param.put("pager",pager);
+                List<Map<String,String>> saleRecords = administratorDao.queryVIPSaleRecords(param);
+
+                logger.info(String.format("查询到[%s]的产品出售明细",saleRecords));
+                accountTrades.put("saleRecords",saleRecords);
+            }else {
+                accountTrades.put("saleRecords",null);
+            }
+
+            logger.info(String.format("查询[%s]的购买明细",accountid));
+            param.clear();
+            Orders orders = new Orders();
+            orders.setAccountid(accountid);
+            orders.setIsvalid("1");
+            param.put("orders",orders);
+            param.put("pager",pager);
+            List<Map<String,String>> buyDetails = ordersDao.queryOrdersByPager(param);
+            logger.info(String.format("查询[%s]的购买记录",buyDetails));
+            accountTrades.put("buyRecords",buyDetails);
+            return accountTrades;
+        }else {
+            throw new APIException(String.format("账户体系中不存在accountid为[%s]的账户",accountid));
+        }
+
     }
 }

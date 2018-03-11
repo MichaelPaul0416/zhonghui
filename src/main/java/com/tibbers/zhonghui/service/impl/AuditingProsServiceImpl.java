@@ -39,6 +39,7 @@ public class AuditingProsServiceImpl implements IAuditingProsService {
             auditingPros.setSerialid(StringUtil.generateUUID());
             auditingPros.setApplydatetime(StringUtil.currentDateTime());
             auditingPros.setAuditstate("0");
+            auditingPros.setRejectreason("");
             auditingProsDao.applyAudit4Product(auditingPros);
             logger.info(String.format("产品[%s]的审核记录已经添加",productid));
         }catch (Exception e){
@@ -47,7 +48,7 @@ public class AuditingProsServiceImpl implements IAuditingProsService {
     }
 
     @Override
-    public void auditProductApply(String auditor, String auditstate,String serialid) {
+    public void auditProductApply(String auditor, String auditstate, String serialid, String rejectreason) {
         AuditingPros auditingPros = new AuditingPros();
         try{
             auditingPros.setSerialid(serialid);
@@ -55,6 +56,7 @@ public class AuditingProsServiceImpl implements IAuditingProsService {
             auditingPros.setAuditor(auditor);
             auditingPros.setBegindatetime(StringUtil.currentDateTime());
             auditingPros.setEnddatetime(StringUtil.currentDateTime());
+            auditingPros.setRejectreason(rejectreason);
             logger.info(String.format("管理员[%s]即将审核[%s]申请",auditor,serialid));
             auditingProsDao.auditProductApply(auditingPros);
             logger.info(String.format("审核申请[%s]状态修改成功,修改为[%s]",serialid,auditstate));

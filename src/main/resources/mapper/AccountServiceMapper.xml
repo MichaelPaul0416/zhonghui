@@ -54,4 +54,12 @@
     <select id="queryByAccountid" parameterType="java.lang.String" resultMap="AccountResult">
         select * from taccount where accountid = #{_parameter}
     </select>
+    
+    <select id="queryAccounts" parameterType="java.lang.String" resultMap="AccountResult">
+        select * from taccount
+        <where>
+            custtype = #{account.custtype}
+        </where>
+        <if test="pager != null">limit #{pager.startLine},#{pager.offset}</if>
+    </select>
 </mapper>

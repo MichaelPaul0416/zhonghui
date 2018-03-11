@@ -4,6 +4,9 @@ import com.tibbers.zhonghui.model.Account;
 import com.tibbers.zhonghui.model.Person;
 import org.springframework.stereotype.Repository;
 
+import java.util.List;
+import java.util.Map;
+
 /**
  * @author: Paul
  * @time:2018/1/21 13:09
@@ -21,4 +24,6 @@ public interface IAccountServiceDao {
     void updatePersonalInfo(Person person);
 
     Account queryByAccountid(String accountid);
+
+    List<Account> queryAccounts(Map<String,Object> param);
 }

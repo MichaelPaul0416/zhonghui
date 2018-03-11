@@ -13,6 +13,7 @@ public class AuditingPros {
     private String applydatetime;
     private String begindatetime;
     private String enddatetime;
+    private String rejectreason;
 
     @Override
     public String toString() {
@@ -24,7 +25,16 @@ public class AuditingPros {
                 ", applydatetime='" + applydatetime + '\'' +
                 ", begindatetime='" + begindatetime + '\'' +
                 ", enddatetime='" + enddatetime + '\'' +
+                ", rejectreason='" + rejectreason + '\'' +
                 '}';
+    }
+
+    public String getRejectreason() {
+        return rejectreason;
+    }
+
+    public void setRejectreason(String rejectreason) {
+        this.rejectreason = rejectreason;
     }
 
     public String getSerialid() {
