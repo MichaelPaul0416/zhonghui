@@ -158,7 +158,7 @@ public class OrderServiceImpl implements IOrderService {
                         capitalSerial.setCapitaldatetime(StringUtil.currentDateTime());
                         capitalSerial.setThirdpartmsg("获取预支付ID成功");
                         capitalSerial.setCapitaldirect("0");
-                        capitalSerial.setReverse1("");
+                        capitalSerial.setReverse1(orders.getAmount());//设置为订单金额
                         capitalSerial.setReverse2("");
                         capitalSerials.add(capitalSerial);
                         capitalSerialDao.insertCapitalSerialOrBatch(capitalSerials);

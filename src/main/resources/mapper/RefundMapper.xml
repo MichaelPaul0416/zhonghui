@@ -40,6 +40,7 @@
             <if test="refund.reverse1 != null "> and t1.reverse1 = #{refund.reverse1}</if>
             <if test="refund.reverse2 != null "> and t1.reverse2 = #{refund.reverse2}</if>
         </if>
+        ORDER by t1.agreedatetime desc
         <if test="pager != null">limit #{pager.startLine},#{pager.offset}</if>
     </select>
 

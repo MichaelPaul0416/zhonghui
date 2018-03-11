@@ -6,6 +6,7 @@ import com.tibbers.zhonghui.model.common.Pager;
 
 import java.io.InputStream;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Paul
@@ -26,5 +27,7 @@ public interface IProductService {
     List<Product> queryByProductStates(String[] states,Pager pager);
 
     void updateProductState(String productid,String targteState);
+
+    List<Product> queryProducts(String productQueryInfo, Pager pager, String[] productStates);
 
 }

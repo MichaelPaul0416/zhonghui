@@ -21,6 +21,14 @@
         <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
     </resultMap>
 
+    <resultMap id="capitalSerialResult" type="java.util.Map">
+        <result column="orderid" jdbcType="VARCHAR" property="orderid"/>
+        <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
+        <result column="isvalid" jdbcType="VARCHAR" property="isvalid"/>
+        <result column="emcapitalserial" jdbcType="VARCHAR" property="emcapitalserial"/>
+        <result column="thirdpartmsg" jdbcType="VARCHAR" property="thirdpartmsg"/>
+    </resultMap>
+
     <!--新增订单表记录-->
     <insert id="insertSingelOrder" parameterType="com.tibbers.zhonghui.model.Orders">
         insert into torders values(#{addressid},#{accountid},#{orderid},#{createdatetime},#{orderstate},#{isvalid},#{expressno},#{donedatetime},#{freetransport},#{transportfee},#{note},#{amount},#{reverse1},#{reverse2})
@@ -57,7 +65,16 @@
         </if>
         order by t1.createdatetime desc,t1.donedatetime desc
         <if test="pager != null">
-            limit #{pager.startLine},#{offset}
+            limit #{pager.startLine},#{pager.offset}
+        </if>
+    </select>
+
+    <select id="queryOrderIdsForDetails" parameterType="java.util.Map" resultMap="capitalSerialResult">
+        select t1.orderid,t1.accountid,t1.isvalid,t2.emcapitalserial,t2.thirdpartmsg from torders t1,tcapitalserial t2
+        where t1.orderid = t2.orderid and t1.accountid = #{account.accountid} and t1.isvalid = '1' and t2.state = '1'
+        order by t1.donedatetime DESC
+        <if test="pager != null">
+            limit #{pager.startLine},#{pager.offset}
         </if>
     </select>
 </mapper>

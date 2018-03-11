@@ -19,4 +19,6 @@ public interface IOrdersDao {
     void updatePartOrderMsg(Orders orders);
 
     List<Map<String,String>> queryOrdersByPager(Map<String,Object> params);
+
+    List<Map<String,String>> queryOrderIdsForDetails(Map<String,Object> params);
 }

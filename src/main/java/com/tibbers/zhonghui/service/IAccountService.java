@@ -1,8 +1,10 @@
 package com.tibbers.zhonghui.service;
 
 import com.tibbers.zhonghui.model.Account;
+import com.tibbers.zhonghui.model.common.Pager;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -21,4 +23,6 @@ public interface IAccountService {
     void updatePersonalInfo(String person);
 
     Account queryByAccountid(String accountid);
+
+    Map<String, List<Map<String, Object>>> queryAccountTrades(String accountid, Pager pager);
 }

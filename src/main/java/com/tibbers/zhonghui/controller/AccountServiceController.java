@@ -1,11 +1,13 @@
 package com.tibbers.zhonghui.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sun.istack.internal.Nullable;
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.config.ServiceConfigBean;
 import com.tibbers.zhonghui.model.Account;
 import com.tibbers.zhonghui.model.common.APIResponse;
+import com.tibbers.zhonghui.model.common.Pager;
 import com.tibbers.zhonghui.model.common.Response;
 import com.tibbers.zhonghui.service.IAccountService;
 import com.tibbers.zhonghui.utils.StringUtil;
@@ -25,6 +27,7 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -184,5 +187,30 @@ public class AccountServiceController {
                 }
             }
         }
+    }
+
+    @RequestMapping("/queryAccountTradeDetails")
+    @ResponseBody
+    public String queryAccountTradeDetails(String accountid, @Nullable String startLine, @Nullable String offset){
+        APIResponse apiResponse ;
+        Response response;
+        if(!StringUtil.isEmpty(accountid)){
+            try{
+                Pager pager = new Pager(Integer.parseInt(startLine),Integer.parseInt(offset));
+                Map<String,List<Map<String,Object>>> results = accountService.queryAccountTrades(accountid,pager);
+                logger.info(String.format("查询到账户[%s]的资金收支明细",accountid));
+                response = new Response(true,results);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getCause().getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            }
+        }else {
+            response = new Response(false,"查询账户id不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
     }
 }

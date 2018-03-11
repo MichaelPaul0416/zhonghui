@@ -26,4 +26,6 @@ public interface IProductDao {
 
     List<Product> queryByProductStates(Map<String,Object> params);
 
+    List<Product> queryProducts(Map<String,Object> params);
+
 }

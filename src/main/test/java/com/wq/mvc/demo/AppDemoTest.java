@@ -230,5 +230,18 @@ public class AppDemoTest {
 
         System.out.println(JSONObject.toJSON(administrator));
     }
+
+    @Test
+    public void queryProduct(){
+        Product product = new Product();
+        product.setProductname("西瓜");
+
+        System.out.println(JSONObject.toJSONString(product));
+    }
+
+    @Test
+    public void recommandInfo(){
+
+    }
 }
 

@@ -1,5 +1,6 @@
 package com.tibbers.zhonghui.service.impl;
 
+import com.alibaba.fastjson.JSONObject;
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.ServiceConfigBean;
 import com.tibbers.zhonghui.dao.IProductBelongDao;
@@ -109,6 +110,26 @@ public class ProductServiceImpl implements IProductService {
         try {
             iProductBelongDao.updateProductState(productBelong);
             logger.info(String.format("产品[%s]销售状态更新成功",productid));
+        }catch (Exception e){
+            throw new APIException(e.getCause());
+        }
+    }
+
+    @Override
+    public List<Product> queryProducts(String productQueryInfo, Pager pager, String[] productStates) {
+        Product product = JSONObject.parseObject(productQueryInfo,Product.class);
+        product.setReverse2("");
+        logger.info(String.format("查询符合下列条件的产品信息[%s]",product));
+
+        try{
+            Map<String,Object> param = new HashMap<>();
+            param.put("product",product);
+            param.put("states",productStates);
+            param.put("pager",pager);
+
+            List<Product> products = iProductDao.queryProducts(param);
+            logger.info(String.format("查询到符合条件的产品信息[%s]",products));
+            return products;
         }catch (Exception e){
             throw new APIException(e.getCause());
         }

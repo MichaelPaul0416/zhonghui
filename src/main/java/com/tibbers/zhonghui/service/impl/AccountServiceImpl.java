@@ -4,10 +4,9 @@ import com.alibaba.fastjson.JSONObject;
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.config.ServiceConfigBean;
-import com.tibbers.zhonghui.dao.IAccountServiceDao;
-import com.tibbers.zhonghui.model.Account;
-import com.tibbers.zhonghui.model.Person;
-import com.tibbers.zhonghui.model.SysParam;
+import com.tibbers.zhonghui.dao.*;
+import com.tibbers.zhonghui.model.*;
+import com.tibbers.zhonghui.model.common.Pager;
 import com.tibbers.zhonghui.service.IAccountService;
 import com.tibbers.zhonghui.utils.CacheUtil;
 import com.tibbers.zhonghui.utils.StringUtil;
@@ -20,7 +19,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,6 +40,15 @@ public class AccountServiceImpl implements IAccountService {
 
     @Autowired
     private ServiceConfigBean serviceConfigBean;
+
+    @Autowired
+    private IOrdersDao ordersDao;
+
+    @Autowired
+    private IRefundDao refundDao;
+
+    @Autowired
+    private IRecommandIncomeDao recommandIncomeDao;
 
     @Override
     public Map<String,String> registerNewAccount(Map<String, String> map) {
@@ -142,6 +150,85 @@ public class AccountServiceImpl implements IAccountService {
         }catch (Exception e){
             throw new APIException(e.getCause());
         }
+    }
+
+    @Override
+    public Map<String, List<Map<String, Object>>> queryAccountTrades(String accountid, Pager pager) {
+        logger.info(String.format("开始查询账户[%s]的资金收支交易记录",accountid));
+        Map<String,List<Map<String,Object>>> queryResults = new HashMap<>();
+
+        logger.info(String.format("查询账户[%s]的资金支出记录",accountid));
+        Map<String,Object> param = new HashMap<>();
+        Orders orders = new Orders();
+        orders.setAccountid(accountid);
+        param.put("account",orders);
+        param.put("pager",pager);
+        //根据订单完成日期降序，查询订单表中有效的订单
+        List<Map<String,String>> orderSerialList = ordersDao.queryOrderIdsForDetails(param);
+        List<Map<String,Object>> capitalInSerials = new ArrayList<>();
+        for(Map<String,String> orderSerial : orderSerialList) {
+
+            Map<String, Object> orderResult = new HashMap<>();
+            orderResult.put("emcapitalserialno", orderSerial.get("emcapitalserial"));//三方流水号
+            orderResult.put("orderid",orderSerial.get("orderid"));
+            orderResult.put("orderdonedatetime",orderSerial.get("donedatetime"));//订单完成时间
+            orderResult.put("amount",orderSerial.get("amount"));//订单金额
+            orderResult.put("thirdMsg",orderSerial.get("thirdpartmsg"));
+
+            capitalInSerials.add(orderResult);
+            logger.info(String.format("查询到资金支出流水[%s]",orderResult));
+        }
+        queryResults.put("capitalInSerials",capitalInSerials);
+
+        //查询所有退款流水
+        logger.info(String.format("查询账户[%s]的退款流水记录",accountid));
+        param.clear();
+        Refund refund = new Refund();
+        refund.setAccountid(accountid);
+        refund.setAgreestate("2");
+        param.put("refund",refund);
+        param.put("pager",pager);
+
+        List<Refund> refundList = refundDao.queryRefundsByPager(param);
+        List<Map<String,Object>> refundResults = new ArrayList<>();
+        for(Refund singleRefund : refundList){
+            Map<String,Object> refundMap = new HashMap<>();
+            refundMap.put("emcapitalserialno",singleRefund.getRefundserialid());
+            refundMap.put("orderid",singleRefund.getOrderid());
+            refundMap.put("refunddatetime",singleRefund.getAgreedatetime());
+            refundMap.put("amount",singleRefund.getAmount());
+            refundMap.put("message",singleRefund.getDetail());
+
+            refundResults.add(refundMap);
+            logger.info(String.format("查询到退款流水[%s]",refundMap));
+        }
+
+        queryResults.put("refundSerials",refundResults);
+
+        logger.info(String.format("查询账户[%s]作为推荐者的收益明细",accountid));
+        param.clear();
+        RecommandIncome recommandIncome = new RecommandIncome();
+        recommandIncome.setAccountid(accountid);
+        recommandIncome.setAlreadydone("1");
+        param.put("income",recommandIncome);
+        param.put("pager",pager);
+
+        List<RecommandIncome> recommandIncomes = recommandIncomeDao.queryRecommandIncomeByPager(param);
+        List<Map<String,Object>> incomeResults = new ArrayList<>();
+        for(RecommandIncome singleIncome : recommandIncomes){
+            Map<String,Object> income = new HashMap<>();
+            income.put("incomeserialno",singleIncome.getIncomeserialno());
+            income.put("comefrom",singleIncome.getComefrom());
+            income.put("amount",singleIncome.getIncome());
+            income.put("incomedatetime",singleIncome.getIncomedatetime());
+            income.put("description",singleIncome.getDescription());
+
+            incomeResults.add(income);
+            logger.info(String.format("查询到推荐收益信息[%s]",income));
+        }
+        queryResults.put("incomeSerials",incomeResults);
+        logger.info(String.format("查询账号[%s]的资金收支明细结束",accountid));
+        return queryResults;
     }
 
 

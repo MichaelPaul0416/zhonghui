@@ -59,6 +59,7 @@ public class RefundScanBuilder implements IScanBuilder{
                                 //2：退款成功，3：退款失败，4：退款中
                                 if("SUCCESS".equals(refundRecord.getRefundStatus())){
                                     updateRefund.setAgreestate("2");
+                                    updateRefund.setAgreedatetime(StringUtil.currentDateTime());
                                 }else if("CHANGE".equals(refundRecord.getRefundStatus())){
                                     updateRefund.setAgreestate("3");
                                 }

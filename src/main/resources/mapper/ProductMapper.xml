@@ -59,4 +59,29 @@
         </if>
     </select>
 
+    <select id="queryProducts" parameterType="java.util.Map" resultMap="ProductResult">
+        select productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,reverse1,reverse2 from tproduct WHERE productid in (select productid from tproductbelong
+        <where>
+            <if test="states.length != 0">
+                salestate in (
+                <foreach collection="states" index="index" item="item" separator=",">
+                    #{item}
+                </foreach>
+                )
+            </if>
+        </where>
+        group by productid)
+        <if test="product != null">
+             <if test="product.productid != null and !&quot;&quot;.equals(product.productid) ">and productid = #{product.productid}  </if>
+            <if test="product.productname != null and !&quot;&quot;.equals(product.productname) ">and productname like '%' #{product.productname} '%'</if>
+             <if test="product.note != null and !&quot;&quot;.equals(product.note) ">and  note like '%' #{product.note} '%'</if>
+             <if test="product.itemid != null and !&quot;&quot;.equals(product.itemid) ">and itemid = #{product.itemid} </if>
+             <if test="product.color != null and !&quot;&quot;.equals(product.color) "> and color = #{product.color} </if>
+             <if test="product.productgrade != null and !&quot;&quot;.equals(product.productgrade) "> and productgrade = #{product.productgrade}  </if>
+             <if test="product.reverse1 != null "> and reverse1 = #{product.reverse1} </if>
+             <if test="product.reverse2 != null "> and reverse2 = #{product.reverse2} </if>
+        </if>
+        <if test="pager != null">limit #{pager.startLine},#{pager.offset}</if>
+    </select>
+
 </mapper>

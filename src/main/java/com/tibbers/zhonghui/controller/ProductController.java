@@ -45,6 +45,37 @@ public class ProductController {
     @Autowired
     private ServiceConfigBean serviceConfigBean;
 
+    @RequestMapping("/queryProducts")
+    @ResponseBody
+    public String queryProducts(String productQueryInfo,String states,int startLine,int offset){
+        APIResponse apiResponse;
+        Response response;
+        if(!StringUtil.isEmpty(productQueryInfo)){
+            try {
+
+                String statesAry[] = null;
+                if(!StringUtil.isEmpty(states)){
+                    statesAry = states.split(",");
+                }
+                Pager pager = new Pager(startLine,offset);
+
+                List<Product> productList = productService.queryProducts(productQueryInfo,pager,statesAry);
+
+                response = new Response(true,productList);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getCause().getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            }
+        }else {
+            response = new Response(false,"产品的查询条件不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
+    }
+
     @RequestMapping("/insertSingleProduct")
     @ResponseBody
     public String  insertSingleProduct(String productInfo,String accountid){
