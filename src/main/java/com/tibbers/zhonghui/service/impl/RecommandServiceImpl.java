@@ -1,7 +1,9 @@
 package com.tibbers.zhonghui.service.impl;
 
 import com.tibbers.zhonghui.config.APIException;
+import com.tibbers.zhonghui.dao.IAccountServiceDao;
 import com.tibbers.zhonghui.dao.IRecommandDao;
+import com.tibbers.zhonghui.model.Account;
 import com.tibbers.zhonghui.model.Recommand;
 import com.tibbers.zhonghui.model.common.Pager;
 import com.tibbers.zhonghui.service.IRecommandService;
@@ -27,6 +29,9 @@ public class RecommandServiceImpl implements IRecommandService {
 
     @Autowired
     private IRecommandDao recommandDao;
+
+    @Autowired
+    private IAccountServiceDao accountServiceDao;
 
     @Override
     public void insertRecommand(String accountid,String recommander) {
@@ -59,15 +64,26 @@ public class RecommandServiceImpl implements IRecommandService {
 
     @Override
     public List<Map<String, String>> queryMyRecommandAccounts(String accountid, Pager pager) {
-        logger.info(String.format("开始查询被账户[%s]的用户信息",accountid));
-        Map<String,Object> param = new HashMap<>();
-        Recommand recommand = new Recommand();
-        recommand.setAccountid(accountid);
-        param.put("recommand",recommand);
-        param.put("pager",pager);
-        List<Map<String,String>> list = recommandDao.queryMyRecommandAccounts(param);
+        logger.info(String.format("开始查询被账户[%s]推荐的用户信息",accountid));
+        Account account = accountServiceDao.queryByAccountid(accountid);
+        if(account != null &&!StringUtil.isEmpty(account.getAccountname())) {
 
-        logger.info(String.format("查询到账户[%s]所推荐的客户信息列表[%s]",accountid,list));
-        return list;
+            if("1".equals(account.getIsvip())) {
+                Map<String, Object> param = new HashMap<>();
+                Recommand recommand = new Recommand();
+                recommand.setAccountid(accountid);
+                param.put("recommand", recommand);
+                param.put("pager", pager);
+                List<Map<String, String>> list = recommandDao.queryMyRecommandAccounts(param);
+
+                logger.info(String.format("查询到账户[%s]所推荐的客户信息列表[%s]", accountid, list));
+
+                return list;
+            }else {
+                throw new APIException(String.format("账户[%s]不是VIP客户，只有VIP客户才能推荐用户，查看其下线用户",accountid));
+            }
+        }else {
+            throw new APIException(String.format("账户表中账户[%s]不存在",accountid));
+        }
     }
 }
