@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Paul
@@ -76,5 +77,29 @@ public class RecommandRelationController {
         }
 
         return String.valueOf(JSONObject.toJSON(apiResponse));
+    }
+
+    @RequestMapping("/queryMyRecommandAccounts")
+    @ResponseBody
+    public String queryMyRecommandAccounts(String accountid,@Nullable String startLine,@Nullable String offset){
+        APIResponse apiResponse;
+        Response response;
+        if(!StringUtil.isEmpty(accountid)){
+            try{
+                Pager pager = new Pager(Integer.valueOf(startLine),Integer.valueOf(offset));
+                List<Map<String,String>> result = recommandService.queryMyRecommandAccounts(accountid,pager);
+                response = new Response(true,result);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getCause().getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            }
+        }else {
+            response = new Response(false,"推荐人账户accountid不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
     }
 }

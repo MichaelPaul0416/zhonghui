@@ -17,4 +17,6 @@ public interface IRecommandDao {
     void insertRecommand(Recommand recommand);
 
     List<Recommand> queryRecommandByPager(Map<String,Object> param);
+
+    List<Map<String,String>> queryMyRecommandAccounts(Map<String,Object> params);
 }

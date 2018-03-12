@@ -56,4 +56,18 @@ public class RecommandServiceImpl implements IRecommandService {
             throw new APIException(e.getCause());
         }
     }
+
+    @Override
+    public List<Map<String, String>> queryMyRecommandAccounts(String accountid, Pager pager) {
+        logger.info(String.format("开始查询被账户[%s]的用户信息",accountid));
+        Map<String,Object> param = new HashMap<>();
+        Recommand recommand = new Recommand();
+        recommand.setAccountid(accountid);
+        param.put("recommand",recommand);
+        param.put("pager",pager);
+        List<Map<String,String>> list = recommandDao.queryMyRecommandAccounts(param);
+
+        logger.info(String.format("查询到账户[%s]所推荐的客户信息列表[%s]",accountid,list));
+        return list;
+    }
 }

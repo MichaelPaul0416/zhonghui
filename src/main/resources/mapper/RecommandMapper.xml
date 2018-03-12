@@ -14,6 +14,16 @@
         <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
     </resultMap>
 
+    <resultMap id="myRecommander" type="java.util.Map">
+        <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
+        <result column="accountname" jdbcType="VARCHAR" property="accountname"/>
+        <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
+        <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
+        <result column="score" jdbcType="VARCHAR" property="score"/>
+        <result column="isvip" jdbcType="VARCHAR" property="isvip"/>
+        <result column="custtype" jdbcType="VARCHAR" property="custtype"/>
+        <result column="accobalance" jdbcType="VARCHAR" property="accobalance"/>
+    </resultMap>
     <insert id="insertRecommand" parameterType="com.tibbers.zhonghui.model.Recommand">
         insert into trecommand values (#{addressid},#{accountid},#{recommander},#{recommanddate},#{recommandtime},#{reverse1},#{reverse2})
     </insert>
@@ -25,4 +35,11 @@
         </if>
     </select>
 
+    <select id="queryMyRecommandAccounts" parameterType="java.util.Map" resultMap="myRecommander">
+        select accountid,accountname,imagepath,imagepath,score,isvip,custtype,accobalance
+        from taccount where accountid in (select recommander from trecommand where accountid = #{recommand.accountid})
+        <if test="pager != null">
+            limit #{pager.startLine},#{pager.offset}
+        </if>
+    </select>
 </mapper>

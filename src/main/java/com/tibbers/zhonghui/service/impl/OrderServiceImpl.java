@@ -80,6 +80,7 @@ public class OrderServiceImpl implements IOrderService {
                 Map<String,Object> map = new HashMap<>();
                 logger.info(String.format("即将为客户生成一笔订单"));
                 Orders orders = JSONObject.parseObject(orderInfo,Orders.class);
+                orders.setAmount(caculateAmount(orders.getAccountid(),orders.getAmount()));
                 orders.setOrderid(StringUtil.serialId());
                 orders.setCreatedatetime(StringUtil.currentDateTime());
                 //订单状态 0未发货，1已发货待收货，2已收货，3退款
@@ -246,6 +247,9 @@ public class OrderServiceImpl implements IOrderService {
                     //修改推荐收益流水信息(根据orderid)
                     updateRecommandIncome(orderid);
 
+                    //新增收益信息到账户余额中--对应recommandincome表中的一条记录
+                    updateAccountBanlaceAsRecommander(orderid);
+
                 }else{
                     capitalSerial.setState("0");
                     capitalSerial.setThirdpartmsg("微信支付失败");
@@ -269,6 +273,61 @@ public class OrderServiceImpl implements IOrderService {
         }
     }
 
+    private void updateAccountBanlaceAsRecommander(String recommandserialid){
+        RecommandIncome recommandIncome = new RecommandIncome();
+        recommandIncome.setIncomeserialno(recommandserialid);
+        Map<String,Object> param = new HashMap<>();
+        param.put("income",recommandIncome);
+        List<RecommandIncome> queryResult = recommandIncomeDao.queryRecommandIncomeByPager(param);
+        if(queryResult.size() == 1 && queryResult.get(0) != null) {
+            RecommandIncome income = queryResult.get(0);
+            String accountid = income.getAccountid();//下单时绑定的推荐者id
+            String amount = income.getIncome();//下单时计算好的收益
+
+            logger.info(String.format("更新账户[%s]作为推荐者的获得的收益[%s]￥到账户余额中", accountid, amount));
+            Account account = new Account();
+            account.setAccountid(accountid);
+            account = accountService.queryByAccountid(accountid);
+            if (account != null && !StringUtil.isEmpty(account.getAccountname())) {
+                String accoBalance = account.getAccobalance();
+                Double balance = StringUtil.formatStr2Dobule(accoBalance);
+                balance += StringUtil.formatStr2Dobule(amount);
+                Account updateAccount = new Account();
+                updateAccount.setAccountid(accountid);
+                updateAccount.setAccobalance(String.valueOf(balance));
+
+                logger.info(String.format("开始更新账户余额[%s]", updateAccount));
+                accountService.updateAccountInfo(updateAccount);
+            } else {
+                throw new APIException("账户[%s]不存在");
+            }
+        }else {
+            throw new APIException(String.format("关于订单的[%s]的推荐流水不存在或者大于1条，请联系管理员",recommandserialid));
+        }
+    }
+
+    private String caculateAmount(String accountid,String amount){
+        logger.info(String.format("查询账户[%s]的详细信息",accountid));
+        Account account = accountService.queryByAccountid(accountid);
+        String finalAmount;
+        if(account != null && !StringUtil.isEmpty(account.getAccountname())){
+            Double oldAmount = StringUtil.formatStr2Dobule(amount);
+            double finalMoney;
+            if("1".equals(account.getIsvip())){
+                finalMoney = oldAmount * 90 / 100;
+            }else {
+                if("1".equals(account.getCusttype())){//被推荐用户
+                    finalMoney = oldAmount * 95 / 100;
+                }else {
+                    finalMoney = oldAmount;
+                }
+            }
+            finalAmount = String.valueOf(finalMoney);
+            return finalAmount;
+        }else {
+            throw new APIException("查询的账户[%s]不存在");
+        }
+    }
     private void updateRecommandIncome(String orderid) {
         RecommandIncome recommandIncome = new RecommandIncome();
         recommandIncome.setIncomeserialno(orderid);
