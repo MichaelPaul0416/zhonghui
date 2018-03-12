@@ -55,10 +55,10 @@
         select * from taccount where accountid = #{_parameter}
     </select>
     
-    <select id="queryAccounts" parameterType="java.lang.String" resultMap="AccountResult">
+    <select id="queryAccounts" parameterType="java.util.Map" resultMap="AccountResult">
         select * from taccount
         <where>
-            custtype = #{account.custtype}
+            custtype = #{account.custtype} and isvip = #{account.isvip}
         </where>
         <if test="pager != null">limit #{pager.startLine},#{pager.offset}</if>
     </select>

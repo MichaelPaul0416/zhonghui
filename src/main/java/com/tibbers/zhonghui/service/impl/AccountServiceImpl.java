@@ -232,9 +232,10 @@ public class AccountServiceImpl implements IAccountService {
     }
 
     @Override
-    public List<Account> queryAccounts(String termid, Pager pager) {
+    public List<Account> queryAccounts(String isvip, String termid, Pager pager) {
         Map<String,Object> param = new HashMap<>();
         Account account = new Account();
+        account.setIsvip(isvip);
         account.setCusttype(termid);
         param.put("account",account);
         param.put("pager",pager);

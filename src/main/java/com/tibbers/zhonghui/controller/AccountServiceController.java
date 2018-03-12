@@ -216,14 +216,14 @@ public class AccountServiceController {
 
     @RequestMapping("/adminQueryAccounts")
     @ResponseBody
-    public String adminQueryAccounts(String termid,@Nullable String startLine,@Nullable String offset){
+    public String adminQueryAccounts(String isvip,String termid,@Nullable String startLine,@Nullable String offset){
         APIResponse apiResponse ;
         Response response;
 
-        if(!StringUtil.isEmpty(termid)){
+        if(!StringUtil.argsEmpty(new String[]{isvip,termid})){
             try{
                 Pager pager = new Pager(Integer.parseInt(startLine),Integer.parseInt(offset));
-                List<Account> accounts = accountService.queryAccounts(termid,pager);
+                List<Account> accounts = accountService.queryAccounts(isvip, termid, pager);
                 response = new Response(true,accounts);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
             }catch (Exception e){
@@ -232,7 +232,7 @@ public class AccountServiceController {
                 apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
             }
         }else {
-            response = new Response(false,"查询的账户类型termid不能为空");
+            response = new Response(false,"查询的账户是否vip，账户类型termid不能为空");
             apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
         }
 
