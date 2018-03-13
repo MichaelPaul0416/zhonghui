@@ -38,7 +38,9 @@
             <if test="income.reverse2 != null "> and t1.reverse2 = #{income.reverse2}</if>
         </if>
         order by t1.incomedatetime desc
-        <if test="pager != null">limit #{pager.startLine},#{pager.offset}</if>
+        <if test="pager != null">
+            limit #{pager.startLine},#{pager.offset}
+        </if>
     </select>
 
     <update id="updateIncomeSerial" parameterType="com.tibbers.zhonghui.model.RecommandIncome">
