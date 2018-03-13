@@ -13,6 +13,10 @@
         <result column="reverse" jdbcType="VARCHAR" property="reverse"/>
     </resultMap>
 
+    <resultMap id="categoryCaption" type="java.util.Map">
+        <result column="categoryid" jdbcType="VARCHAR" property="categoryid"/>
+        <result column="caption" jdbcType="VARCHAR" property="caption"/>
+    </resultMap>
     <select id="loadSysConfig2Cache" resultMap="SysParamResult">
         select categoryid,itemid,itemname,description,reverse from tsysparameter where deleteflag != '1'
     </select>
@@ -50,5 +54,9 @@
             (#{item.categoryid},#{item.itemid},#{item.itemname},#{item.caption},#{item.description},#{item.reverse})
         </foreach>
     </insert>
+
+    <select id="queryCategoryCaption"  resultMap="categoryCaption">
+        select categoryid,caption from tsysparameter where deleteflag != '1' group by categoryid,caption
+    </select>
 
 </mapper>

@@ -4,6 +4,7 @@ import com.tibbers.zhonghui.model.SysParam;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Paul
@@ -28,4 +29,6 @@ public interface ISysParamDao {
     boolean deleteCategoryItem(SysParam sysParam);//删除某一个类别明细
 
     boolean updateCategoryItem(SysParam sysParam);//更新某一个条目
+
+    List<Map<String,String>> queryCategoryCaption();
 }

@@ -73,13 +73,25 @@ public class OrderServiceImpl implements IOrderService {
     public PayResult createOrder(String orderInfo, String itemlist, String code, String clientip, String recommandinfo) {
         logger.info(String.format("根据[%s]获取鉴权信息",code));
         try {
-            WxMpOAuth2AccessToken accessToken = this.wxMpService.oauth2getAccessToken(code);
-            String openid = accessToken.getOpenId();
+            //根据payforbalance判断是余额支付还是微信支付，余额支付的话，查询是否有该账户，有的话继续
+            Orders orders = JSONObject.parseObject(orderInfo,Orders.class);
+            String openid;
+            if("1".equals(orders.getPaybybalance())) {//0--其他支付，1--余额支付
+                Account account = accountService.queryByAccountid(orders.getAccountid());
+                if(account != null && !StringUtil.isEmpty(account.getAccountname())){
+                    openid = account.getAccountid();
+                }else {
+                    throw new APIException(String.format("账户[%s]不存在",orders.getAccountid()));
+                }
+            }else{
+                WxMpOAuth2AccessToken accessToken = this.wxMpService.oauth2getAccessToken(code);
+                openid = accessToken.getOpenId();
+
+            }
+
             if(!StringUtils.isEmpty(openid)){
 //            if(true){
-                Map<String,Object> map = new HashMap<>();
                 logger.info(String.format("即将为客户生成一笔订单"));
-                Orders orders = JSONObject.parseObject(orderInfo,Orders.class);
                 orders.setAmount(caculateAmount(orders.getAccountid(),orders.getAmount()));
                 orders.setOrderid(StringUtil.serialId());
                 orders.setCreatedatetime(StringUtil.currentDateTime());
@@ -89,112 +101,79 @@ public class OrderServiceImpl implements IOrderService {
                 orders.setIsvalid("1");
                 List<OrderItems> orderItemsList = JSONObject.parseArray(itemlist,OrderItems.class);
 
-                map.put("orders",orders);
-                map.put("orderitems",orderItemsList);
+                if("1".equals(orders.getPaybybalance())){
+                    PayResult payResult ;
+                    try {
+                        orders.setIsvalid("1");
+                        //更新订单表
+                        ordersDao.insertSingelOrder(orders);
+                        generateOrderItems(orders, orderItemsList);
+                        updateShopcar(orderItemsList);
+
+                        payResult = buildPayResult(orders);
+                        prePaySerial(orders, orders.getOrderid(), payResult ,orders.getPaybybalance());
+
+                        generateRecommandRelation(recommandinfo, orders,orders.getPaybybalance());
+
+                        payResult.setOrderid(orders.getOrderid());
+                        return payResult;
+                    }catch (Exception e){
+                        logger.error(e.getMessage(),e);
+//                        payResult = new PayResult();
+//                        payResult.setAppid(wxPayConfiguration.getAppId());
+//                        payResult.setMchid(wxPayConfiguration.getMchId());
+//                        payResult.setNonce_str(StringUtil.generateUUID());
+//                        payResult.setSign("");
+//                        payResult.setPrepay_id("");
+//                        payResult.setTrade_type("balance");
+                        throw new APIException(e.getCause().getMessage());
+                    }
+                }else {
+                    Map<String, Object> map = new HashMap<>();
+                    map.put("orders", orders);
+                    map.put("orderitems", orderItemsList);
 //                map.put("openid","oUpF8uMuAJO_M2pxb1Q9zNjWeS6o");
-                map.put("openid",openid);
-                map.put("clientip",clientip);
-                WxPayUnifiedOrderRequest request = assembelyOrderRequest(map);
-                //统一下单
-                WxPayUnifiedOrderResult result = payService.unifiedOrder(request);
-                PayResult payResult = buildPayResult(result,orders);
-                if(AppConstants.RETURN_CODE.equals(payResult.getReturn_code()) ){
-                    if(!AppConstants.RESULT_CODE.equals(payResult.getResult_code())){
-                        orders.setIsvalid("0");
-                    }
-                    //更新订单表
-                    ordersDao.insertSingelOrder(orders);
-                    logger.info(String.format("客户[%s]的订单生成成功[%s]",orders.getAccountid(),orders));
-                    for(OrderItems orderItems : orderItemsList){
-                        orderItems.setSerialid(StringUtil.serialId());
-                        orderItems.setOrderid(orders.getOrderid());
-                        orderItems.setReverse1(orders.getAddressid());
-                    }
-                    logger.info(String.format("即将开始生成订单[%s]的订单明细[%s]",orders.getOrderid(),orderItemsList));
+                    map.put("openid", openid);
+                    map.put("clientip", clientip);
+                    WxPayUnifiedOrderRequest request = assembelyOrderRequest(map);
+                    //统一下单
+                    WxPayUnifiedOrderResult result = payService.unifiedOrder(request);
+                    PayResult payResult = buildPayResult(result, orders);
 
-                    //更新订单明细
-                    orderItemsDao.insertItemsBatch(orderItemsList);
-                    logger.info(String.format("订单[%s]的明细已经生成",orders.getOrderid()));
-
-                    //如果预支付成功的话
-                    if(AppConstants.RESULT_CODE.equals(payResult.getResult_code())){
-                        //根据订单明细，获取哪些是从购物车结账的
-                        Map<String,OrderItems> shoppingCarMap = new HashMap<>();
-                        List<String> shopcarids = new ArrayList<>();
-                        for(OrderItems orderItems : orderItemsList){
-//                            orderItems.setSerialid(StringUtil.generateUUID());
-//                            orderItems.setOrderid(orders.getOrderid());
-                            if(!StringUtils.isEmpty(orderItems.getShopcarid())){
-                                shopcarids.add(orderItems.getShopcarid());
-                                shoppingCarMap.put(orderItems.getShopcarid(),orderItems);
-                            }
+                    if(AppConstants.RETURN_CODE.equals(payResult.getReturn_code()) ){
+                        if(!AppConstants.RESULT_CODE.equals(payResult.getResult_code())){
+                            orders.setIsvalid("0");
                         }
-                        if(shopcarids.size() > 0) {
-                            logger.info(String.format("更新购物车中的明细记录"));
-                            List<ShoppingCar> shoppingCarList = shoppingCarDao.queryListBySerialid(shopcarids);
-                            List<ShoppingCar> batchRemoveList = new ArrayList<>();
-                            for (ShoppingCar shoppingCar : shoppingCarList) {
-                                OrderItems orderItems = shoppingCarMap.get(shoppingCar.getSerialid());
-                                if (shoppingCar.getNumber() == orderItems.getPronumber()) {//如果订单明细的商品数量=购物车中商品数量，则从购物车中删除该明细，否则只是数量减少
-                                    batchRemoveList.add(shoppingCar);
-                                } else {
-                                    shoppingCar.setNumber(shoppingCar.getNumber() - orderItems.getPronumber());
-                                    shoppingCar.setModifydatetime(StringUtil.currentDateTime());
-                                    logger.info(String.format("更新购物车明细信息[%s]", shoppingCar));
-                                    shoppingCarDao.updateGoodsInShopCar(shoppingCar);
-                                }
-                            }
-                            if (batchRemoveList.size() > 0) {
-                                logger.info(String.format("将下列购物车明细[%s]删除", batchRemoveList));
-                                shoppingCarDao.removeBatchFromShopCar(batchRemoveList);
-                            }
-                        }
-                        //预支付流水生成
-                        logger.info(String.format("根据微信预支付号[%s]生成一条支付流水",payResult.getPrepay_id()));
-                        List<CapitalSerial> capitalSerials = new ArrayList<>();
-                        CapitalSerial capitalSerial = new CapitalSerial();
-                        capitalSerial.setEmcapitalserial(request.getOutTradeNo());
-                        capitalSerial.setThirdpartserial(payResult.getPrepay_id());
-                        capitalSerial.setOrderid(orders.getOrderid());
-                        capitalSerial.setCapitaldatetime(StringUtil.currentDateTime());
-                        capitalSerial.setThirdpartmsg("获取预支付ID成功");
-                        capitalSerial.setCapitaldirect("0");
-                        capitalSerial.setReverse1(orders.getAmount());//设置为订单金额
-                        capitalSerial.setReverse2("");
-                        capitalSerials.add(capitalSerial);
-                        capitalSerialDao.insertCapitalSerialOrBatch(capitalSerials);
+                        //更新订单表
+                        ordersDao.insertSingelOrder(orders);
 
-                        //推荐人关系收益
-                        if(!StringUtils.isEmpty(recommandinfo)){
-                            RecommandIncome recommandIncome = JSONObject.parseObject(recommandinfo,RecommandIncome.class);
-                            recommandIncome.setIncomeserialno(orders.getOrderid());//关联订单
-                            double total = StringUtil.formatStr2Dobule(orders.getAmount());
-                            recommandIncome.setIncome(StringUtil.caculteIncome(total,Integer.parseInt(wxPayConfiguration.getRecommandfee())));
-                            recommandIncome.setIncomedatetime(StringUtil.currentDateTime());
-                            recommandIncome.setAlreadydone("0");
-                            recommandIncome.setDescription("");
-                            recommandIncome.setReverse1("");
-                            recommandIncome.setReverse2("");
-                            List<RecommandIncome> list = new ArrayList<>();
-                            list.add(recommandIncome);
-                            recommandIncomeDao.insertRecommandIncomeOrBatch(list);
-                            logger.info(String.format("新增推荐人[%s]/被推荐人[%s]收益关系[%s]成功",recommandIncome.getAccountid(),recommandIncome.getComefrom(),recommandIncome));
+                        generateOrderItems(orders, orderItemsList);
+
+                        //如果预支付成功的话
+                        if(AppConstants.RESULT_CODE.equals(payResult.getResult_code())){
+
+                            updateShopcar(orderItemsList);
+
+                            prePaySerial(orders, request.getOutTradeNo(), payResult,"0");
+
+                            generateRecommandRelation(recommandinfo, orders,"0");
+
+                            //账户余额和积分等微信进行扣款成功通知之后在做修改
                         }
 
-                        //账户余额和积分等微信进行扣款成功通知之后在做修改
+                    }else{
+                        payResult.setAppid(wxPayConfiguration.getAppId());
+                        payResult.setMchid(wxPayConfiguration.getMchId());
+                        payResult.setNonce_str(request.getNonceStr());
+                        payResult.setSign("");
+                        payResult.setPrepay_id("");
+                        payResult.setTrade_type(AppConstants.TRADE_TYPE);
                     }
 
-                }else{
-                    payResult.setAppid(wxPayConfiguration.getAppId());
-                    payResult.setMchid(wxPayConfiguration.getMchId());
-                    payResult.setNonce_str(request.getNonceStr());
-                    payResult.setSign("");
-                    payResult.setPrepay_id("");
-                    payResult.setTrade_type(AppConstants.TRADE_TYPE);
+                    payResult.setOrderid(orders.getOrderid());
+                    return payResult;
                 }
 
-                payResult.setOrderid(orders.getOrderid());
-                return payResult;
             }else{
                 throw new APIException(String.format("微信鉴权接口根据code[%s]返回的openid为空",code));
             }
@@ -219,6 +198,99 @@ public class OrderServiceImpl implements IOrderService {
             }
         }
 
+    }
+
+    private void generateOrderItems(Orders orders, List<OrderItems> orderItemsList) {
+        logger.info(String.format("客户[%s]的订单生成成功[%s]",orders.getAccountid(),orders));
+        for(OrderItems orderItems : orderItemsList){
+            orderItems.setSerialid(StringUtil.serialId());
+            orderItems.setOrderid(orders.getOrderid());
+            orderItems.setReverse1(orders.getAddressid());
+        }
+        logger.info(String.format("即将开始生成订单[%s]的订单明细[%s]",orders.getOrderid(),orderItemsList));
+
+        //更新订单明细
+        orderItemsDao.insertItemsBatch(orderItemsList);
+        logger.info(String.format("订单[%s]的明细已经生成",orders.getOrderid()));
+    }
+
+    private void generateRecommandRelation(String recommandinfo, Orders orders,String paybybalance) {
+        //推荐人关系收益
+        if(!StringUtils.isEmpty(recommandinfo)){
+            RecommandIncome recommandIncome = JSONObject.parseObject(recommandinfo,RecommandIncome.class);
+            recommandIncome.setIncomeserialno(orders.getOrderid());//关联订单
+            double total = StringUtil.formatStr2Dobule(orders.getAmount());
+            recommandIncome.setIncome(StringUtil.caculteIncome(total,Integer.parseInt(wxPayConfiguration.getRecommandfee())));
+            recommandIncome.setIncomedatetime(StringUtil.currentDateTime());
+            if("1".equals(paybybalance)){
+                recommandIncome.setAlreadydone("1");
+            }else {
+                recommandIncome.setAlreadydone("0");
+            }
+            recommandIncome.setDescription("");
+            recommandIncome.setReverse1("");
+            recommandIncome.setReverse2("");
+            List<RecommandIncome> list = new ArrayList<>();
+            list.add(recommandIncome);
+            recommandIncomeDao.insertRecommandIncomeOrBatch(list);
+            logger.info(String.format("新增推荐人[%s]/被推荐人[%s]收益关系[%s]成功",recommandIncome.getAccountid(),recommandIncome.getComefrom(),recommandIncome));
+        }
+    }
+
+    private void prePaySerial(Orders orders, String orderid, PayResult payResult,String paybybalance) {
+        //预支付流水生成
+        logger.info(String.format("根据微信预支付号[%s]生成一条支付流水",payResult.getPrepay_id()));
+        List<CapitalSerial> capitalSerials = new ArrayList<>();
+        CapitalSerial capitalSerial = new CapitalSerial();
+        capitalSerial.setEmcapitalserial(orderid);
+        capitalSerial.setThirdpartserial(payResult.getPrepay_id());
+        capitalSerial.setOrderid(orders.getOrderid());
+        capitalSerial.setCapitaldatetime(StringUtil.currentDateTime());
+        capitalSerial.setCapitaldirect("0");
+        capitalSerial.setReverse1(orders.getAmount());//设置为订单金额
+        capitalSerial.setReverse2("");
+        capitalSerials.add(capitalSerial);
+        if("1".equals(paybybalance)){
+            capitalSerial.setState("1");
+            capitalSerial.setThirdpartmsg("使用账户余额支付成功");
+        }else {
+            capitalSerial.setThirdpartmsg("获取预支付ID成功");
+        }
+        capitalSerialDao.insertCapitalSerialOrBatch(capitalSerials);
+    }
+
+    private void updateShopcar(List<OrderItems> orderItemsList) {
+        //根据订单明细，获取哪些是从购物车结账的
+        Map<String,OrderItems> shoppingCarMap = new HashMap<>();
+        List<String> shopcarids = new ArrayList<>();
+        for(OrderItems orderItems : orderItemsList){
+//                            orderItems.setSerialid(StringUtil.generateUUID());
+//                            orderItems.setOrderid(orders.getOrderid());
+            if(!StringUtils.isEmpty(orderItems.getShopcarid())){
+                shopcarids.add(orderItems.getShopcarid());
+                shoppingCarMap.put(orderItems.getShopcarid(),orderItems);
+            }
+        }
+        if(shopcarids.size() > 0) {
+            logger.info(String.format("更新购物车中的明细记录"));
+            List<ShoppingCar> shoppingCarList = shoppingCarDao.queryListBySerialid(shopcarids);
+            List<ShoppingCar> batchRemoveList = new ArrayList<>();
+            for (ShoppingCar shoppingCar : shoppingCarList) {
+                OrderItems orderItems = shoppingCarMap.get(shoppingCar.getSerialid());
+                if (shoppingCar.getNumber() == orderItems.getPronumber()) {//如果订单明细的商品数量=购物车中商品数量，则从购物车中删除该明细，否则只是数量减少
+                    batchRemoveList.add(shoppingCar);
+                } else {
+                    shoppingCar.setNumber(shoppingCar.getNumber() - orderItems.getPronumber());
+                    shoppingCar.setModifydatetime(StringUtil.currentDateTime());
+                    logger.info(String.format("更新购物车明细信息[%s]", shoppingCar));
+                    shoppingCarDao.updateGoodsInShopCar(shoppingCar);
+                }
+            }
+            if (batchRemoveList.size() > 0) {
+                logger.info(String.format("将下列购物车明细[%s]删除", batchRemoveList));
+                shoppingCarDao.removeBatchFromShopCar(batchRemoveList);
+            }
+        }
     }
 
     @Override
@@ -363,6 +435,21 @@ public class OrderServiceImpl implements IOrderService {
         account.setScore(String.valueOf(totalScore));
         accountService.updateAccountInfo(account);
         logger.info(String.format("账户[%s]积分更新成功[%s]",accountid,account));
+    }
+
+    private PayResult buildPayResult(Orders orders){
+        PayResult payResult = new PayResult();
+        logger.info(String.format("客户[%s]使用账户余额支付成功",orders.getAccountid()));
+        payResult.setReturn_code("SUCCESS");
+        payResult.setResult_code("SUCCESS");
+        payResult.setAppid(wxPayConfiguration.getAppId());
+        payResult.setMchid(wxPayConfiguration.getMchId());
+        payResult.setNonce_str(StringUtil.generateUUID());
+        payResult.setSign("");
+        payResult.setPrepay_id(orders.getOrderid());
+        payResult.setTrade_type("balance");
+
+        return payResult;
     }
 
     private PayResult buildPayResult(WxPayUnifiedOrderResult result,Orders orders){

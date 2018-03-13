@@ -19,6 +19,7 @@ public class Orders {
     private String transportfee;
     private String note;
     private String amount;
+    private String paybybalance;
     private String reverse1;
     private String reverse2;
 
@@ -37,9 +38,18 @@ public class Orders {
                 ", transportfee='" + transportfee + '\'' +
                 ", note='" + note + '\'' +
                 ", amount='" + amount + '\'' +
+                ", paybybalance='" + paybybalance + '\'' +
                 ", reverse1='" + reverse1 + '\'' +
                 ", reverse2='" + reverse2 + '\'' +
                 '}';
+    }
+
+    public String getPaybybalance() {
+        return paybybalance;
+    }
+
+    public void setPaybybalance(String paybybalance) {
+        this.paybybalance = paybybalance;
     }
 
 

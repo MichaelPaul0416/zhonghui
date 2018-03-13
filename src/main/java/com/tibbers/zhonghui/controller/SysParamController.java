@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 import javax.servlet.http.HttpServletRequest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Paul
@@ -32,6 +33,24 @@ public class SysParamController {
 
     @Autowired
     private ISysParamService iSysParamService;
+
+    @RequestMapping("/queryCategoryCaption")
+    @ResponseBody
+    public String queryCategoryCaption(){
+        APIResponse apiResponse;
+        Response response;
+        try{
+            List<Map<String,String>> results = iSysParamService.queryAllType();
+            response = new Response(true,results);
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+        }catch (Exception e){
+            logger.error(e.getMessage(),e);
+            response = new Response(false,e.getCause().getMessage());
+            apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
+    }
 
     @RequestMapping("/createSysCategory")
     @ResponseBody

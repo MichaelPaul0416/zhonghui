@@ -14,6 +14,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -141,5 +142,13 @@ public class SysParamServiceImpl implements ISysParamService {
         }catch (Exception e){
             throw new APIException(e.getCause());
         }
+    }
+
+    @Override
+    public List<Map<String, String>> queryAllType() {
+        logger.info("查询所有的系统大类名称");
+        List<Map<String,String>> categories = iSysParamDao.queryCategoryCaption();
+        logger.info(String.format("查询到所有大类[%s]",categories));
+        return categories;
     }
 }

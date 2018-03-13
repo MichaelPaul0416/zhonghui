@@ -3,6 +3,7 @@ package com.tibbers.zhonghui.service;
 import com.tibbers.zhonghui.model.SysParam;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Paul
@@ -23,4 +24,6 @@ public interface ISysParamService {
     boolean deleteCategoryItem(SysParam sysParam);
 
     boolean updateCategoryItem(SysParam sysParam);
+
+    List<Map<String, String>> queryAllType();
 }

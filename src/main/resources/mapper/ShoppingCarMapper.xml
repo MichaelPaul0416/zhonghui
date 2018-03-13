@@ -18,7 +18,7 @@
 
 
     <resultMap id="ShopCarShowResult" type="java.util.Map">
-        <result column="addressid" jdbcType="VARCHAR" property="addressid"/>
+        <result column="serialid" jdbcType="VARCHAR" property="serialid"/>
         <result column="number" jdbcType="VARCHAR" property="number"/>
         <result column="unitprice" jdbcType="VARCHAR" property="unitprice"/>
         <result column="productname" jdbcType="VARCHAR" property="productname"/>
@@ -55,7 +55,7 @@
     </update>
     
     <select id="queryListByPager" parameterType="java.util.Map" resultMap="ShopCarShowResult">
-      select t1.addressid,t1.number,t2.unitprice,t2.productname,t2.color,t2.productgrade,t2.valuescore,t3.itemname,t4.salestate
+      select t1.serialid,t1.number,t2.unitprice,t2.productname,t2.color,t2.productgrade,t2.valuescore,t3.itemname,t4.salestate
         from tshopcar t1,tproduct t2,tsysparameter t3,tproductbelong t4
         where t1.productid = t2.productid and t2.itemid = t3.itemid and t2.productid = t4.productid
         and t1.accountid = #{accountid} and t4.salestate = #{salestate}

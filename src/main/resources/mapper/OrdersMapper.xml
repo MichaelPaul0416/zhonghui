@@ -17,6 +17,7 @@
         <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
         <result column="note" jdbcType="VARCHAR" property="note"/>
         <result column="amount" property="amount" jdbcType="VARCHAR"/>
+        <result column="paybybalance" property="paybybalance" jdbcType="VARCHAR"/>
         <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
         <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
     </resultMap>
@@ -25,13 +26,14 @@
         <result column="orderid" jdbcType="VARCHAR" property="orderid"/>
         <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
         <result column="isvalid" jdbcType="VARCHAR" property="isvalid"/>
+        <result column="paybybalance" jdbcType="VARCHAR" property="paybybalance"/>
         <result column="emcapitalserial" jdbcType="VARCHAR" property="emcapitalserial"/>
         <result column="thirdpartmsg" jdbcType="VARCHAR" property="thirdpartmsg"/>
     </resultMap>
 
     <!--新增订单表记录-->
     <insert id="insertSingelOrder" parameterType="com.tibbers.zhonghui.model.Orders">
-        insert into torders values(#{addressid},#{accountid},#{orderid},#{createdatetime},#{orderstate},#{isvalid},#{expressno},#{donedatetime},#{freetransport},#{transportfee},#{note},#{amount},#{reverse1},#{reverse2})
+        insert into torders values(#{addressid},#{accountid},#{orderid},#{createdatetime},#{orderstate},#{isvalid},#{expressno},#{donedatetime},#{freetransport},#{transportfee},#{note},#{amount},#{paybybalance},#{reverse1},#{reverse2})
     </insert>
 
     <update id="updatePartOrderMsg" parameterType="com.tibbers.zhonghui.model.Orders">
@@ -49,7 +51,7 @@
 
     <!--Orders,Account,Pager-->
     <select id="queryOrdersByPager" parameterType="java.util.Map" resultMap="OrderResult">
-        select t1.accountid,t2.accountname,t1.orderid,t1.createdatetime,t1.orderstate,t1.isvalid,t1.expressno,t1.donedatetime,t1.freetransport,t1.transportfee,t1.note,t1.amount,t1.reverse1,t1.reverse2
+        select t1.accountid,t2.accountname,t1.orderid,t1.createdatetime,t1.orderstate,t1.isvalid,t1.expressno,t1.donedatetime,t1.freetransport,t1.transportfee,t1.note,t1.amount,t1.paybybalance,t1.reverse1,t1.reverse2
         from torders t1,taccount t2 where t1.accountid = t2.accountid
         <if test="orders != null">
             <if test="orders.accountid != null and !&quot;&quot;.equals(orders.accountid)">and t1.accountid = #{orders.accountid}</if>
@@ -60,6 +62,7 @@
             <if test="orders.expressno != null and !&quot;&quot;.equals(orders.expressno)">and t1.expressno = #{orders.expressno} </if>
             <if test="orders.freetransport != null and !&quot;&quot;.equals(orders.freetransport)">and t1.freetransport = #{orders.freetransport} </if>
             <if test="orders.note != null and !&quot;&quot;.equals(orders.note)">and t1.note like '%' #{orders.note} '%' </if>
+            <if test="orders.paybybalance != null and !&quot;&quot;.equals(orders.paybybalance)">and t1.paybybalance = #{orders.paybybalance}</if>
             <if test="orders.reverse1 != null ">and t1.reverse1 like '%' #{orders.reverse1} '%' </if>
             <if test="orders.reverse2 != null ">and t1.reverse2 like '%' #{orders.reverse2} '%' </if>
         </if>
@@ -70,7 +73,7 @@
     </select>
 
     <select id="queryOrderIdsForDetails" parameterType="java.util.Map" resultMap="capitalSerialResult">
-        select t1.orderid,t1.accountid,t1.isvalid,t2.emcapitalserial,t2.thirdpartmsg from torders t1,tcapitalserial t2
+        select t1.orderid,t1.accountid,t1.isvalid,t1.paybybalance,t2.emcapitalserial,t2.thirdpartmsg from torders t1,tcapitalserial t2
         where t1.orderid = t2.orderid and t1.accountid = #{account.accountid} and t1.isvalid = '1' and t2.state = '1'
         order by t1.donedatetime DESC
         <if test="pager != null">
