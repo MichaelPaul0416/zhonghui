@@ -28,4 +28,6 @@ public interface IAccountServiceDao {
     List<Account> queryAccounts(Map<String,Object> param);
 
     List<Map<String,Object>> orderByScore(Map<String,Object> param);
+
+    Account queryAccountByOpenid(String openid);
 }

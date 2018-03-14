@@ -29,4 +29,6 @@ public interface IAccountService {
     List<Account> queryAccounts(String isvip, String termid, Pager pager);
 
     List<Map<String,Object>> orderByScore(Map<String,Object> param);
+
+    Account queryAccountByOpenid(String openid);
 }

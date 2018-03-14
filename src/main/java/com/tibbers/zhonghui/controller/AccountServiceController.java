@@ -49,6 +49,37 @@ public class AccountServiceController {
     private ServiceConfigBean serviceConfigBean;
 
 
+    @RequestMapping("queryAccountByOpenid")
+    @ResponseBody
+    public String queryAccountByOpenid(String openid){
+        APIResponse apiResponse ;
+        Response response;
+
+        if(!StringUtil.isEmpty(openid)){
+            try{
+                Account account = accountService.queryAccountByOpenid(openid);
+                Map<String,Object> result = new HashMap<>();
+                if(account != null && !StringUtil.isEmpty(account.getAccountid())){
+                    result.put("registry",true);
+                    result.put("msg","已注册");
+                    result.put("accountid",account.getAccountid());
+                }else {
+                    result.put("registry",false);
+                    result.put("msg",openid + "对应的微信用户未在本系统中注册绑定");
+                }
+                response = new Response(true,result);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getCause().getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            }
+        }else {
+            response = new Response(false,"微信openid不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+        }
+        return JSONObject.toJSONString(apiResponse);
+    }
 
     @RequestMapping("/queryScore")
     @ResponseBody

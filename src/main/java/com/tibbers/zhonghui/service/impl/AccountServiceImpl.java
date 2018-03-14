@@ -250,5 +250,13 @@ public class AccountServiceImpl implements IAccountService {
         return accountServiceDao.orderByScore(param);
     }
 
+    @Override
+    public Account queryAccountByOpenid(String openid) {
+        logger.info(String.format("根据微信openid[%s]查询绑定的账户信息",openid));
+        Account account = accountServiceDao.queryAccountByOpenid(openid);
+        logger.info(String.format("微信openid[%s]绑定的账户信息如下[%s]",openid,account));
+        return account;
+    }
+
 
 }
