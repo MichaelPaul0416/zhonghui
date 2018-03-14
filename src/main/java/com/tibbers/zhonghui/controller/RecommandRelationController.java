@@ -86,7 +86,10 @@ public class RecommandRelationController {
         Response response;
         if(!StringUtil.isEmpty(accountid)){
             try{
-                Pager pager = new Pager(Integer.valueOf(startLine),Integer.valueOf(offset));
+                Pager pager = null;
+                if(!StringUtil.isEmpty(startLine) && !StringUtil.isEmpty(offset)){
+                    pager = new Pager(Integer.valueOf(startLine),Integer.valueOf(offset));
+                }
                 List<Map<String,String>> result = recommandService.queryMyRecommandAccounts(accountid,pager);
                 response = new Response(true,result);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);

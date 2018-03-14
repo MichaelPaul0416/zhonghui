@@ -219,7 +219,10 @@ public class AdministratorController {
 
         if(!StringUtil.isEmpty(accountid)){
             try{
-                Pager pager = new Pager(Integer.parseInt(startLine),Integer.parseInt(offset));
+                Pager pager = null;
+                if(!StringUtil.isEmpty(startLine) && !StringUtil.isEmpty(offset)){
+                    pager = new Pager(Integer.parseInt(startLine),Integer.parseInt(offset));
+                }
                 Map<String,List<Map<String,String>>> results = administratorService.queryAccountTradeDetails(accountid,pager);
                 response = new Response(true,results);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);

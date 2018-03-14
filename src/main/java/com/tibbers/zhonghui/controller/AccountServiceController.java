@@ -196,7 +196,10 @@ public class AccountServiceController {
         Response response;
         if(!StringUtil.isEmpty(accountid)){
             try{
-                Pager pager = new Pager(Integer.parseInt(startLine),Integer.parseInt(offset));
+                Pager pager = null;
+                if(!StringUtil.isEmpty(startLine) && !StringUtil.isEmpty(offset)){
+                    pager = new Pager(Integer.parseInt(startLine),Integer.parseInt(offset));
+                }
                 Map<String,List<Map<String,Object>>> results = accountService.queryAccountTrades(accountid,pager);
                 logger.info(String.format("查询到账户[%s]的资金收支明细",accountid));
                 response = new Response(true,results);
@@ -222,7 +225,10 @@ public class AccountServiceController {
 
         if(!StringUtil.argsEmpty(new String[]{isvip,termid})){
             try{
-                Pager pager = new Pager(Integer.parseInt(startLine),Integer.parseInt(offset));
+                Pager pager = null;
+                if(!StringUtil.isEmpty(startLine) && !StringUtil.isEmpty(offset)){
+                    pager = new Pager(Integer.parseInt(startLine),Integer.parseInt(offset));
+                }
                 List<Account> accounts = accountService.queryAccounts(isvip, termid, pager);
                 response = new Response(true,accounts);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
