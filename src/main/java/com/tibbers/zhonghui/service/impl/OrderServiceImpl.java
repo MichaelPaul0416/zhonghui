@@ -432,7 +432,7 @@ public class OrderServiceImpl implements IOrderService {
 
         Account account = new Account();
         account.setAccountid(accountid);
-        account.setScore(String.valueOf(totalScore));
+        account.setScore((totalScore));
         accountService.updateAccountInfo(account);
         logger.info(String.format("账户[%s]积分更新成功[%s]",accountid,account));
     }

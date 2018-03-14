@@ -49,6 +49,34 @@ public class AccountServiceController {
     private ServiceConfigBean serviceConfigBean;
 
 
+
+    @RequestMapping("/queryScore")
+    @ResponseBody
+    public String queryScore(@Nullable String accountid){
+        APIResponse apiResponse;
+        Response response;
+        try {
+            Account account = null;
+            if (!StringUtil.isEmpty(accountid)) {
+                account = new Account();
+                account.setAccountid(accountid);
+            }
+            Map<String, Object> param = new HashMap<>();
+            param.put("account", account);
+            List<Map<String, Object>> ranks = accountService.orderByScore(param);
+            logger.info(String.format("查询到的排名信息[%s]", ranks));
+
+            response = new Response(true,ranks);
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+        }catch (Exception e){
+            logger.error(e.getMessage(),e);
+            response = new Response(false,e.getCause().getMessage());
+            apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
+
+    }
     @RequestMapping("/registerAccount")
     @ResponseBody
     public String registerAccount(String personInfo,String accountInfo){

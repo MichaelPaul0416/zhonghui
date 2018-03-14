@@ -27,4 +27,6 @@ public interface IAccountService {
     Map<String, List<Map<String, Object>>> queryAccountTrades(String accountid, Pager pager);
 
     List<Account> queryAccounts(String isvip, String termid, Pager pager);
+
+    List<Map<String,Object>> orderByScore(Map<String,Object> param);
 }

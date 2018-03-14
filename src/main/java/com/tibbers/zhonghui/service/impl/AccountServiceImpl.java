@@ -245,5 +245,10 @@ public class AccountServiceImpl implements IAccountService {
         return accounts;
     }
 
+    @Override
+    public List<Map<String, Object>> orderByScore(Map<String, Object> param) {
+        return accountServiceDao.orderByScore(param);
+    }
+
 
 }

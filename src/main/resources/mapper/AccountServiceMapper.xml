@@ -9,20 +9,33 @@
         <result column="accountname" jdbcType="VARCHAR" property="accountname"/>
         <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
         <result column="bindphone" jdbcType="VARCHAR" property="bindphone"/>
-        <result column="score" jdbcType="VARCHAR" property="score"/>
+        <result column="score" jdbcType="INTEGER" property="score"/>
         <result column="isvip" jdbcType="VARCHAR" property="isvip"/>
         <result column="custtype" jdbcType="VARCHAR" property="custtype"/>
         <result column="accobalance" jdbcType="VARCHAR" property="accobalance"/>
         <result column="reverse" jdbcType="VARCHAR" property="reverse"/>
     </resultMap>
 
+    <resultMap id="RankDetails" type="java.util.Map">
+        <id column="accountid" jdbcType="VARCHAR" property="accountid"/>
+        <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="accountname" jdbcType="VARCHAR" property="accountname"/>
+        <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
+        <result column="bindphone" jdbcType="VARCHAR" property="bindphone"/>
+        <result column="score" jdbcType="INTEGER" property="score"/>
+        <result column="isvip" jdbcType="VARCHAR" property="isvip"/>
+        <result column="custtype" jdbcType="VARCHAR" property="custtype"/>
+        <result column="accobalance" jdbcType="VARCHAR" property="accobalance"/>
+        <result column="reverse" jdbcType="VARCHAR" property="reverse"/>
+        <result column="rank" jdbcType="VARCHAR" property="rank"/>
+    </resultMap>
 
     <insert id="registerPersonInfo" parameterType="com.tibbers.zhonghui.model.Person">
         insert into tperson values (#{personid},#{personname},#{sex},#{age},#{phone},#{address},#{bindQQ},#{reverse1},#{reverse2},#{reverse3})
     </insert>
 
     <insert id="registerAccountInfo" parameterType="com.tibbers.zhonghui.model.Account">
-        insert into taccount values (#{accountid},#{personid},#{accountname},#{imagepath},#{bindphone},#{score},#{isvip},#{custtype},#{accobalance})
+        insert into taccount values (#{accountid},#{personid},#{accountname},#{imagepath},#{bindphone},#{score},#{isvip},#{custtype},#{accobalance},#{reverse})
     </insert>
 
     <update id="updateAccountInfo" parameterType="com.tibbers.zhonghui.model.Account">
@@ -30,7 +43,7 @@
         <if test="accountname != null and !&quot;&quot;.equals(accountname.trim())"> accountname = #{accountname} ,</if>
         <if test="imagepath != null and !&quot;&quot;.equals(imagepath.trim())"> imagepath = #{imagepath} ,</if>
         <if test="bindphone != null and !&quot;&quot;.equals(bindphone.trim())"> bindphone = #{bindphone} ,</if>
-        <if test="score != null and !&quot;&quot;.equals(score.trim())"> score= #{score} ,</if>
+        <if test="score > -1"> score= #{score} ,</if>
         <if test="isvip != null and !&quot;&quot;.equals(isvip.trim())"> isvip = #{isvip} ,</if>
         <if test="accobalance != null and !&quot;&quot;.equals(accobalance.trim())"> accobalance = #{accobalance},</if>
         <if test="reverse != null"> reverse = #{reverse} </if>
@@ -61,5 +74,14 @@
             custtype = #{account.custtype} and isvip = #{account.isvip}
         </where>
         <if test="pager != null">limit #{pager.startLine},#{pager.offset}</if>
+    </select>
+
+    <select id="orderByScore" parameterType="java.util.Map" resultMap="RankDetails">
+        select c.* from (select a.*,(select count(score) from taccount b where a.score &lt; b.score) + 1 as rank
+        from taccount a
+        order by rank) c
+        <if test="account != null and !&quot;&quot;.equals(account.getAccountid())">
+            c.accountid = #{accountid}
+        </if>
     </select>
 </mapper>

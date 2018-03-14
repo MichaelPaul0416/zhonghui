@@ -120,7 +120,7 @@ public class AppDemoTest {
         account.setCusttype("00430320");
         account.setBindphone("37453475034");
         account.setIsvip("0");
-        account.setScore("");
+//        account.setScore("");
         account.setImagepath("");
         System.out.println(JSONObject.toJSON(account));
     }
