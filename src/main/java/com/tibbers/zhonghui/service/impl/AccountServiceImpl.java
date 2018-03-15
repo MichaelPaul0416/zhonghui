@@ -59,7 +59,7 @@ public class AccountServiceImpl implements IAccountService {
             try {
                 Person person = JSONObject.parseObject(personInfo, Person.class);
                 Account account = JSONObject.parseObject(accountInfo, Account.class);
-                String personId = StringUtil.generateUUID();
+                String personId = account.getPersonid();
                 person.setPersonid(personId);
                 logger.info(String.format("即将注册个人信息[%s]", person));
                 accountServiceDao.registerPersonInfo(person);
@@ -88,7 +88,7 @@ public class AccountServiceImpl implements IAccountService {
                     throw new APIException("账户类型与现有系统中配置的账户类型不匹配，请联系管理员");
                 }
             }catch (Exception e){
-                throw new APIException(e.getCause());
+                throw new APIException(e.getCause().getMessage());
             }
         }else{
             throw new APIException("输入的个人信息与账户信息为空，请检查后重新输入");

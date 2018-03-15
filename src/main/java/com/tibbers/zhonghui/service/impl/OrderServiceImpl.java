@@ -86,6 +86,7 @@ public class OrderServiceImpl implements IOrderService {
             }else{
                 WxMpOAuth2AccessToken accessToken = this.wxMpService.oauth2getAccessToken(code);
                 openid = accessToken.getOpenId();
+//                openid = "oe9PL4qR5KW4gKxN0csK2n3LgdCE";
 
             }
 
@@ -177,11 +178,7 @@ public class OrderServiceImpl implements IOrderService {
             }else{
                 throw new APIException(String.format("微信鉴权接口根据code[%s]返回的openid为空",code));
             }
-        }
-        catch (WxErrorException e) {
-            throw new APIException("调用微信鉴权接口异常：" + e.getMessage());
-        }
-        catch (Exception e){
+        } catch (Exception e){
             logger.error(e.getMessage(),e);
             if(e instanceof WxPayException){
                 WxPayException exception = (WxPayException) e;
@@ -193,7 +190,9 @@ public class OrderServiceImpl implements IOrderService {
                 }
                 String info = String.format("微信返回错误代码[%s],错误描述[%s]",errorcode,errormsg);
                 throw new APIException(info);
-            }else{
+            }else if(e instanceof WxErrorException){
+                throw new APIException("调用微信鉴权接口异常：" + e.getMessage());
+            }else {
                 throw new APIException(e.getCause().getMessage());
             }
         }

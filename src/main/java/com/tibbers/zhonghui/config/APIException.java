@@ -7,7 +7,7 @@ package com.tibbers.zhonghui.config;
  */
 public class APIException extends RuntimeException {
     public APIException(String msg){
-        super(msg);
+        super(new RuntimeException(msg));
     }
 
     public APIException(String message,Throwable e){

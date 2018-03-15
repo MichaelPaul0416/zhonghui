@@ -132,7 +132,7 @@ public class AccountServiceController {
             registResult = accountService.registerNewAccount(paramMap);
             response = new Response(true,registResult);
             apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
-        }catch (APIException e){
+        }catch (Exception e){
             logger.error(e.getMessage(),e);
             response = new Response(false,e.getMessage());
             apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
@@ -150,7 +150,7 @@ public class AccountServiceController {
                 accountService.updateAccountInfo(accountinfo);
                 response = new Response(true,"账户信息更新成功");
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
-            }catch (APIException e){
+            }catch (Exception e){
                 logger.error(e.getMessage(),e);
                 response = new Response(false,e.getMessage());
                 apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
@@ -184,7 +184,7 @@ public class AccountServiceController {
             logger.error(e.getMessage(),e);
             response = new Response(false,"读取文件流失败,确认文件是否正确");
             apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
-        }catch (APIException e){
+        }catch (Exception e){
             logger.error(e.getMessage(),e);
             response = new Response(false,e.getMessage());
             apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
@@ -204,7 +204,7 @@ public class AccountServiceController {
                 accountService.updatePersonalInfo(personinfo);
                 response = new Response(true,"更新个人信息成功");
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
-            }catch (APIException e){
+            }catch (Exception e){
                 logger.error(e.getMessage(),e);
                 response = new Response(false,e.getMessage());
                 apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
