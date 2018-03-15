@@ -84,7 +84,7 @@ public class StringUtil {
         return  timestamp + generateUUID();
     }
 
-    public static boolean argsEmpty(String[] args){
+    public static boolean argsNotEmpty(String[] args){
         boolean flag = true;
         for(String arg : args){
             if(StringUtils.isEmpty(arg)){

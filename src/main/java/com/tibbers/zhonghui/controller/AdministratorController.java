@@ -43,7 +43,7 @@ public class AdministratorController {
     public String createAdmin(String actionAdminid,String adminInfo){
         APIResponse apiResponse;
         Response response;
-        if(!StringUtil.argsEmpty(new String[]{actionAdminid,adminInfo})){
+        if(StringUtil.argsNotEmpty(new String[]{actionAdminid,adminInfo})){
             try {
                 String adminid = administratorService.createSingleAdmin(adminInfo);
                 Map<String,String> map = new HashMap<>();
@@ -70,7 +70,7 @@ public class AdministratorController {
     public String deleteAdmin(String actionAdminid,String adminid){
         APIResponse apiResponse;
         Response response;
-        if(StringUtil.argsEmpty(new String[]{actionAdminid,adminid})) {
+        if(StringUtil.argsNotEmpty(new String[]{actionAdminid,adminid})) {
             try{
                 administratorService.deleteAdmin(adminid);
                 logger.warn(String.format("已经删除管理员[%d]的角色",adminid));
@@ -96,7 +96,7 @@ public class AdministratorController {
         APIResponse apiResponse;
         Response response;
 
-        if(StringUtil.argsEmpty(new String[]{actionAdminid,updateInfo})){
+        if(StringUtil.argsNotEmpty(new String[]{actionAdminid,updateInfo})){
             try{
                 administratorService.updateInfoAdmin(updateInfo);
                 response = new Response(true,"管理员信息更新成功");
@@ -151,7 +151,7 @@ public class AdministratorController {
         APIResponse apiResponse;
         Response response;
 
-        if(StringUtil.argsEmpty(new String[]{actionAdminid,adminid})){
+        if(StringUtil.argsNotEmpty(new String[]{actionAdminid,adminid})){
             try{
                 Administrator administrator = new Administrator();
                 administrator.setAdminid(adminid);
@@ -180,7 +180,7 @@ public class AdministratorController {
         APIResponse apiResponse ;
         Response response;
 
-        if(StringUtil.argsEmpty(new String[]{adminname,password})){
+        if(StringUtil.argsNotEmpty(new String[]{adminname,password})){
             try{
                 Administrator administrator = new Administrator();
                 administrator.setAdminname(adminname);

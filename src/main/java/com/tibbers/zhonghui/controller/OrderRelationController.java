@@ -41,7 +41,7 @@ public class OrderRelationController {
         APIResponse apiResponse ;
         Response response;
 
-        if(StringUtil.argsEmpty(new String[]{orderinfo,itemlist,code,clientip})){
+        if(StringUtil.argsNotEmpty(new String[]{orderinfo,itemlist,code,clientip})){
             try{
                 PayResult payResult = orderService.createOrder(orderinfo,itemlist,code,clientip,recommandinfo);
                 response = new Response(true,payResult);

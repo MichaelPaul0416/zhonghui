@@ -19,7 +19,6 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Map;
 
@@ -44,7 +43,7 @@ public class RefundController {
         APIResponse apiResponse;
         Response response;
 
-        if(StringUtil.argsEmpty(new String[]{refundSerial})){
+        if(StringUtil.argsNotEmpty(new String[]{refundSerial})){
             try {
                 Map<String, Object> resultMap = refundService.refundApply(file, refundSerial);
                 response = new Response(true, resultMap);

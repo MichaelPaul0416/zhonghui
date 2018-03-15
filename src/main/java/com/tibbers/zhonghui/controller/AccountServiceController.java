@@ -1,6 +1,7 @@
 package com.tibbers.zhonghui.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.google.gson.Gson;
 import com.sun.istack.internal.Nullable;
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.AppConstants;
@@ -51,11 +52,11 @@ public class AccountServiceController {
 
     @RequestMapping("queryAccountByOpenid")
     @ResponseBody
-    public String queryAccountByOpenid(String openid){
+    public String queryAccountByOpenid(String openid,String imageUrl){
         APIResponse apiResponse ;
         Response response;
 
-        if(!StringUtil.isEmpty(openid)){
+        if(StringUtil.argsNotEmpty(new String[]{openid,imageUrl})){
             try{
                 Account account = accountService.queryAccountByOpenid(openid);
                 Map<String,Object> result = new HashMap<>();
@@ -63,6 +64,14 @@ public class AccountServiceController {
                     result.put("registry",true);
                     result.put("msg","已注册");
                     result.put("accountid",account.getAccountid());
+                    if(!imageUrl.equals(account.getImagepath())){
+                        Account update = new Account();
+                        update.setAccountid(account.getAccountid());
+                        update.setImagepath(imageUrl);
+                        logger.info(String.format("更新用户[%s]的微信头像信息[%s]",account.getAccountid(),imageUrl));
+                        accountService.updateAccountInfo(new Gson().toJson(update));
+                    }
+                    result.put("imagePath",imageUrl);
                 }else {
                     result.put("registry",false);
                     result.put("msg",openid + "对应的微信用户未在本系统中注册绑定");
@@ -75,7 +84,7 @@ public class AccountServiceController {
                 apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
             }
         }else {
-            response = new Response(false,"微信openid不能为空");
+            response = new Response(false,"微信openid,微信头像imageUrl不能为空");
             apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
         }
         return JSONObject.toJSONString(apiResponse);
@@ -282,7 +291,7 @@ public class AccountServiceController {
         APIResponse apiResponse ;
         Response response;
 
-        if(!StringUtil.argsEmpty(new String[]{isvip,termid})){
+        if(StringUtil.argsNotEmpty(new String[]{isvip,termid})){
             try{
                 Pager pager = null;
                 if(!StringUtil.isEmpty(startLine) && !StringUtil.isEmpty(offset)){

@@ -80,9 +80,11 @@
         select c.* from (select a.*,(select count(score) from taccount b where a.score &lt; b.score) + 1 as rank
         from taccount a
         order by rank) c
+        <where>
         <if test="account != null and !&quot;&quot;.equals(account.getAccountid())">
-            c.accountid = #{accountid}
+            c.accountid = #{account.accountid}
         </if>
+        </where>
     </select>
 
     <select id="queryAccountByOpenid" parameterType="java.lang.String" resultMap="AccountResult">
