@@ -15,6 +15,7 @@ public class Product {
     private String color;
     private int valuescore;
     private String productgrade;
+    private String fieldmeaning;
     private String reverse1;
     private String reverse2;
 
@@ -30,9 +31,18 @@ public class Product {
                 ", color='" + color + '\'' +
                 ", valuescore=" + valuescore +
                 ", productgrade='" + productgrade + '\'' +
+                ", fieldmeaning='" + fieldmeaning + '\'' +
                 ", reverse1='" + reverse1 + '\'' +
                 ", reverse2='" + reverse2 + '\'' +
                 '}';
+    }
+
+    public String getFieldmeaning() {
+        return fieldmeaning;
+    }
+
+    public void setFieldmeaning(String fieldmeaning) {
+        this.fieldmeaning = fieldmeaning;
     }
 
     public String getProductid() {

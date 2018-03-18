@@ -5,6 +5,7 @@ import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.ServiceConfigBean;
 import com.tibbers.zhonghui.dao.IProductBelongDao;
 import com.tibbers.zhonghui.dao.IProductDao;
+import com.tibbers.zhonghui.model.Account;
 import com.tibbers.zhonghui.model.Product;
 import com.tibbers.zhonghui.model.ProductBelong;
 import com.tibbers.zhonghui.model.common.Pager;
@@ -84,7 +85,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public Product queryByProductId(String productId) {
+    public Map<String, Object> queryByProductId(String productId) {
         return iProductDao.queryByProductId(productId);
     }
 
@@ -94,7 +95,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public List<Product> queryByProductStates(String[] states,Pager pager) {
+    public List<Map<String, Object>> queryByProductStates(String[] states, Pager pager) {
         Map<String,Object> params = new HashMap<>();
         params.put("states",states);
         params.put("pager",pager);
@@ -133,6 +134,40 @@ public class ProductServiceImpl implements IProductService {
         }catch (Exception e){
             throw new APIException(e.getCause());
         }
+    }
+
+    @Override
+    public List<Map<String, Object>> vipQueryUploadProducts(Product product, Account account, Pager pager) {
+        logger.info(String.format("开始为VIP用户[%s]查询他上传的产品信息",account.getAccountid()));
+        if("1".equals(account.getIsvip())){
+            Map<String,Object> map = new HashMap<>();
+            map.put("product",product);
+            map.put("pager",pager);
+            map.put("account",account);
+            List<Map<String,Object>> productList = iProductDao.vipQueryUploadProducts(map);
+
+            logger.info(String.format("查询到VIP用户[%s]的上传产品[%s]",account.getAccountid(),productList));
+            return  productList;
+        }else {
+            throw new APIException(String.format("只有VIP用户才能上传商品，您[%s]当前为非VIP用户，若想在商城中销售商品，请先向管理员申请成为VIP用户",account.getAccountid()));
+        }
+    }
+
+    @Override
+    public void updateProductBelongRemaindernum(String productid, String remaindernum) {
+        ProductBelong productBelong = new ProductBelong();
+        productBelong.setProductid(productid);
+
+        if(StringUtil.isEmpty(remaindernum)){
+            throw new APIException("产品余量remainerdernum必须输入");
+        }
+        productBelong.setRemaindernum(Integer.parseInt(remaindernum));
+
+        logger.info(String.format("更新产品[%s]的归属信息[%s]",productid,productBelong));
+
+        iProductBelongDao.updateProductBelongRemaindernum(productBelong);
+
+        logger.info(String.format("产品归属信息[%s]更新成功",productBelong));
     }
 
 }

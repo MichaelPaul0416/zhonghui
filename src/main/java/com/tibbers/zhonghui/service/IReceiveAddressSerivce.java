@@ -11,7 +11,7 @@ import java.util.List;
  * @description:
  */
 public interface IReceiveAddressSerivce {
-    void addOneReceiveAddress(String addressInfo,boolean isDefault);
+    String addOneReceiveAddress(String addressInfo, boolean isDefault);
 
     void updateReceiveAddress(String addressInfo);
 

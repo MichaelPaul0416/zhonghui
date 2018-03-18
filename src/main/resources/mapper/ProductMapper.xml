@@ -14,19 +14,38 @@
         <result column="color" jdbcType="VARCHAR" property="color"/>
         <result column="valuescore" jdbcType="INTEGER" property="valuescore"/>
         <result column="productgrade" jdbcType="VARCHAR" property="productgrade"/>
+        <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
         <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
         <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
     </resultMap>
 
+    <resultMap id="customProductQuery" type="java.util.Map">
+        <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="unitprice" jdbcType="VARCHAR" property="unitprice"/>
+        <result column="productname" jdbcType="VARCHAR" property="productname"/>
+        <result column="note" jdbcType="VARCHAR" property="note"/>
+        <result column="itemid" jdbcType="VARCHAR" property="itemid"/>
+        <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
+        <result column="color" jdbcType="VARCHAR" property="color"/>
+        <result column="valuescore" jdbcType="INTEGER" property="valuescore"/>
+        <result column="productgrade" jdbcType="VARCHAR" property="productgrade"/>
+        <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
+        <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
+        <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
+        <result column="salestate" jdbcType="VARCHAR" property="salestate"/>
+        <result column="remaindernum" jdbcType="INTEGER" property="remaindernum"/>
+
+    </resultMap>
+
     <insert id="insertSingleProduct" parameterType="com.tibbers.zhonghui.model.Product">
-        insert into tproduct ( productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,reverse1,reverse2)
-        values(#{productid},#{unitprice},#{productname},#{note},#{itemid},#{imagepath},#{color},#{valuescore},#{productgrade},#{reverse1},#{reverse2})
+        insert into tproduct ( productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,reverse1,reverse2)
+        values(#{productid},#{unitprice},#{productname},#{note},#{itemid},#{imagepath},#{color},#{valuescore},#{productgrade},#{fieldmeaning},#{reverse1},#{reverse2})
     </insert>
 
     <insert id="insertBatchProduct" parameterType="java.util.List">
-        insert into tproduct ( productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,reverse1,reverse2) values
+        insert into tproduct ( productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,reverse1,reverse2) values
         <foreach collection="productList" item="item" separator="," index="index">
-            (#{item.productid},#{item.unitprice},#{item.productname},#{item.note},#{item.itemid},#{item.imagepath},#{item.color},#{item.valuescore},#{item.productgrade},#{item.reverse1},#{item.reverse2})
+            (#{item.productid},#{item.unitprice},#{item.productname},#{item.note},#{item.itemid},#{item.imagepath},#{item.color},#{item.valuescore},#{item.productgrade},#{item.fieldmeaning},#{item.reverse1},#{item.reverse2})
         </foreach>
     </insert>
 
@@ -34,16 +53,19 @@
         update tproduct set imagepath = #{imagepath} where productid = #{productid}
     </update>
 
-    <select id="queryByProductId" parameterType="java.lang.String" resultMap="ProductResult">
-        select productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,reverse1,reverse2 from tproduct where productid = #{_parameter}
+    <select id="queryByProductId" parameterType="java.lang.String" resultMap="customProductQuery">
+        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum
+        from tproduct t1,tproductbelong t2
+        where t1.productid = t2.productid and t1.productid = #{_parameter}
     </select>
 
     <select id="queryProductByPage" parameterType="com.tibbers.zhonghui.model.common.Pager" resultMap="ProductResult">
-        select  productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,reverse1,reverse2 from tproduct limit  #{startLine},#{offset}
+        select  productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,reverse1,reverse2 from tproduct limit  #{startLine},#{offset}
     </select>
 
-    <select id="queryByProductStates" parameterType="java.util.Map" resultMap="ProductResult">
-        select  productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,reverse1,reverse2 from tproduct where productid in (select productid from tproductbelong
+    <select id="queryByProductStates" parameterType="java.util.Map" resultMap="customProductQuery">
+        select  t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum from tproduct t1,tproductbelong t2
+        where t1.productid = t2.productid and t1.productid in (select productid from tproductbelong
         <where>
             <if test="states.length != 0">
                 salestate in (
@@ -60,7 +82,7 @@
     </select>
 
     <select id="queryProducts" parameterType="java.util.Map" resultMap="ProductResult">
-        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.reverse1,t1.reverse2,t2.remaindernum
+        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,fieldmeaning,t1.reverse1,t1.reverse2,t2.remaindernum
         from tproduct t1,tproductbelong t2
         WHERE t1.productid = t2.productid and t1.productid in (select productid from tproductbelong
         <where>
@@ -75,15 +97,38 @@
         group by productid)
         <if test="product != null">
              <if test="product.productid != null and !&quot;&quot;.equals(product.productid) ">and t1.productid = #{product.productid}  </if>
-            <if test="product.productname != null and !&quot;&quot;.equals(product.productname) ">and t1.productname like '%' #{product.productname} '%'</if>
+             <if test="product.productname != null and !&quot;&quot;.equals(product.productname) ">and t1.productname like '%' #{product.productname} '%'</if>
              <if test="product.note != null and !&quot;&quot;.equals(product.note) ">and  t1.note like '%' #{product.note} '%'</if>
              <if test="product.itemid != null and !&quot;&quot;.equals(product.itemid) ">and t1.itemid = #{product.itemid} </if>
              <if test="product.color != null and !&quot;&quot;.equals(product.color) "> and t1.color = #{product.color} </if>
-             <if test="product.productgrade != null and !&quot;&quot;.equals(product.productgrade) "> and t1.productgrade = #{product.productgrade}  </if>
+             <if test="product.productgrade != null and !&quot;&quot;.equals(product.productgrade) "> and t1.productgrade like '%' #{product.productgrade} '%'</if>
              <if test="product.reverse1 != null "> and t1.reverse1 = #{product.reverse1} </if>
              <if test="product.reverse2 != null "> and t1.reverse2 = #{product.reverse2} </if>
         </if>
         <if test="pager != null">limit #{pager.startLine},#{pager.offset}</if>
     </select>
 
+    <!--会员查询自己的上传产品的列表-->
+    <select id="vipQueryUploadProducts" parameterType="java.util.Map" resultMap="customProductQuery">
+        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum
+        from tproduct t1,tproductbelong t2,taccount t3
+        where t1.productid = t2.productid and t2.accountid = t3.accountid
+        <if test="product != null">
+            <if test="product.productid != null and !&quot;&quot;.equals(product.productid) ">and t1.productid = #{product.productid}  </if>
+            <if test="product.productname != null and !&quot;&quot;.equals(product.productname) ">and t1.productname like '%' #{product.productname} '%'</if>
+            <if test="product.note != null and !&quot;&quot;.equals(product.note) ">and  t1.note like '%' #{product.note} '%'</if>
+            <if test="product.itemid != null and !&quot;&quot;.equals(product.itemid) ">and t1.itemid = #{product.itemid} </if>
+            <if test="product.color != null and !&quot;&quot;.equals(product.color) "> and t1.color = #{product.color} </if>
+            <if test="product.productgrade != null and !&quot;&quot;.equals(product.productgrade) "> and t1.productgrade like '%' #{product.productgrade} '%'</if>
+            <if test="product.reverse1 != null "> and t1.reverse1 = #{product.reverse1} </if>
+            <if test="product.reverse2 != null "> and t1.reverse2 = #{product.reverse2} </if>
+        </if>
+        <if test="account != null">
+            <if test="account.accountid != null and !&quot;&quot;.equals(account.accountid) ">and t3.accountid = #{account.accountid}</if>
+            <if test="account.custtype != null and !&quot;&quot;.equals(account.custtype) ">and t3.custtype = #{account.custtype}</if>
+        </if>
+        <if test="pager != null">
+            limit #{pager.startLine},#{pager.offset}
+        </if>
+    </select>
 </mapper>

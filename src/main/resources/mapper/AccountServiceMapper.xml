@@ -90,4 +90,5 @@
     <select id="queryAccountByOpenid" parameterType="java.lang.String" resultMap="AccountResult">
         select * from taccount where personid = #{_parameter}
     </select>
+
 </mapper>

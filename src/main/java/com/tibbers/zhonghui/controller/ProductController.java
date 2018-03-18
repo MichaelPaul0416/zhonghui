@@ -5,6 +5,7 @@ import com.sun.istack.internal.Nullable;
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.config.ServiceConfigBean;
+import com.tibbers.zhonghui.model.Account;
 import com.tibbers.zhonghui.model.Product;
 import com.tibbers.zhonghui.model.common.APIResponse;
 import com.tibbers.zhonghui.model.common.Pager;
@@ -44,6 +45,62 @@ public class ProductController {
 
     @Autowired
     private ServiceConfigBean serviceConfigBean;
+
+    @RequestMapping("/updateProductBelongRemaindernum")
+    @ResponseBody
+    public String updateProductBelongRemaindernum(String productid,String remaindernum){
+        APIResponse apiResponse;
+        Response response;
+
+        if(!StringUtil.isEmpty(productid)){
+            try{
+                productService.updateProductBelongRemaindernum(productid,remaindernum);
+                response = new Response(true,String.format("产品[%s]的归属信息已经更新",productid));
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            }
+        }else {
+            response = new Response(false,"产品编号productid不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
+    }
+
+    @RequestMapping("/vipQueryUploadProducts")
+    @ResponseBody
+    public String vipQueryUploadProducts(@Nullable String productinfo,String accountinfo,@Nullable String startLine,@Nullable String offset){
+        APIResponse apiResponse;
+        Response response;
+        if(StringUtil.argsNotEmpty(new String[]{accountinfo})){
+            try {
+                Pager pager = null;
+                if (StringUtil.argsNotEmpty(new String[]{startLine, offset})) {
+                    pager = new Pager(Integer.parseInt(startLine), Integer.parseInt(offset));
+                }
+                Product product = null;
+                if(!StringUtil.isEmpty(productinfo)){
+                    product = JSONObject.parseObject(productinfo,Product.class);
+                }
+                Account account = JSONObject.parseObject(accountinfo,Account.class);
+                List<Map<String, Object>> result = productService.vipQueryUploadProducts(product,account,pager);
+                response = new Response(true,result);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            }
+        }else {
+            response = new Response(false,"VIP账户信息accountinfo不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+        }
+        return JSONObject.toJSONString(apiResponse);
+    }
+
 
     @RequestMapping("/queryProducts")
     @ResponseBody
@@ -174,7 +231,7 @@ public class ProductController {
         Response response;
         if(!StringUtils.isEmpty(productid)){
             try{
-                Product product = productService.queryByProductId(productid);
+                Map<String,Object> product = productService.queryByProductId(productid);
                 logger.info(String.format("查询到匹配的产品信息[%s]",product));
                 response = new Response(true,product);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
@@ -223,7 +280,7 @@ public class ProductController {
                     pager = new Pager(Integer.parseInt(startLine),Integer.parseInt(offset));
                 }
                 String[] productStates = states.split(",");
-                List<Product> result = productService.queryByProductStates(productStates,pager);
+                List<Map<String,Object>> result = productService.queryByProductStates(productStates,pager);
                 response = new Response(true, result);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE, response);
             }catch (Exception e){
@@ -232,7 +289,7 @@ public class ProductController {
                 apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
             }
         }else{
-            response = new Response(false,"请输入需要查询的状态[0:未上架,1:在售,2:售罄,3:下架]");
+            response = new Response(false,"请输入需要查询的状态[0:未上架,1:在售,2:售罄,3:下架,4:已删除]");
             apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
         }
 
@@ -265,9 +322,9 @@ public class ProductController {
     public void showProductImage(String productid, HttpServletResponse response){
         File image;
         if(!StringUtils.isEmpty(productid)){
-            Product product = productService.queryByProductId(productid);
+            Map<String,Object> product = productService.queryByProductId(productid);
             if(product != null){
-                image = new File(product.getImagepath());
+                image = new File((String) product.get("imagepath"));
                 if(!image.exists()){
                     image = new File(serviceConfigBean.getDefaultImagePath());
                 }

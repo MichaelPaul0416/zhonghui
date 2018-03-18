@@ -20,12 +20,14 @@ public interface IProductDao {
 
     void uploadImage(Product product);
 
-    Product queryByProductId(String productid);
+    Map<String,Object> queryByProductId(String productid);
 
     List<Product> queryProductByPage(Pager pager);
 
-    List<Product> queryByProductStates(Map<String,Object> params);
+    List<Map<String, Object>> queryByProductStates(Map<String,Object> params);
 
     List<Product> queryProducts(Map<String,Object> params);
+
+    List<Map<String,Object>> vipQueryUploadProducts(Map<String,Object> params);
 
 }

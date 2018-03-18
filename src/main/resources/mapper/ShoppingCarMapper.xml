@@ -5,7 +5,7 @@
 <mapper namespace="com.tibbers.zhonghui.dao.IShoppingCarDao">
 
     <resultMap id="ShopCarResult" type="com.tibbers.zhonghui.model.ShoppingCar">
-        <id column="addressid" jdbcType="VARCHAR" property="addressid"/>
+        <id column="serialid" jdbcType="VARCHAR" property="serialid"/>
         <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
         <result column="productid" jdbcType="VARCHAR" property="productid"/>
         <result column="number" jdbcType="INTEGER" property="number"/>
@@ -29,11 +29,11 @@
         <result column="salestate" jdbcType="VARCHAR" property="salestate"/>
     </resultMap>
     <insert id="addItem2ShopCar" parameterType="com.tibbers.zhonghui.model.ShoppingCar">
-        insert into tshopcar values(#{addressid},#{accountid},#{productid},#{number},#{adddatetime},#{modifydatetime},#{deleteflag},#{reverse1},#{reverse2})
+        insert into tshopcar values(#{serialid},#{accountid},#{productid},#{number},#{adddatetime},#{modifydatetime},#{deleteflag},#{reverse1},#{reverse2})
     </insert>
     
     <update id="removeFromShopCar" parameterType="com.tibbers.zhonghui.model.ShoppingCar">
-        update tshopcar set deleteflag = #{deleteflag} where addressid = #{addressid}
+        update tshopcar set deleteflag = #{deleteflag} where serialid = #{serialid}
     </update>
 
     <update id="removeBatchFromShopCar" parameterType="java.util.List">

@@ -21,4 +21,8 @@
     <update id="updateProductState" parameterType="com.tibbers.zhonghui.model.ProductBelong">
         update tproductbelong set salestate = #{salestate} where productid = #{productid}
     </update>
+
+    <update id="updateProductBelongRemaindernum" parameterType="com.tibbers.zhonghui.model.ProductBelong">
+        update tproductbelong set remaindernum = #{remaindernum} where productid = #{productid}
+    </update>
 </mapper>

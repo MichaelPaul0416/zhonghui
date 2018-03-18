@@ -5,7 +5,7 @@
 <mapper namespace="com.tibbers.zhonghui.dao.IReceiveAddressDao">
 
     <resultMap id="ReceiveAddressResult" type="com.tibbers.zhonghui.model.ReceiveAddress">
-        <id column="addressid" property="addressid" jdbcType="VARCHAR"/>
+        <id column="serialid" property="serialid" jdbcType="VARCHAR"/>
         <result column="accountid" property="accountid" jdbcType="VARCHAR"/>
         <result column="receivename" property="receivename" jdbcType="VARCHAR"/>
         <result column="contactphone" property="contactphone" jdbcType="VARCHAR"/>
@@ -23,11 +23,11 @@
     </resultMap>
 
     <insert id="addOneReceiveAddress" parameterType="com.tibbers.zhonghui.model.ReceiveAddress">
-        insert into treceiveaddress values(#{addressid},#{accountid},#{receivename},#{contactphone},#{postcode},#{province},#{city},#{area},#{street},#{addressmore},#{totaladdress},#{deleteflag},#{defaultaddress},#{reverse})
+        insert into treceiveaddress values(#{serialid},#{accountid},#{receivename},#{contactphone},#{postcode},#{province},#{city},#{area},#{street},#{addressmore},#{totaladdress},#{deleteflag},#{defaultaddress},#{reverse})
     </insert>
 
     <select id="checkAndFindDefaultAddress" parameterType="java.lang.String" resultMap="ReceiveAddressResult">
-        select addressid,accountid,defaultaddress from treceiveaddress where accountid = #{_parameter} and defaultaddress = '1' and deleteflag = '0'
+        select serialid,accountid,defaultaddress from treceiveaddress where accountid = #{_parameter} and defaultaddress = '1' and deleteflag = '0'
     </select>
 
 
@@ -45,11 +45,11 @@
         <if test="totaladdress != null and !&quot;&quot;.equals(totaladdress)">totaladdress = #{totaladdress} , </if>
         <if test="defaultaddress != null and !&quot;&quot;.equals(defaultaddress)">defaultaddress = #{defaultaddress} , </if>
         <if test="reverse != null ">reverse = #{reverse}  </if>
-        where addressid = #{addressid} and deleteflag = '0'
+        where serialid = #{serialid} and deleteflag = '0'
     </update>
 
     <update id="deleteReceiveAddress" parameterType="java.lang.String">
-        update treceiveaddress set deleteflag = '1' where addressid = #{_parameter}
+        update treceiveaddress set deleteflag = '1' where serialid = #{_parameter}
     </update>
 
     <select id="queryAddressByPager" parameterType="java.util.Map" resultMap="ReceiveAddressResult">

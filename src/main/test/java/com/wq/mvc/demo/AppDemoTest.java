@@ -128,8 +128,8 @@ public class AppDemoTest {
     @Test
     public void newShopCar(){
         ShoppingCar shoppingCar = new ShoppingCar();
-        shoppingCar.setSerialid(StringUtil.generateUUID());
-        shoppingCar.setAccountid("210e512c68497189");
+//        shoppingCar.setSerialid(StringUtil.generateUUID());
+        shoppingCar.setAccountid("oe9PL4qR5KW4gKxN0csK2n3LgdCE");
         shoppingCar.setAdddatetime(StringUtil.currentDateTime());
         shoppingCar.setDeleteflag("1");
         shoppingCar.setNumber(10);
@@ -156,15 +156,15 @@ public class AppDemoTest {
     public void addReceiveAddress(){
         ReceiveAddress receiveAddress = new ReceiveAddress();
         receiveAddress.setSerialid(StringUtil.generateUUID());
-        receiveAddress.setAccountid("210e512c68497189");
-        receiveAddress.setReceivename("王强");
-        receiveAddress.setContactphone("18369872045");
+        receiveAddress.setAccountid("210e512c6849734756");
+        receiveAddress.setReceivename("王23强");
+        receiveAddress.setContactphone("18369874355");
         receiveAddress.setPostcode("310018");
         receiveAddress.setProvince("浙江省");
         receiveAddress.setCity("杭州市");
         receiveAddress.setArea("滨江区");
         receiveAddress.setStreet("白杨街道");
-        receiveAddress.setAddressmore("哦松岛枫凭借后卫hi");
+        receiveAddress.setAddressmore("哦松岛枫凭dstg借后卫hi");
 
         System.out.println(JSONObject.toJSON(receiveAddress));
     }

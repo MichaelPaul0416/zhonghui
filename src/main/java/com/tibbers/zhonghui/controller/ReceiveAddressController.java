@@ -16,7 +16,9 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Paul
@@ -40,8 +42,11 @@ public class ReceiveAddressController {
         if(!StringUtils.isEmpty(addressinfo)){
             try{
                 //0:不是默认收货地址，1:默认收货地址
-                receiveAddressSerivce.addOneReceiveAddress(addressinfo,"1".equals(isdefault));
-                response = new Response(true,"新增收货地址成功");
+                String addressid = receiveAddressSerivce.addOneReceiveAddress(addressinfo,"1".equals(isdefault));
+                Map<String,String> resultMap = new HashMap<>();
+                resultMap.put("addressid",addressid);
+                resultMap.put("msg","新增收货地址成功");
+                response = new Response(true,resultMap);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE,response);
             }catch (APIException e){
                 logger.error(e.getMessage(),e);

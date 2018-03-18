@@ -13,4 +13,6 @@ public interface IProductBelongDao {
     void insertSingleRelation(ProductBelong productBelong);
 
     boolean updateProductState(ProductBelong productBelong);
+
+    void updateProductBelongRemaindernum(ProductBelong productBelong);
 }

@@ -419,8 +419,8 @@ public class OrderServiceImpl implements IOrderService {
         int totalScore = 0;
         for(OrderItems items : orderItemss){
             String productid = items.getProductid();
-            Product product = productDao.queryByProductId(productid);
-            totalScore += product.getValuescore();
+            Map<String,Object> product = productDao.queryByProductId(productid);
+            totalScore += Integer.parseInt(String.valueOf(product.get("valuescore")));
         }
         Map<String,Object> map = new HashMap<>();
         Orders orderQuery = new Orders();

@@ -34,7 +34,7 @@ public class ReceiveAddressServiceImpl implements IReceiveAddressSerivce {
 
 
     @Override
-    public void addOneReceiveAddress(String addressInfo,boolean isDefault) {
+    public String addOneReceiveAddress(String addressInfo, boolean isDefault) {
         try{
             ReceiveAddress receiveAddress = JSONObject.parseObject(addressInfo,ReceiveAddress.class);
             receiveAddress.setSerialid(StringUtil.generateUUID());
@@ -67,6 +67,7 @@ public class ReceiveAddressServiceImpl implements IReceiveAddressSerivce {
             logger.info(String.format("账户[%s]新增收货地址[%s]",receiveAddress.getAccountid(),receiveAddress));
             receiveAddressDao.addOneReceiveAddress(receiveAddress);
             logger.info(String.format("账户[%s]的收货地址新增成功",receiveAddress.getAccountid()));
+            return receiveAddress.getSerialid();
         }catch (Exception e){
             throw new APIException(e.getCause());
         }
