@@ -31,6 +31,26 @@
         <result column="thirdpartmsg" jdbcType="VARCHAR" property="thirdpartmsg"/>
     </resultMap>
 
+    <!--订单中心返回对象-->
+    <resultMap id="orderCenterObject" type="java.util.Map">
+        <result column="orderid" jdbcType="VARCHAR" property="orderid"/>
+        <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
+        <result column="createdatetime" jdbcType="VARCHAR" property="createdatetime"/>
+        <result column="orderstate" jdbcType="VARCHAR" property="orderstate"/>
+        <result column="isvalid" jdbcType="VARCHAR" property="isvalid"/>
+        <result column="freetransport" jdbcType="VARCHAR" property="freetransport"/>
+        <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
+        <result column="amount" jdbcType="VARCHAR" property="amount"/>
+        <result column="unitprice" jdbcType="VARCHAR" property="unitprice"/>
+        <result column="productname" jdbcType="VARCHAR" property="productname"/>
+        <result column="valuescore" jdbcType="INTEGER" property="valuescore"/>
+        <result column="productgrade" jdbcType="VARCHAR" property="productgrade"/>
+        <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
+        <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
+        <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
+    </resultMap>
+
     <!--新增订单表记录-->
     <insert id="insertSingelOrder" parameterType="com.tibbers.zhonghui.model.Orders">
         insert into torders values(#{addressid},#{accountid},#{orderid},#{createdatetime},#{orderstate},#{isvalid},#{expressno},#{donedatetime},#{freetransport},#{transportfee},#{note},#{amount},#{paybybalance},#{reverse1},#{reverse2})
@@ -79,5 +99,52 @@
         <if test="pager != null">
             limit #{pager.startLine},#{pager.offset}
         </if>
+    </select>
+
+    <select id="accountOrderCenter" parameterType="java.util.Map" resultMap="orderCenterObject">
+        SELECT
+            t3.orderid,
+            t3.productid,
+            t4.accountid,
+            t4.createdatetime,
+            t4.orderstate,
+            t4.isvalid,
+            t4.freetransport,
+            t4.transportfee,
+            t4.amount,
+            t5.unitprice,
+            t5.productname,
+            t5.valuescore,
+            t5.productgrade,
+            t5.fieldmeaning,
+            t5.transportfee AS pertransportfee,
+            t5.imagepath
+        FROM
+            (
+                SELECT
+                    t1.orderid,
+                    t2.productid
+                FROM
+                    torders t1,
+                    torderitem t2
+                WHERE
+                    t1.orderid = t2.orderid
+                AND t1.accountid = #{accountid}
+                AND t1.isvalid = '1'
+                <if test="orderstate != null and !&quot;&quot;.equals(orderstate)"> t1.ordertsate = #{orderstate}</if>
+                GROUP BY
+                    t1.orderid,
+                    t2.productid
+            ) t3,
+            torders t4,
+            tproduct t5
+        WHERE
+            t3.orderid = t4.orderid
+        AND t3.productid = t5.productid
+        order by t4.createdatetime DESC
+        <if test="pager != null">
+            limit #{pager.startLine},#{pager.offset}
+        </if>
+
     </select>
 </mapper>

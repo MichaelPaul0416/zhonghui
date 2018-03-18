@@ -11,6 +11,7 @@ import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.config.WxPayConfiguration;
 import com.tibbers.zhonghui.dao.*;
 import com.tibbers.zhonghui.model.*;
+import com.tibbers.zhonghui.model.common.Pager;
 import com.tibbers.zhonghui.model.common.PayResult;
 import com.tibbers.zhonghui.service.IAccountService;
 import com.tibbers.zhonghui.service.IOrderService;
@@ -342,6 +343,20 @@ public class OrderServiceImpl implements IOrderService {
         } catch (WxPayException e) {
             throw new APIException(e.getCause().getMessage());
         }
+    }
+
+    @Override
+    public List<Map<String, Object>> accountOrderCenter(String accountid, String orderstate, Pager pager) {
+        logger.info(String.format("开始查询用户[%s]的订单详细信息",accountid));
+
+        Map<String,Object> map = new HashMap<>();
+        map.put("accountid",accountid);
+        map.put("orderstate",orderstate);
+        map.put("pager",pager);
+
+        List<Map<String,Object>> list = ordersDao.accountOrderCenter(map);
+        logger.info(String.format("查询到用户[%s]需要的订单详细信息[%s]",accountid,list));
+        return list;
     }
 
     private void updateAccountBanlaceAsRecommander(String recommandserialid){

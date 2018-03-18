@@ -1,9 +1,11 @@
 package com.tibbers.zhonghui.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sun.istack.internal.Nullable;
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.model.common.APIResponse;
+import com.tibbers.zhonghui.model.common.Pager;
 import com.tibbers.zhonghui.model.common.PayResult;
 import com.tibbers.zhonghui.model.common.Response;
 import com.tibbers.zhonghui.service.IOrderService;
@@ -20,6 +22,8 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.List;
+import java.util.Map;
 
 /**
  * @author: Paul
@@ -34,6 +38,40 @@ public class OrderRelationController {
 
     @Autowired
     private IOrderService orderService;
+
+    @RequestMapping("/accountOrderCenter")
+    @ResponseBody
+    public String accountOrderCenter(String accountid, @Nullable String orderstate,@Nullable String startLine,@Nullable String offset){
+        APIResponse apiResponse;
+        Response response;
+
+        if(!StringUtil.isEmpty(accountid)){
+            try{
+                String orderState = null;
+                if(!StringUtil.isEmpty(orderstate)){
+                    orderState = orderstate;
+                }
+
+                Pager pager = null;
+                if(!StringUtil.isEmpty(startLine) && !StringUtil.isEmpty(offset)){
+                    pager = new Pager(Integer.parseInt(startLine),Integer.parseInt(offset));
+                }
+
+                List<Map<String,Object>> result = orderService.accountOrderCenter(accountid,orderState,pager);
+                response = new Response(true,result);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            }
+        }else {
+            response = new Response(false,"查询账户编号accountid不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
+    }
 
     @RequestMapping("/createSingleOrder")
     @ResponseBody

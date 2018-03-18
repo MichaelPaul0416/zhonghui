@@ -21,4 +21,6 @@ public interface IOrdersDao {
     List<Map<String,String>> queryOrdersByPager(Map<String,Object> params);
 
     List<Map<String,String>> queryOrderIdsForDetails(Map<String,Object> params);
+
+    List<Map<String,Object>> accountOrderCenter(Map<String,Object> params);
 }
