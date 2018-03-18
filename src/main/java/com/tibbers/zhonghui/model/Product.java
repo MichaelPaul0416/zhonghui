@@ -16,6 +16,7 @@ public class Product {
     private int valuescore;
     private String productgrade;
     private String fieldmeaning;
+    private String transportfee;
     private String reverse1;
     private String reverse2;
 
@@ -32,9 +33,18 @@ public class Product {
                 ", valuescore=" + valuescore +
                 ", productgrade='" + productgrade + '\'' +
                 ", fieldmeaning='" + fieldmeaning + '\'' +
+                ", transportfee='" + transportfee + '\'' +
                 ", reverse1='" + reverse1 + '\'' +
                 ", reverse2='" + reverse2 + '\'' +
                 '}';
+    }
+
+    public String getTransportfee() {
+        return transportfee;
+    }
+
+    public void setTransportfee(String transportfee) {
+        this.transportfee = transportfee;
     }
 
     public String getFieldmeaning() {

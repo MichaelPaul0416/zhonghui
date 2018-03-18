@@ -15,6 +15,7 @@
         <result column="valuescore" jdbcType="INTEGER" property="valuescore"/>
         <result column="productgrade" jdbcType="VARCHAR" property="productgrade"/>
         <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
+        <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
         <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
         <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
     </resultMap>
@@ -30,6 +31,7 @@
         <result column="valuescore" jdbcType="INTEGER" property="valuescore"/>
         <result column="productgrade" jdbcType="VARCHAR" property="productgrade"/>
         <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
+        <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
         <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
         <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
         <result column="salestate" jdbcType="VARCHAR" property="salestate"/>
@@ -38,14 +40,14 @@
     </resultMap>
 
     <insert id="insertSingleProduct" parameterType="com.tibbers.zhonghui.model.Product">
-        insert into tproduct ( productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,reverse1,reverse2)
-        values(#{productid},#{unitprice},#{productname},#{note},#{itemid},#{imagepath},#{color},#{valuescore},#{productgrade},#{fieldmeaning},#{reverse1},#{reverse2})
+        insert into tproduct ( productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,transportfee,reverse1,reverse2)
+        values(#{productid},#{unitprice},#{productname},#{note},#{itemid},#{imagepath},#{color},#{valuescore},#{productgrade},#{fieldmeaning},#{transportfee},#{reverse1},#{reverse2})
     </insert>
 
     <insert id="insertBatchProduct" parameterType="java.util.List">
-        insert into tproduct ( productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,reverse1,reverse2) values
+        insert into tproduct ( productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,transportfee,reverse1,reverse2) values
         <foreach collection="productList" item="item" separator="," index="index">
-            (#{item.productid},#{item.unitprice},#{item.productname},#{item.note},#{item.itemid},#{item.imagepath},#{item.color},#{item.valuescore},#{item.productgrade},#{item.fieldmeaning},#{item.reverse1},#{item.reverse2})
+            (#{item.productid},#{item.unitprice},#{item.productname},#{item.note},#{item.itemid},#{item.imagepath},#{item.color},#{item.valuescore},#{item.productgrade},#{item.fieldmeaning},#{transportfee},#{item.reverse1},#{item.reverse2})
         </foreach>
     </insert>
 
@@ -54,17 +56,17 @@
     </update>
 
     <select id="queryByProductId" parameterType="java.lang.String" resultMap="customProductQuery">
-        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum
+        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.transportfee,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum
         from tproduct t1,tproductbelong t2
         where t1.productid = t2.productid and t1.productid = #{_parameter}
     </select>
 
     <select id="queryProductByPage" parameterType="com.tibbers.zhonghui.model.common.Pager" resultMap="ProductResult">
-        select  productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,reverse1,reverse2 from tproduct limit  #{startLine},#{offset}
+        select  productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,transportfee,reverse1,reverse2 from tproduct limit  #{startLine},#{offset}
     </select>
 
     <select id="queryByProductStates" parameterType="java.util.Map" resultMap="customProductQuery">
-        select  t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum from tproduct t1,tproductbelong t2
+        select  t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.transportfee,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum from tproduct t1,tproductbelong t2
         where t1.productid = t2.productid and t1.productid in (select productid from tproductbelong
         <where>
             <if test="states.length != 0">
@@ -82,7 +84,7 @@
     </select>
 
     <select id="queryProducts" parameterType="java.util.Map" resultMap="ProductResult">
-        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,fieldmeaning,t1.reverse1,t1.reverse2,t2.remaindernum
+        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.transportfee,t1.reverse1,t1.reverse2,t2.remaindernum
         from tproduct t1,tproductbelong t2
         WHERE t1.productid = t2.productid and t1.productid in (select productid from tproductbelong
         <where>
