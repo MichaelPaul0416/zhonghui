@@ -11,6 +11,7 @@ import com.tibbers.zhonghui.model.common.APIResponse;
 import com.tibbers.zhonghui.model.common.Pager;
 import com.tibbers.zhonghui.model.common.Response;
 import com.tibbers.zhonghui.service.IAccountService;
+import com.tibbers.zhonghui.service.IRecommandService;
 import com.tibbers.zhonghui.utils.StringUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,10 +48,46 @@ public class AccountServiceController {
     private IAccountService accountService;
 
     @Autowired
+    private IRecommandService recommandService;
+    @Autowired
     private ServiceConfigBean serviceConfigBean;
 
 
-    @RequestMapping("queryAccountByOpenid")
+    @RequestMapping("/recommandByVip")
+    @ResponseBody
+    public String queryByAccountid(String accountid){
+        APIResponse apiResponse;
+        Response response;
+        if(!StringUtil.isEmpty(accountid)){
+            try {
+                logger.info(String.format("开始查询账户编号[%s]是否被vip推荐", accountid));
+                Map<String,String> result = recommandService.recommandByVIP(accountid);
+                logger.info(String.format("查询到账户编号[%s]是否被vip推荐结果", accountid, result));
+                if(result != null && !StringUtil.isEmpty(result.get("isvip"))){
+                    if("1".equals(result.get("isvip"))){
+                        result.put("isvip","true");
+                    }else {
+                        result.put("recommander","");
+                        result.put("isvip","false");
+                    }
+                }else {
+                    throw new APIException("用户["+accountid+"]不存在");
+                }
+                response = new Response(true, result);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE, response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response( false,e.getCause().getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+            }
+        }else {
+            response = new Response(false,"查询账户编号accountid不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
+    }
+    @RequestMapping("/queryAccountByOpenid")
     @ResponseBody
     public String queryAccountByOpenid(String openid,String imageUrl){
         APIResponse apiResponse ;

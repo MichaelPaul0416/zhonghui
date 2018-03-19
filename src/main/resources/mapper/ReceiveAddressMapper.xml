@@ -19,6 +19,23 @@
         <result column="deleteflag" property="deleteflag" jdbcType="VARCHAR"/>
         <result column="defaultaddress" property="defaultaddress" jdbcType="VARCHAR"/>
         <result column="reverse" property="reverse" jdbcType="VARCHAR"/>
+    </resultMap>
+
+    <resultMap id="customReceiveAddress" type="java.util.Map">
+        <result column="serialid" property="serialid" jdbcType="VARCHAR"/>
+        <result column="accountid" property="accountid" jdbcType="VARCHAR"/>
+        <result column="receivename" property="receivename" jdbcType="VARCHAR"/>
+        <result column="contactphone" property="contactphone" jdbcType="VARCHAR"/>
+        <result column="postcode" property="postcode" jdbcType="VARCHAR"/>
+        <result column="province" property="province" jdbcType="VARCHAR"/>
+        <result column="city" property="city" jdbcType="VARCHAR"/>
+        <result column="area" property="area" jdbcType="VARCHAR"/>
+        <result column="street" property="street" jdbcType="VARCHAR"/>
+        <result column="addressmore" property="addressmore" jdbcType="VARCHAR"/>
+        <result column="totaladdress" property="totaladdress" jdbcType="VARCHAR"/>
+        <result column="deleteflag" property="deleteflag" jdbcType="VARCHAR"/>
+        <result column="defaultaddress" property="defaultaddress" jdbcType="VARCHAR"/>
+        <result column="reverse" property="reverse" jdbcType="VARCHAR"/>
         <result column="accountname" property="accountname" jdbcType="VARCHAR"/>
     </resultMap>
 
@@ -52,7 +69,7 @@
         update treceiveaddress set deleteflag = '1' where serialid = #{_parameter}
     </update>
 
-    <select id="queryAddressByPager" parameterType="java.util.Map" resultMap="ReceiveAddressResult">
+    <select id="queryAddressByPager" parameterType="java.util.Map" resultMap="customReceiveAddress">
         select t1.*,t2.accountname from treceiveaddress t1,taccount t2
         where t1.accountid = t2.accountid and t1.deleteflag = '0' and t1.accountid = #{receiveaddress.accountid}
         order by t1.defaultaddress DESC

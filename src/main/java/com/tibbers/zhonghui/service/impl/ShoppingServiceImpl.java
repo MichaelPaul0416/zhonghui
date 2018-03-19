@@ -96,11 +96,12 @@ public class ShoppingServiceImpl implements IShoppingService {
     }
 
     @Override
-    public List<Map<String,String>> queryListByPager(String accountid, String salestate, Pager pager) {
+    public List<Map<String,String>> queryListByPager(String accountid, String salestate, String deleteflag, Pager pager) {
         Map<String,Object> map = new HashMap<>();
         map.put("accountid",accountid);
         map.put("salestate",salestate);
         map.put("pager",pager);
+        map.put("deleteflag",deleteflag);
 
         try{
             return shoppingCarDao.queryListByPager(map);

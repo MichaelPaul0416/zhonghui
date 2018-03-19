@@ -130,7 +130,7 @@ public class ShoppingCarController {
 
     @RequestMapping("/queryListByPager")
     @ResponseBody
-    public String queryListByPager(String accountid, String salestate, @Nullable String startLine,@Nullable String offset){
+    public String queryListByPager(String accountid, String salestate, String deleteflag,@Nullable String startLine,@Nullable String offset){
         APIResponse apiResponse ;
         Response response;
         if(!StringUtils.isEmpty(accountid) && !StringUtils.isEmpty(salestate)){
@@ -139,7 +139,7 @@ public class ShoppingCarController {
                 pager = new Pager(Integer.parseInt(startLine),Integer.parseInt(offset));
             }
             try{
-                List<Map<String,String>> datas = shoppingService.queryListByPager(accountid,salestate,pager);
+                List<Map<String,String>> datas = shoppingService.queryListByPager(accountid,salestate, deleteflag, pager);
                 response = new Response(true,datas);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
             }catch (APIException e){

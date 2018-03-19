@@ -71,7 +71,8 @@ public class RecommandServiceImpl implements IRecommandService {
             if("1".equals(account.getIsvip())) {
                 Map<String, Object> param = new HashMap<>();
                 Recommand recommand = new Recommand();
-                recommand.setAccountid(accountid);
+//                recommand.setAccountid(accountid);
+                recommand.setRecommander(accountid);//recommander是推荐人id
                 param.put("recommand", recommand);
                 param.put("pager", pager);
                 List<Map<String, String>> list = recommandDao.queryMyRecommandAccounts(param);
@@ -85,5 +86,11 @@ public class RecommandServiceImpl implements IRecommandService {
         }else {
             throw new APIException(String.format("账户表中账户[%s]不存在",accountid));
         }
+    }
+
+    @Override
+    public Map<String, String> recommandByVIP(String accountid) {
+        Map<String,String> resultMap = recommandDao.recommandByVIP(accountid);
+        return  resultMap;
     }
 }

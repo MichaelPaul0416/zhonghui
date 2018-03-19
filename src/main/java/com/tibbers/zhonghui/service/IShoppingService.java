@@ -19,5 +19,5 @@ public interface IShoppingService {
 
     void updateGoodsInShopCar(String shoppingCar);
 
-    List<Map<String,String>> queryListByPager(String accountid, String salestate, Pager pager);
+    List<Map<String,String>> queryListByPager(String accountid, String salestate, String deleteflag, Pager pager);
 }

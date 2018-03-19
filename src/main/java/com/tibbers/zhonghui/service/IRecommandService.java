@@ -18,4 +18,6 @@ public interface IRecommandService {
     List<Recommand> queryRecommandByPager(Pager pager);
 
     List<Map<String,String>> queryMyRecommandAccounts(String accountid,Pager pager);
+
+    Map<String, String> recommandByVIP(String accountid);
 }

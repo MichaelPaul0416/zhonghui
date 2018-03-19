@@ -1,7 +1,6 @@
 package com.tibbers.zhonghui.dao;
 
 import com.tibbers.zhonghui.model.Recommand;
-import com.tibbers.zhonghui.model.common.Pager;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -19,4 +18,6 @@ public interface IRecommandDao {
     List<Recommand> queryRecommandByPager(Map<String,Object> param);
 
     List<Map<String,String>> queryMyRecommandAccounts(Map<String,Object> params);
+
+    Map<String, String> recommandByVIP(String accountid);
 }

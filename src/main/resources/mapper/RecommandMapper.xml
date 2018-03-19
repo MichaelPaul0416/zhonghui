@@ -24,6 +24,12 @@
         <result column="custtype" jdbcType="VARCHAR" property="custtype"/>
         <result column="accobalance" jdbcType="VARCHAR" property="accobalance"/>
     </resultMap>
+
+    <resultMap id="recommandRelation" type="java.util.Map">
+        <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
+        <result column="recommander" jdbcType="VARCHAR" property="recommander"/>
+        <result column="isvip" jdbcType="VARCHAR" property="isvip"/>
+    </resultMap>
     <insert id="insertRecommand" parameterType="com.tibbers.zhonghui.model.Recommand">
         insert into trecommand values (#{addressid},#{accountid},#{recommander},#{recommanddate},#{recommandtime},#{reverse1},#{reverse2})
     </insert>
@@ -37,9 +43,15 @@
 
     <select id="queryMyRecommandAccounts" parameterType="java.util.Map" resultMap="myRecommander">
         select accountid,accountname,imagepath,imagepath,score,isvip,custtype,accobalance
-        from taccount where accountid in (select recommander from trecommand where accountid = #{recommand.accountid})
+        from taccount where accountid in (select recommander from trecommand where recommander = #{recommand.recommander})
         <if test="pager != null">
             limit #{pager.startLine},#{pager.offset}
         </if>
+    </select>
+
+    <!--accountid是客户本身，recommander是推荐人的账号id-->
+    <select id="recommandByVIP" parameterType="java.lang.String" resultMap="recommandRelation">
+        select t1.accountid,t1.recommander ,t2.isvip from trecommand t1,taccount t2
+         where t1.recommander = t2.accountid and t1.accountid = #{_parameter}
     </select>
 </mapper>
