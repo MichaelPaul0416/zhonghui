@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tibbers.zhonghui.dao.IWithDrawDao">
+    <resultMap id="WithDrawResult" type="java.util.Map">
+        <result property="serialid" jdbcType="VARCHAR" column="serialid"/>
+        <result property="accountid" jdbcType="VARCHAR" column="accountid"/>
+        <result property="applydatetime" jdbcType="VARCHAR" column="applydatetime"/>
+        <result property="amount" jdbcType="VARCHAR" column="amount"/>
+        <result property="applystate" jdbcType="VARCHAR" column="applystate"/>
+        <result property="adminid" jdbcType="VARCHAR" column="adminid"/>
+        <result property="agreedatetime" jdbcType="VARCHAR" column="agreedatetime"/>
+        <result property="refusereason" jdbcType="VARCHAR" column="refusereason"/>
+        <result property="reverse1" jdbcType="VARCHAR" column="reverse1"/>
+        <result property="reverse2" jdbcType="VARCHAR" column="sereverse2"/>
+    </resultMap>
+
+    <insert id="applyWithDrawOrBatch" parameterType="java.util.List">
+        insert into twithdraw values
+        <foreach collection="withDraws" index="index" separator="," item="item">
+            #{item.serialid},#{item.accountid},#{item.applydatetime},#{item.amount},#{item.applystate},#{item.adminid},#{item.agreedatetime},#{item.refusereason}#{item.reverse1},#{item.reverse2}
+        </foreach>
+    </insert>
+
+
+    <update id="auditWithDraw" parameterType="com.tibbers.zhonghui.model.WithDraw">
+        update twithdraw set adminid = #{adminid},agreedatetime = #{agreedatetime},applystate = #{applystate}
+        <if test="refusereason != null and !&quot;&quot;.equals(refusereason)"> , refusereason = #{refusereason}</if>
+        where accounid = #{accountid}
+    </update>
+
+    <select id="queryWithDraws" parameterType="java.util.Map" resultMap="WithDrawResult">
+        select * from twithdraw where 1 = 1
+        <if test="withdraw != null">
+          <if test="serialid != null and !&quot;&quot;.equals(serialid)"> and serialid = #{withdraw.serial} </if>
+          <if test="accountid != null and !&quot;&quot;.equals(accountid)"> and accountid = #{withdraw.accountid} </if>
+          <if test="applydatetime != null and !&quot;&quot;.equals(applydatetime)"> and applydatetime like '%' #{withdraw.applydatetime} '%'</if>
+          <if test="applystate != null and !&quot;&quot;.equals(applystate)"> and applystate = #{withdraw.applystate} </if>
+          <if test="adminid != null and !&quot;&quot;.equals(adminid)"> and adminid = #{withdraw.adminid} </if>
+          <if test="agreedatetime != null and !&quot;&quot;.equals(agreedatetime)"> and agreedatetime like '%' #{withdraw.agreedatetime} '%' </if>
+          <if test="refusereason != null and !&quot;&quot;.equals(refusereason)"> and refusereason like '%' #{withdraw.refusereason} '%' </if>
+          <if test="reverse1 != null"> and reverse1 like '%' #{withdraw.reverse1} '%'</if>
+          <if test="reverse2 != null "> and reverse2 like '%' #{withdraw.reverse2} '%'</if>
+        </if>
+        <if test="pager != null">
+            limit #{pager.startLine},#{pager.offset}
+        </if>
+    </select>
+
+
+</mapper>
