@@ -70,6 +70,9 @@ public class OrderServiceImpl implements IOrderService {
     @Autowired
     private IAccountServiceDao accountService;
 
+    @Autowired
+    private IRefundDao refundDao;
+
     @Override
     public PayResult createOrder(String orderInfo, String itemlist, String code, String clientip, String recommandinfo) {
         logger.info(String.format("根据[%s]获取鉴权信息",code));
@@ -349,12 +352,34 @@ public class OrderServiceImpl implements IOrderService {
     public List<Map<String, Object>> accountOrderCenter(String accountid, String orderstate, Pager pager) {
         logger.info(String.format("开始查询用户[%s]的订单详细信息",accountid));
 
-        Map<String,Object> map = new HashMap<>();
-        map.put("accountid",accountid);
-        map.put("orderstate",orderstate);
-        map.put("pager",pager);
 
-        List<Map<String,Object>> list = ordersDao.accountOrderCenter(map);
+        List<Map<String, Object>> list = new ArrayList<>();
+        //orderstate--> 0未发货，1已发货待收货，2已收货，3退款
+        if("3".equals(orderstate)){
+            //客户端查询退款订单的话，另外调用接口查询
+            Map<String,Object> params = new HashMap<>();
+            Refund refund = new Refund();
+            refund.setAccountid(accountid);
+            refund.setAgreestate("4");
+            params.put("refund",refund);
+            params.put("pager",pager);
+            list.addAll(refundDao.refundSerialsInCenter(params));
+        }else {
+            Map<String,Object> map = new HashMap<>();
+            map.put("accountid",accountid);
+            map.put("orderstate",orderstate);
+            map.put("pager",pager);
+            list = ordersDao.accountOrderCenter(map);//如果orderstate有值，则查询有值的，如果不传，则查询除了3以外的所有订单
+            if (StringUtil.isEmpty(orderstate)){//不传的情况，针对3需要特殊接口查询
+                Map<String,Object> params = new HashMap<>();
+                Refund refund = new Refund();
+                refund.setAccountid(accountid);
+                refund.setAgreestate("4");
+                params.put("refund",refund);
+                params.put("pager",pager);
+                list.addAll(refundDao.refundSerialsInCenter(params));
+            }
+        }
         logger.info(String.format("查询到用户[%s]需要的订单详细信息[%s]",accountid,list));
         return list;
     }

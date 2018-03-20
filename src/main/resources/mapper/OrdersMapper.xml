@@ -130,8 +130,8 @@
                 WHERE
                     t1.orderid = t2.orderid
                 AND t1.accountid = #{accountid}
-                AND t1.isvalid = '1'
-                <if test="orderstate != null and !&quot;&quot;.equals(orderstate)"> t1.ordertsate = #{orderstate}</if>
+                AND t1.isvalid = '1' and t1.orderstate != '3'
+                <if test="orderstate != null and !&quot;&quot;.equals(orderstate)">and  t1.orderstzate = #{orderstate} </if>
                 GROUP BY
                     t1.orderid,
                     t2.productid

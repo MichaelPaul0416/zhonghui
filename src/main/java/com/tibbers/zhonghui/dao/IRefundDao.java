@@ -18,4 +18,6 @@ public interface IRefundDao {
     List<Refund> queryRefundsByPager(Map<String,Object> params);
 
     void uploadRefundSerialInfo(Refund refund);//部分字段允许修改
+
+    List<Map<String,Object>> refundSerialsInCenter(Map<String,Object> params);
 }

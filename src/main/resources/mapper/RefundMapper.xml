@@ -20,6 +20,32 @@
         <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
     </resultMap>
 
+    <!--订单中心返回退款流水-->
+    <resultMap id="orderCenterObject" type="java.util.Map">
+        <result column="refundserialid" jdbcType="VARCHAR" property="refundserialid"/>
+        <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
+        <result column="applydatetime" jdbcType="VARCHAR" property="applydatetime"/>
+        <result column="agreestate" jdbcType="VARCHAR" property="agreestate"/>
+        <result column="orderid" jdbcType="VARCHAR" property="orderid"/>
+        <result column="itemid" jdbcType="VARCHAR" property="itemid"/>
+        <result column="detail" jdbcType="VARCHAR" property="detail"/>
+        <result column="amount" jdbcType="VARCHAR" property="amount"/>
+        <result column="unitprice" jdbcType="VARCHAR" property="unitprice"/>
+        <result column="productname" jdbcType="VARCHAR" property="productname"/>
+        <result column="valuescore" jdbcType="INTEGER" property="valuescore"/>
+        <result column="productgrade" jdbcType="VARCHAR" property="productgrade"/>
+        <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
+        <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
+        <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
+    </resultMap>
+
+    <select id="refundSerialsInCenter" parameterType="java.util.Map" resultMap="orderCenterObject">
+        select t1.refundserialid,t1.productid,t1.accountid,t1.applydatetime,t1.agreestate,t1.orderid,t1.itemid,t1.detail,t1.amount,t2.unitprice,t2.productname,t2.valuescore,t2.productgrade,t2.fieldmeaning,t2.transportfee,t2.imagepath
+        from trefund t1,tproduct t2 where t1.productid = t2.productid and t1.accountid = #{refund.accountid} and t1.agreestate = #{refund.agreestate}
+        <if test="pager != null">limit #{pager.startLine},#{pager.offset}</if>
+    </select>
+
     <insert id="insertSingelRefund" parameterType="com.tibbers.zhonghui.model.Refund">
         insert into trefund values(#{refundserailid},#{accountid},#{orderid},#{productid},#{amount},#{itemid},#{applydatetime},#{agreestate},#{dealdatetime},#{agreedatetime},#{reverse1},#{reverse2})
     </insert>
