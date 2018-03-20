@@ -1,6 +1,5 @@
 package com.tibbers.zhonghui.controller;
 
-import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.sun.istack.internal.Nullable;
 import com.tibbers.zhonghui.config.AppConstants;
@@ -26,7 +25,8 @@ import java.util.Map;
  * @Description:
  * @Resource:
  */
-@Controller("withdraw")
+@Controller
+@RequestMapping("withdraw")
 public class WithDrawController {
 
     private Logger logger = Logger.getLogger(getClass());

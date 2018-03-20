@@ -54,7 +54,7 @@ public class WithDrawServiceImpl implements IWithDrawService{
     public void auditWithDraw(WithDraw withDraw) {
         logger.info(String.format("管理员[%s]审核[%s]的提现申请",withDraw.getAdminid(),withDraw.getAccountid()));
         try {
-            withDrawDao.auditWithDraw(withDraw);
+
             if("1".equals(withDraw.getApplystate())){
                 logger.info(String.format("管理员同意[%s]的提现申请，即将更新账户余额",withDraw.getAccountid()));
                 Account account = new Account();
@@ -71,6 +71,16 @@ public class WithDrawServiceImpl implements IWithDrawService{
                     logger.info(String.format("开始更新账户[%s]的账户余额",account.getAccountid()));
                     accountServiceDao.updateAccountInfo(account);
                     logger.info(String.format("账户[%s]余额信息更新成功",account.getAccountid()));
+                    withDrawDao.auditWithDraw(withDraw);
+                }else {
+                    throw new APIException(String.format("账户[%s]不存在或者尚未绑定微信账号",withDraw.getAccountid()));
+                }
+            }else {
+                logger.info(String.format("管理员拒绝[%s]的提现申请",withDraw.getAccountid()));
+                Account query = accountServiceDao.queryByAccountid(withDraw.getAccountid());
+                if(query != null && !StringUtil.isEmpty(query.getPersonid())){
+                    withDrawDao.auditWithDraw(withDraw);
+                    logger.info(String.format("更新提现申请[%s]成功",withDraw.getSerialid()));
                 }else {
                     throw new APIException(String.format("账户[%s]不存在或者尚未绑定微信账号",withDraw.getAccountid()));
                 }
