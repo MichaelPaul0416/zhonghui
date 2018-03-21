@@ -162,7 +162,7 @@
     </select>
 
     <update id="updateImages4Products" parameterType="java.util.Map" >
-        update tproducts set imagepath = #{imagepaths} where productid in (
+        update tproduct set imagepath = #{imagepaths} where productid in (
             <foreach collection="list" item="item" separator="," index="index">
               #{item.productid}
             </foreach>

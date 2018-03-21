@@ -23,7 +23,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -182,7 +181,9 @@ public class ProductController {
                 String productId = StringUtil.generateUUID();
                 logger.info(String.format("为产品[%s]生成序列id[%s]",product.getProductname(),productId));
                 product.setProductid(productId);
-                productService.insertSingleProduct(product,accountid);
+                int number = Integer.parseInt(product.getReverse1());
+                product.setReverse1("");
+                productService.insertSingleProduct(product,accountid, number);
                 response = new Response(true, productId);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE, response);
             } catch (Exception e) {
@@ -214,13 +215,20 @@ public class ProductController {
                     productIdList.add(productid);
 
                     ProductBelong productBelong = new ProductBelong();
-                    productBelong.setSerialid();
+                    productBelong.setSerialid(StringUtil.serialId());
+                    productBelong.setAccountid(accountid);
+                    productBelong.setRemaindernum(Integer.parseInt(product.getReverse1()));
+                    productBelong.setProductid(product.getProductid());
+                    productBelong.setSalestate("0");
+                    productBelongs.add(productBelong);
+
+                    product.setReverse1("");
                 }
                 logger.info(String.format("开始插入[%s]条产品记录",products.size()));
                 productService.insertBatchProduct(products);
                 logger.info(String.format("更新产品归属表，新增[%s]的上传产品记录",accountid));
 
-                productBelongDao.insertBatchRelation();
+                productBelongDao.insertBatchRelation(productBelongs);
                 Map<String,Object> responseMap = new HashMap<>();
                 responseMap.put("size",productIdList.size());
                 responseMap.put("tip","批量插入产品ID");

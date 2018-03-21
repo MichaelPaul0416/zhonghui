@@ -15,7 +15,7 @@ import java.util.Map;
  * @description:
  */
 public interface IProductService {
-    void insertSingleProduct(Product product,String accountid);
+    void insertSingleProduct(Product product, String accountid, Integer number);
 
     void insertBatchProduct(List<Product> productList);
 

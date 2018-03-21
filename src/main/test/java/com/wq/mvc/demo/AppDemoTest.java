@@ -241,7 +241,10 @@ public class AppDemoTest {
 
     @Test
     public void recommandInfo(){
-        System.out.println(StringUtil.serialId());
+//        System.out.println(StringUtil.serialId());
+        for (int i=0;i<100;i++){
+            System.out.println(Math.abs("210e512c68497189".hashCode()));
+        }
     }
 }
 

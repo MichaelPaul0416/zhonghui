@@ -19,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -49,14 +48,14 @@ public class ProductServiceImpl implements IProductService {
 
     @Transactional()
     @Override
-    public void insertSingleProduct(Product product,String accountid) {
+    public void insertSingleProduct(Product product, String accountid, Integer number) {
         iProductDao.insertSingleProduct(product);
         ProductBelong productBelong = new ProductBelong();
         productBelong.setSerialid(StringUtil.generateUUID());
         productBelong.setProductid(product.getProductid());
         productBelong.setAccountid(accountid);
         productBelong.setSalestate("0");
-        productBelong.setRemaindernum(0);
+        productBelong.setRemaindernum(number);
         iProductBelongDao.insertSingleRelation(productBelong);
         logger.info(String.format("记录[%s]插入数据库成功",product));
 
@@ -224,7 +223,7 @@ public class ProductServiceImpl implements IProductService {
             Map<String,Object> map = new HashMap<>();
             map.put("imagepaths",allPath);
             map.put("list",products);
-            iProductDao.salerQueryProductsByState(map);
+            iProductDao.updateImages4Products(map);
 
             logger.info(String.format("产品描述图片上传成功"));
 
