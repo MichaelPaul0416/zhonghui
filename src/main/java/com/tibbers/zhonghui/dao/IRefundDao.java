@@ -20,4 +20,7 @@ public interface IRefundDao {
     void uploadRefundSerialInfo(Refund refund);//部分字段允许修改
 
     List<Map<String,Object>> refundSerialsInCenter(Map<String,Object> params);
+
+    //商户查看待退款流水
+    List<Map<String,Object>> merchantQueryRefundOrders(Map<String,Object> params);
 }

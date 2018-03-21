@@ -10,6 +10,7 @@ public class Refund {
     private String accountid;
     private String orderid;
     private String productid;
+    private int number;
     private String amount;
     private String itemid;
     private String detail;
@@ -27,6 +28,7 @@ public class Refund {
                 ", accountid='" + accountid + '\'' +
                 ", orderid='" + orderid + '\'' +
                 ", productid='" + productid + '\'' +
+                ", number=" + number +
                 ", amount='" + amount + '\'' +
                 ", itemid='" + itemid + '\'' +
                 ", detail='" + detail + '\'' +
@@ -37,6 +39,14 @@ public class Refund {
                 ", reverse1='" + reverse1 + '\'' +
                 ", reverse2='" + reverse2 + '\'' +
                 '}';
+    }
+
+    public int getNumber() {
+        return number;
+    }
+
+    public void setNumber(int number) {
+        this.number = number;
     }
 
     public String getRefundserialid() {

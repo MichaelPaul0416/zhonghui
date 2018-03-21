@@ -20,4 +20,6 @@ public interface IOrderService {
     String dealWithAsynNotifyOrder(String xmlData);
 
     List<Map<String,Object>> accountOrderCenter(String accountid, String orderstate, Pager pager);
+
+    List<Map<String,Object>> merchantQueryOrders(String accountid,String orderstate,Pager pager);
 }

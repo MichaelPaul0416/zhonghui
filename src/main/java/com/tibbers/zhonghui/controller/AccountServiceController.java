@@ -49,6 +49,7 @@ public class AccountServiceController {
 
     @Autowired
     private IRecommandService recommandService;
+
     @Autowired
     private ServiceConfigBean serviceConfigBean;
 

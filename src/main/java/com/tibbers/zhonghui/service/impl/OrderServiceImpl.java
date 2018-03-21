@@ -17,6 +17,7 @@ import com.tibbers.zhonghui.service.IAccountService;
 import com.tibbers.zhonghui.service.IOrderService;
 import com.tibbers.zhonghui.utils.EncryptUtil;
 import com.tibbers.zhonghui.utils.StringUtil;
+import com.tibbers.zhonghui.utils.WxLoginUtil;
 import me.chanjar.weixin.common.exception.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpService;
 import me.chanjar.weixin.mp.bean.result.WxMpOAuth2AccessToken;
@@ -88,8 +89,8 @@ public class OrderServiceImpl implements IOrderService {
                     throw new APIException(String.format("账户[%s]不存在",orders.getAccountid()));
                 }
             }else{
-                WxMpOAuth2AccessToken accessToken = this.wxMpService.oauth2getAccessToken(code);
-                openid = accessToken.getOpenId();
+                JSONObject jsonObject = WxLoginUtil.doLoginAuth(code);
+                openid = jsonObject.getString("opendid");
 //                openid = "oe9PL4qR5KW4gKxN0csK2n3LgdCE";
 
             }
@@ -381,6 +382,36 @@ public class OrderServiceImpl implements IOrderService {
             }
         }
         logger.info(String.format("查询到用户[%s]需要的订单详细信息[%s]",accountid,list));
+        return list;
+    }
+
+    @Override
+    public List<Map<String, Object>> merchantQueryOrders(String accountid, String orderstate, Pager pager) {
+        logger.info(String.format("开始查询商户[%s]的订单详细信息",accountid));
+
+        List<Map<String,Object>> list = new ArrayList<>();
+        if("3".equals(orderstate)){
+            logger.info(String.format("查询商户[%s]的退款信息",accountid));
+            Map<String,Object> param = new HashMap<>();
+            param.put("accountid",accountid);
+            param.put("pager",pager);
+            list.addAll(refundDao.merchantQueryRefundOrders(param));
+            logger.info(String.format("查询到商户[%s]的待确认的退款流水[%s]",accountid,list));
+        }else {
+            //要么查询全部，要么根据状态查询
+            Map<String,Object> map = new HashMap<>();
+            map.put("accountid",accountid);
+            map.put("orderstate",orderstate);
+            map.put("pager",pager);
+            list = ordersDao.salerOrderCenter(map);
+            if(StringUtil.isEmpty(orderstate)){
+                Map<String,Object> param = new HashMap<>();
+                param.put("accountid",accountid);
+                param.put("pager",pager);
+                list.addAll(refundDao.merchantQueryRefundOrders(param));
+            }
+        }
+        logger.info(String.format("查询到商户[%s]的订单中心信息[%s]",accountid,list));
         return list;
     }
 

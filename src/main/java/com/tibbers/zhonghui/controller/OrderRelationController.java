@@ -39,6 +39,40 @@ public class OrderRelationController {
     @Autowired
     private IOrderService orderService;
 
+    @RequestMapping("/salerOrderCenter")
+    @ResponseBody
+    public String salerOrderCenter(String accountid,@Nullable String orderstate,@Nullable String startLine,@Nullable String offset){
+        APIResponse apiResponse;
+        Response response;
+
+        if(!StringUtil.isEmpty(accountid)){
+            try{
+                String state = null;
+                if(!StringUtil.isEmpty(orderstate)){
+                    state = orderstate;
+                }
+                Pager pager = null;
+                if(!StringUtil.isEmpty(startLine) && !StringUtil.isEmpty(offset)){
+                    pager = new Pager(Integer.parseInt(startLine),Integer.parseInt(offset));
+                }
+
+                List<Map<String,Object>> result = orderService.merchantQueryOrders(accountid,state,pager);
+                response = new Response(true,result);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            }
+        }else {
+            response = new Response(false,"卖家编号accountid不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
+    }
+
+
     @RequestMapping("/accountOrderCenter")
     @ResponseBody
     public String accountOrderCenter(String accountid, @Nullable String orderstate,@Nullable String startLine,@Nullable String offset){

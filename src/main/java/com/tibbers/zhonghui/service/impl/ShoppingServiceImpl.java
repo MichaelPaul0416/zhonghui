@@ -36,6 +36,7 @@ public class ShoppingServiceImpl implements IShoppingService {
             ShoppingCar shoppingCar = JSONObject.parseObject(shoppingCarInfo,ShoppingCar.class);
             logger.info(String.format("购物车中新增一条明细记录[%s]",shoppingCar));
             shoppingCar.setSerialid(StringUtil.generateUUID());
+            shoppingCar.setDeleteflag("1");
             shoppingCarDao.addItem2ShopCar(shoppingCar);
             logger.info("明细新增成功");
             return shoppingCar.getSerialid();

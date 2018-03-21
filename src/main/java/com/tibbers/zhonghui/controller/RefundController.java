@@ -39,7 +39,7 @@ public class RefundController {
 
     @RequestMapping("/refundApply")
     @ResponseBody
-    public String refundApply(@RequestParam("refundcerts")MultipartFile[] file, String refundSerial){
+    public String refundApply(@RequestParam("refundcerts")MultipartFile[] file, String refundSerial){//退款productid的数量number需要前端传入，amount前端计算好
         APIResponse apiResponse;
         Response response;
 
