@@ -5,7 +5,7 @@
 <mapper namespace="com.tibbers.zhonghui.dao.IProductBelongDao">
 
     <resultMap id="SingleRelation" type="com.tibbers.zhonghui.model.ProductBelong">
-        <id column="addressid" jdbcType="VARCHAR" property="addressid"/>
+        <id column="serialid" jdbcType="VARCHAR" property="serialid"/>
         <result column="productid" jdbcType="VARCHAR" property="productid"/>
         <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
         <result column="salestate" jdbcType="VARCHAR" property="salestate"/>
@@ -14,7 +14,7 @@
 
 
     <insert id="insertSingleRelation" parameterType="com.tibbers.zhonghui.model.ProductBelong">
-        insert into tproductbelong values(#{addressid},#{productid},#{accountid},#{salestate},#{remaindernum})
+        insert into tproductbelong values(#{serialid},#{productid},#{accountid},#{salestate},#{remaindernum})
     </insert>
 
 
@@ -25,4 +25,11 @@
     <update id="updateProductBelongRemaindernum" parameterType="com.tibbers.zhonghui.model.ProductBelong">
         update tproductbelong set remaindernum = #{remaindernum} where productid = #{productid}
     </update>
+
+    <insert id="insertBatchRelation" parameterType="java.util.List">
+        insert into tproductbelong values
+        <foreach collection="list" index="index" separator="," item="item">
+            (#item.serialid,#{item.productid},#{item.accountid},#{item.salestate},#{remaindernum})
+        </foreach>
+    </insert>
 </mapper>

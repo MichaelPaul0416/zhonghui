@@ -5,8 +5,10 @@ import com.sun.istack.internal.Nullable;
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.config.ServiceConfigBean;
+import com.tibbers.zhonghui.dao.IProductBelongDao;
 import com.tibbers.zhonghui.model.Account;
 import com.tibbers.zhonghui.model.Product;
+import com.tibbers.zhonghui.model.ProductBelong;
 import com.tibbers.zhonghui.model.common.APIResponse;
 import com.tibbers.zhonghui.model.common.Pager;
 import com.tibbers.zhonghui.model.common.Response;
@@ -46,6 +48,9 @@ public class ProductController {
 
     @Autowired
     private ServiceConfigBean serviceConfigBean;
+
+    @Autowired
+    private IProductBelongDao productBelongDao;
 
     @RequestMapping("/salerQueryProductsByState")
     @ResponseBody
@@ -195,24 +200,32 @@ public class ProductController {
 
     @RequestMapping("/insertBatchProduct")
     @ResponseBody
-    public String insertBatchProduct(String productList){
+    public String insertBatchProduct(String productList,@Nullable String accountid){
         APIResponse apiResponse;
         Response response;
         if(!StringUtil.isEmpty(productList)){
             try{
                 List<String> productIdList = new ArrayList<>();
                 List<Product> products = JSONObject.parseArray(productList,Product.class);
+                List<ProductBelong> productBelongs = new ArrayList<>();
                 for(Product product : products){
                     String productid = StringUtil.generateUUID();
                     product.setProductid(productid);
                     productIdList.add(productid);
+
+                    ProductBelong productBelong = new ProductBelong();
+                    productBelong.setSerialid();
                 }
                 logger.info(String.format("开始插入[%s]条产品记录",products.size()));
                 productService.insertBatchProduct(products);
+                logger.info(String.format("更新产品归属表，新增[%s]的上传产品记录",accountid));
+
+                productBelongDao.insertBatchRelation();
                 Map<String,Object> responseMap = new HashMap<>();
                 responseMap.put("size",productIdList.size());
                 responseMap.put("tip","批量插入产品ID");
                 responseMap.put("list",productIdList);
+                responseMap.put("accountid",accountid);
                 response = new Response(true, responseMap);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE, response);
             }catch (Exception e){
