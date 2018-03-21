@@ -3,6 +3,7 @@ package com.tibbers.zhonghui.service;
 import com.tibbers.zhonghui.model.Account;
 import com.tibbers.zhonghui.model.Product;
 import com.tibbers.zhonghui.model.common.Pager;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.InputStream;
 import java.util.List;
@@ -35,4 +36,6 @@ public interface IProductService {
     void updateProductBelongRemaindernum(String productid,String remaindernum);
 
     List<Map<String,Object>> salerQueryProductsByState(Product product,Account account,String salestates,Pager pager);
+
+    void updateImages4Products(MultipartFile[] files, String[] productids);
 }

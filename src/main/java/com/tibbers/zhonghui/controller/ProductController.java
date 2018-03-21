@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -254,6 +255,34 @@ public class ProductController {
             apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE, AppConstants.REQUEST_STATUS_MESSAGE, response);
         }
         return String.valueOf(JSONObject.toJSON(apiResponse));
+    }
+
+    @RequestMapping("/updateImages4Products")
+    @ResponseBody
+    public String updateImages4Products(@RequestParam("proImageDetails") MultipartFile[] files,HttpServletRequest request){
+        APIResponse apiResponse;
+        Response response;
+
+        try{
+            String productids = request.getParameter("productids");
+            if(!StringUtil.isEmpty(productids)){
+                String[] pids = productids.split(",");
+                productService.updateImages4Products(files,pids);
+                Map<String,Boolean> map = new HashMap<>();
+                map.put("flag",true);
+
+                response = new Response(true,map);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+            }else {
+                throw new APIException("需要更新的productids不能为空");
+            }
+        }catch (Exception e){
+            logger.error(e.getMessage(),e);
+            response = new Response(false,e.getCause().getMessage());
+            apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
     }
 
     @RequestMapping("/queryByProductId")

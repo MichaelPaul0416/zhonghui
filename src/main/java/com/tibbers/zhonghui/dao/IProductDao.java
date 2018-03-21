@@ -32,4 +32,6 @@ public interface IProductDao {
 
     List<Map<String,Object>>  salerQueryProductsByState (Map<String,Object> params);
 
+    void updateImages4Products(Map<String,Object> params);
+
 }

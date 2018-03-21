@@ -16,9 +16,12 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.InputStream;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -186,6 +189,47 @@ public class ProductServiceImpl implements IProductService {
             return result;
         }else {
             throw new APIException(String.format("只有VIP用户才能上传商品，您[%s]当前为非VIP用户，若想在商城中销售商品，请先向管理员申请成为VIP用户",account.getAccountid()));
+        }
+    }
+
+    @Override
+    public void updateImages4Products(MultipartFile[] files, String[] productids) {
+        String localPath = serviceConfigBean.getAbsoluteProductPathPrefix();
+        try {
+            File dir = new File(localPath);
+            if(!dir.exists()){
+                logger.info(String.format("目录[%s]不存在，创建文件夹",localPath));
+            }
+            StringBuilder builder = new StringBuilder();
+            List<Product> products = new ArrayList<>();
+            for(MultipartFile file : files){
+                String storePath = localPath + "\\" + file.getOriginalFilename();
+                FileUtils.copyInputStreamToFile(file.getInputStream(),new File(storePath));
+                logger.info(String.format("文件[%s]落地完成",storePath));
+                builder.append(storePath).append("|");
+            }
+
+            builder.deleteCharAt(builder.length() - 1);
+
+            String allPath = builder.toString();
+
+            for(String productid : productids){
+                Product product = new Product();
+                product.setProductid(productid);
+                product.setImagepath(allPath);
+                products.add(product);
+            }
+
+
+            Map<String,Object> map = new HashMap<>();
+            map.put("imagepaths",allPath);
+            map.put("list",products);
+            iProductDao.salerQueryProductsByState(map);
+
+            logger.info(String.format("产品描述图片上传成功"));
+
+        } catch (Exception e) {
+            throw new APIException(e.getCause());
         }
     }
 
