@@ -168,4 +168,15 @@
             </foreach>
         )
     </update>
+
+    <update id="updateProductInfo" parameterType="com.tibbers.zhonghui.model.Product">
+        update tproduct set familyid = ''
+        <if test="unitprice != null and !&quot;&quot;.equals(unitprice)"> , unitprice = #{unitprice}</if>
+        <if test="productname != null and !&quot;&quot;.equals(productname)"> , productname = #{productname}</if>
+        <if test="note != null and !&quot;&quot;.equals(note)"> , note = #{note}</if>
+        <if test="color != null and !&quot;&quot;.equals(color)"> , color = #{color}</if>
+        <if test="valuescore != null and !&quot;&quot;.equals(valuescore)"> , valuescore = #{valuescore}</if>
+        <if test="transportfee != null and !&quot;&quot;.equals(transportfee)"> , transportfee = #{transportfee}</if>
+        where productid = #{productid}
+    </update>
 </mapper>

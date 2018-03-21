@@ -232,4 +232,11 @@ public class ProductServiceImpl implements IProductService {
         }
     }
 
+    @Override
+    public void updateProductInfo(Product product) {
+        logger.info(String.format("更新产品[%s]的信息",product.getProductid()));
+        iProductDao.updateProductInfo(product);
+        logger.info(String.format("更新产品[%s]信息[%s]成功",product.getProductid(),product));
+    }
+
 }

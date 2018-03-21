@@ -51,6 +51,34 @@ public class ProductController {
     @Autowired
     private IProductBelongDao productBelongDao;
 
+    @RequestMapping("/updateProductInfo")
+    @ResponseBody
+    public String updateProductInfo(String productInfo){
+        APIResponse apiResponse;
+        Response response;
+
+        if(!StringUtil.isEmpty(productInfo)){
+            try{
+                Product product = JSONObject.parseObject(productInfo,Product.class);
+                productService.updateProductInfo(product);
+                Map<String,Object> result = new HashMap<>();
+                result.put("flag",true);
+                result.put("msg","update successfully");
+                response = new Response(true,result);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            }
+        }else {
+            response = new Response(false,"更新产品信息productInfo不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
+    }
+
     @RequestMapping("/salerQueryProductsByState")
     @ResponseBody
     public String salerQueryProductsByState(String accountInfo,String productInfo,String salestates,@Nullable String startLine,@Nullable String offset){

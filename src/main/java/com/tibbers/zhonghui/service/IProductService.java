@@ -38,4 +38,6 @@ public interface IProductService {
     List<Map<String,Object>> salerQueryProductsByState(Product product,Account account,String salestates,Pager pager);
 
     void updateImages4Products(MultipartFile[] files, String[] productids);
+
+    void updateProductInfo(Product product);
 }

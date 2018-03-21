@@ -34,4 +34,6 @@ public interface IProductDao {
 
     void updateImages4Products(Map<String,Object> params);
 
+    void updateProductInfo(Product product);
+
 }
