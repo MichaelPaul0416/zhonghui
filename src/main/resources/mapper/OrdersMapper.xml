@@ -31,7 +31,7 @@
         <result column="thirdpartmsg" jdbcType="VARCHAR" property="thirdpartmsg"/>
     </resultMap>
 
-    <!--订单中心返回对象-->
+    <!--消费者订单中心返回对象-->
     <resultMap id="orderCenterObject" type="java.util.Map">
         <result column="orderid" jdbcType="VARCHAR" property="orderid"/>
         <result column="productid" jdbcType="VARCHAR" property="productid"/>
@@ -49,6 +49,24 @@
         <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
         <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
         <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
+    </resultMap>
+
+    <!--商户订单中心-->
+    <resultMap id="salerOrderCenter" type="java.util.Map">
+        <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
+        <result column="orderid" jdbcType="VARCHAR" property="orderid"/>
+        <result column="freetransport" jdbcType="VARCHAR" property="freetransport"/>
+        <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
+        <result column="createdatetime" jdbcType="VARCHAR" property="createdatetime"/>
+        <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
+        <result column="productname" jdbcType="VARCHAR" property="productname"/>
+        <result column="unitprice" jdbcType="VARCHAR" property="unitprice"/>
+        <result column="productgrade" jdbcType="VARCHAR" property="productgrade"/>
+        <result column="productname" jdbcType="VARCHAR" property="productname"/>
+        <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
+        <result column="amount" jdbcType="VARCHAR" property="amount"/>
+        <result column="paybybalance" jdbcType="VARCHAR" property="paybybalance"/>
     </resultMap>
 
     <!--新增订单表记录-->
@@ -146,5 +164,17 @@
             limit #{pager.startLine},#{pager.offset}
         </if>
 
+    </select>
+
+    <select id="salerOrderCenter" parameterType="java.util.Map" resultMap="salerOrderCenter">
+        select t1.accountid,t1.orderid,t1.freetransport,t1.transportfee,t1.createdatetime,t2.productid,t4.imagepath,t4.productname,t4.unitprice,t4.productgrade,t4.fieldmeaning,t2.pronumber,t1.amount,t1.paybybalance
+        from torders t1,torderitem t2,tproductbelong t3 ,tproduct t4
+        where t1.orderid = t2.orderid and t2.productid = t3.productid and t2.productid = t4.productid
+        <if test="orderstate != null and !&quot;&quot;.equals(orderstate)">and t1.orderstate = #{orderstate} </if>
+        and t3.salestate = '1'
+        and t3.accountid = #{accountid}
+        <if test="pager != null">
+            limit #{pager.startLine},#{pager.offset}
+        </if>
     </select>
 </mapper>

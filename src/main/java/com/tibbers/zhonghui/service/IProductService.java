@@ -33,4 +33,6 @@ public interface IProductService {
     List<Map<String,Object>> vipQueryUploadProducts(Product product, Account account,Pager pager);
 
     void updateProductBelongRemaindernum(String productid,String remaindernum);
+
+    List<Map<String,Object>> salerQueryProductsByState(Product product,Account account,String salestates,Pager pager);
 }

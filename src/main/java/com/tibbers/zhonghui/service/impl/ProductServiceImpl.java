@@ -170,4 +170,23 @@ public class ProductServiceImpl implements IProductService {
         logger.info(String.format("产品归属信息[%s]更新成功",productBelong));
     }
 
+    @Override
+    public List<Map<String, Object>> salerQueryProductsByState(Product product, Account account, String salestates, Pager pager) {
+        logger.info(String.format("开始为VIP用户[%s]按照状态[%s]查询他的上传产品信息",account.getAccountid(),salestates));
+        if("1".equals(account.getIsvip())){
+            Map<String,Object> param = new HashMap<>();
+            param.put("account",account);
+            param.put("prodduct",product);
+            param.put("salestate",salestates);
+            param.put("pager",pager);
+
+            List<Map<String,Object>> result = iProductDao.salerQueryProductsByState(param);
+            logger.info(String.format("VIP用户[%s]根据产品状态[%s]查询到的产品信息列表[%s]",account.getAccountid(),salestates,result));
+
+            return result;
+        }else {
+            throw new APIException(String.format("只有VIP用户才能上传商品，您[%s]当前为非VIP用户，若想在商城中销售商品，请先向管理员申请成为VIP用户",account.getAccountid()));
+        }
+    }
+
 }

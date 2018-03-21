@@ -241,7 +241,7 @@ public class AppDemoTest {
 
     @Test
     public void recommandInfo(){
-
+        System.out.println(StringUtil.serialId());
     }
 }
 

@@ -30,4 +30,6 @@ public interface IProductDao {
 
     List<Map<String,Object>> vipQueryUploadProducts(Map<String,Object> params);
 
+    List<Map<String,Object>>  salerQueryProductsByState (Map<String,Object> params);
+
 }

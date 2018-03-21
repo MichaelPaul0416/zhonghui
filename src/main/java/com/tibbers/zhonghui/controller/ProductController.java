@@ -46,6 +46,38 @@ public class ProductController {
     @Autowired
     private ServiceConfigBean serviceConfigBean;
 
+    @RequestMapping("/salerQueryProductsByState")
+    @ResponseBody
+    public String salerQueryProductsByState(String accountInfo,String productInfo,String salestates,@Nullable String startLine,@Nullable String offset){
+        APIResponse apiResponse;
+        Response response;
+
+        if(StringUtil.argsNotEmpty(new String[]{accountInfo,productInfo,salestates})){
+            try{
+                Pager pager = null;
+                if(!StringUtil.isEmpty(startLine) && !StringUtil.isEmpty(offset)){
+                    pager = new Pager(Integer.parseInt(startLine),Integer.parseInt(offset));
+                }
+
+                Product product = JSONObject.parseObject(productInfo,Product.class);
+                Account account = JSONObject.parseObject(accountInfo,Account.class);
+                List<Map<String,Object>> result = productService.salerQueryProductsByState(product,account,salestates,pager);
+
+                response = new Response(true,result);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getCause().getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            }
+        }else {
+            response = new Response(false,"用户信息accountInfo,产品查询信息productInfo,销售状态salestates不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
+    }
+
     @RequestMapping("/updateProductBelongRemaindernum")
     @ResponseBody
     public String updateProductBelongRemaindernum(String productid,String remaindernum){

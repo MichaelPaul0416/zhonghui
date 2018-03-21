@@ -133,4 +133,31 @@
             limit #{pager.startLine},#{pager.offset}
         </if>
     </select>
+
+    <select id="salerQueryProductsByState" parameterType="java.util.Map" resultMap="customProductQuery">
+        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum
+        from tproduct t1,tproductbelong t2,taccount t3
+        where t1.productid = t2.productid and t2.accountid = t3.accountid
+        <if test="product != null">
+            <if test="product.productid != null and !&quot;&quot;.equals(product.productid) ">and t1.productid = #{product.productid}  </if>
+            <if test="product.productname != null and !&quot;&quot;.equals(product.productname) ">and t1.productname like '%' #{product.productname} '%'</if>
+            <if test="product.note != null and !&quot;&quot;.equals(product.note) ">and  t1.note like '%' #{product.note} '%'</if>
+            <if test="product.itemid != null and !&quot;&quot;.equals(product.itemid) ">and t1.itemid = #{product.itemid} </if>
+            <if test="product.color != null and !&quot;&quot;.equals(product.color) "> and t1.color = #{product.color} </if>
+            <if test="product.productgrade != null and !&quot;&quot;.equals(product.productgrade) "> and t1.productgrade like '%' #{product.productgrade} '%'</if>
+            <if test="product.reverse1 != null "> and t1.reverse1 = #{product.reverse1} </if>
+            <if test="product.reverse2 != null "> and t1.reverse2 = #{product.reverse2} </if>
+        </if>
+        <if test="account != null">
+            <if test="account.accountid != null and !&quot;&quot;.equals(account.accountid) ">and t3.accountid = #{account.accountid}</if>
+            <if test="account.custtype != null and !&quot;&quot;.equals(account.custtype) ">and t3.custtype = #{account.custtype}</if>
+        </if>
+        <if test="salestate != null and !&quot;&quot;.equals(salestate)">
+            and t2.salestate in (#{salestate})
+        </if>
+        <if test="pager != null">
+            limit #{pager.startLine},#{pager.offset}
+        </if>
+
+    </select>
 </mapper>
