@@ -4,6 +4,7 @@ import com.tibbers.zhonghui.model.WithDraw;
 import com.tibbers.zhonghui.model.common.Pager;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Author: wangqiang20995
@@ -17,4 +18,6 @@ public interface IWithDrawService {
     void auditWithDraw(WithDraw withDraw);//审核提现
 
     List<WithDraw> queryWithDraws(WithDraw withDraw, Pager pager);
+
+    List<Map<String,String>> queryTotalWithdraw(String accountid);
 }

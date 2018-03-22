@@ -29,6 +29,8 @@
         <result column="paybybalance" jdbcType="VARCHAR" property="paybybalance"/>
         <result column="emcapitalserial" jdbcType="VARCHAR" property="emcapitalserial"/>
         <result column="thirdpartmsg" jdbcType="VARCHAR" property="thirdpartmsg"/>
+        <result column="donedatetime" jdbcType="VARCHAR" property="donedatetime"/>
+        <result column="amount" jdbcType="VARCHAR" property="amount"/>
     </resultMap>
 
     <!--消费者订单中心返回对象-->
@@ -111,7 +113,7 @@
     </select>
 
     <select id="queryOrderIdsForDetails" parameterType="java.util.Map" resultMap="capitalSerialResult">
-        select t1.orderid,t1.accountid,t1.isvalid,t1.paybybalance,t2.emcapitalserial,t2.thirdpartmsg from torders t1,tcapitalserial t2
+        select t1.orderid,t1.accountid,t1.isvalid,t1.paybybalance,t2.emcapitalserial,t2.thirdpartmsg,t1.donedatetime,t2.reverse1 as amount from torders t1,tcapitalserial t2
         where t1.orderid = t2.orderid and t1.accountid = #{account.accountid} and t1.isvalid = '1' and t2.state = '1'
         order by t1.donedatetime DESC
         <if test="pager != null">

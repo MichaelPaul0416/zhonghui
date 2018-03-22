@@ -18,4 +18,6 @@ public interface IRecommandIncomeDao {
     List<RecommandIncome> queryRecommandIncomeByPager(Map<String,Object> param);
 
     void updateIncomeSerial(RecommandIncome recommandIncome);
+
+    List<Map<String,String>> queryTotalRecommandIncome(String accountid);
 }

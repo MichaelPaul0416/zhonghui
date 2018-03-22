@@ -3,6 +3,7 @@ package com.tibbers.zhonghui.service.impl;
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.dao.IAccountServiceDao;
 import com.tibbers.zhonghui.dao.IRecommandDao;
+import com.tibbers.zhonghui.dao.IRecommandIncomeDao;
 import com.tibbers.zhonghui.model.Account;
 import com.tibbers.zhonghui.model.Recommand;
 import com.tibbers.zhonghui.model.common.Pager;
@@ -32,6 +33,9 @@ public class RecommandServiceImpl implements IRecommandService {
 
     @Autowired
     private IAccountServiceDao accountServiceDao;
+
+    @Autowired
+    private IRecommandIncomeDao recommandIncomeDao;
 
     @Override
     public void insertRecommand(String accountid,String recommander) {
@@ -92,5 +96,11 @@ public class RecommandServiceImpl implements IRecommandService {
     public Map<String, String> recommandByVIP(String accountid) {
         Map<String,String> resultMap = recommandDao.recommandByVIP(accountid);
         return  resultMap;
+    }
+
+    @Override
+    public List<Map<String, String>> queryTotalRecommandIncome(String accountid) {
+        logger.info(String.format("开始查询[%s]作为推荐人的总收益",accountid));
+        return recommandIncomeDao.queryTotalRecommandIncome(accountid);
     }
 }

@@ -9,6 +9,7 @@ import com.tibbers.zhonghui.model.common.APIResponse;
 import com.tibbers.zhonghui.model.common.Pager;
 import com.tibbers.zhonghui.model.common.Response;
 import com.tibbers.zhonghui.service.IRecommandService;
+import com.tibbers.zhonghui.service.IWithDrawService;
 import com.tibbers.zhonghui.utils.StringUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +18,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +35,45 @@ public class RecommandRelationController {
 
     @Autowired
     private IRecommandService recommandService;
+
+    @Autowired
+    private IWithDrawService withDrawService;
+
+    @RequestMapping("/queryTotalIncomAndWithdraw")
+    @ResponseBody
+    public String queryTotalIncomAndWithdraw(String accountid){
+        APIResponse apiResponse;
+        Response response;
+
+        if(!StringUtil.isEmpty(accountid)){
+            try{
+                Map<String,Object> map = new HashMap<>();
+                List<Map<String,String>> income = recommandService.queryTotalRecommandIncome(accountid);
+                if (income.size() == 1) {
+                    map.put("income", income.get(0));
+                }else {
+                    map.put("income","");
+                }
+                List<Map<String,String>> withdraw = withDrawService.queryTotalWithdraw(accountid);
+                if(withdraw.size() == 1) {
+                    map.put("withdraw", withdraw.get(0));
+                }else{
+                    map.put("withdraw","");
+                }
+                response = new Response(true,map);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getCause().getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            }
+        }else {
+            response = new Response( false,"账户编号accountid不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
+    }
 
     @RequestMapping("/insertRecommand")
     @ResponseBody

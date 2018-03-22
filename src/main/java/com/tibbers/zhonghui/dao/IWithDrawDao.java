@@ -20,4 +20,6 @@ public interface IWithDrawDao {
     void auditWithDraw(WithDraw withDraw);//审核提现
 
     List<WithDraw> queryWithDraws(Map<String,Object> param);
+
+    List<Map<String,String>> queryTotalWithdraw(String accountid);
 }

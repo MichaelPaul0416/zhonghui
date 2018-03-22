@@ -16,6 +16,11 @@
         <result property="reverse2" jdbcType="VARCHAR" column="sereverse2"/>
     </resultMap>
 
+    <resultMap id="withdrawResult" type="java.util.Map">
+        <result column="accountid" property="accountid" jdbcType="VARCHAR"/>
+        <result column="totalwithdraw" property="totalwithdraw" jdbcType="VARCHAR"/>
+    </resultMap>
+
     <insert id="applyWithDrawOrBatch" parameterType="java.util.List">
         insert into twithdraw values
         <foreach collection="list" index="index" separator="," item="item">
@@ -48,5 +53,10 @@
         </if>
     </select>
 
-
+    <select id="queryTotalWithdraw" resultMap="withdrawResult">
+        select t.* from (select accountid,sum(CAST(amount AS DECIMAL(9,2))) as totalwithdraw from twithdraw where  applystate = '1' GROUP BY accountid) t
+        <where>
+            t.accountid = #{_parameter}
+        </where>
+    </select>
 </mapper>

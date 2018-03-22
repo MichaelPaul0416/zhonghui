@@ -104,4 +104,10 @@ public class WithDrawServiceImpl implements IWithDrawService{
         }
 
     }
+
+    @Override
+    public List<Map<String, String>> queryTotalWithdraw(String accountid) {
+        logger.info(String.format("开始查询[%s]的提现总金额",accountid));
+        return withDrawDao.queryTotalWithdraw(accountid);
+    }
 }

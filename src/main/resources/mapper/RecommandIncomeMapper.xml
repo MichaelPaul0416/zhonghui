@@ -17,6 +17,11 @@
         <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
     </resultMap>
 
+    <resultMap id="incomeResult" type="java.util.Map">
+        <result column="accountid" property="accountid" jdbcType="VARCHAR"/>
+        <result column="totalincome" property="totalincome" jdbcType="VARCHAR"/>
+    </resultMap>
+
     <insert id="insertRecommandIncomeOrBatch" parameterType="java.util.List">
         insert into trecommandincome VALUES
         <foreach collection="list" index="index" item="item" separator=",">
@@ -46,4 +51,12 @@
     <update id="updateIncomeSerial" parameterType="com.tibbers.zhonghui.model.RecommandIncome">
         update trecommandincome set incomedatetime = #{incomedatetime},alreadydone = #{alreadydone},description = #{description} where incomeserialno = #{incomeserialno}
     </update>
+
+    <!--查询accountid作为推荐者的总收益-->
+    <select id="queryTotalRecommandIncome" resultMap="incomeResult">
+        select t.* from (select accountid,sum(CAST(income AS DECIMAL(9,2))) as totalincome from trecommandincome where alreadydone = '1' GROUP BY  accountid) t
+        <where>
+            t.accountid = #{_parameter}
+        </where>
+    </select>
 </mapper>

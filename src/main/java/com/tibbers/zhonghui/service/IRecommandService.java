@@ -20,4 +20,6 @@ public interface IRecommandService {
     List<Map<String,String>> queryMyRecommandAccounts(String accountid,Pager pager);
 
     Map<String, String> recommandByVIP(String accountid);
+
+    List<Map<String,String>> queryTotalRecommandIncome(String accountid);
 }
