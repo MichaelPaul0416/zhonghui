@@ -15,6 +15,7 @@ public class Account {
     private String isvip;
     private String custtype;
     private String accobalance;
+    private String codeimagepath;
     private String reverse;
 
     public Account(){
@@ -29,12 +30,21 @@ public class Account {
                 ", accountname='" + accountname + '\'' +
                 ", imagepath='" + imagepath + '\'' +
                 ", bindphone='" + bindphone + '\'' +
-                ", score='" + score + '\'' +
+                ", score=" + score +
                 ", isvip='" + isvip + '\'' +
                 ", custtype='" + custtype + '\'' +
                 ", accobalance='" + accobalance + '\'' +
+                ", codeImagepath='" + codeimagepath + '\'' +
                 ", reverse='" + reverse + '\'' +
                 '}';
+    }
+
+    public String getCodeImagepath() {
+        return codeimagepath;
+    }
+
+    public void setCodeImagepath(String codeImagepath) {
+        this.codeimagepath = codeImagepath;
     }
 
     public String getAccountname() {

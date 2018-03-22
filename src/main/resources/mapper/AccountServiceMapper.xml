@@ -13,6 +13,7 @@
         <result column="isvip" jdbcType="VARCHAR" property="isvip"/>
         <result column="custtype" jdbcType="VARCHAR" property="custtype"/>
         <result column="accobalance" jdbcType="VARCHAR" property="accobalance"/>
+        <result column="codeimagepath" jdbcType="VARCHAR" property="codeimagepath"/>
         <result column="reverse" jdbcType="VARCHAR" property="reverse"/>
     </resultMap>
 
@@ -26,6 +27,7 @@
         <result column="isvip" jdbcType="VARCHAR" property="isvip"/>
         <result column="custtype" jdbcType="VARCHAR" property="custtype"/>
         <result column="accobalance" jdbcType="VARCHAR" property="accobalance"/>
+        <result column="codeimagepath" jdbcType="VARCHAR" property="codeimagepath"/>
         <result column="reverse" jdbcType="VARCHAR" property="reverse"/>
         <result column="rank" jdbcType="VARCHAR" property="rank"/>
     </resultMap>
@@ -35,7 +37,7 @@
     </insert>
 
     <insert id="registerAccountInfo" parameterType="com.tibbers.zhonghui.model.Account">
-        insert into taccount values (#{accountid},#{personid},#{accountname},#{imagepath},#{bindphone},#{score},#{isvip},#{custtype},#{accobalance},#{reverse})
+        insert into taccount values (#{accountid},#{personid},#{accountname},#{imagepath},#{bindphone},#{score},#{isvip},#{custtype},#{accobalance},#{codeimagepath},#{reverse})
     </insert>
 
     <update id="updateAccountInfo" parameterType="com.tibbers.zhonghui.model.Account">
@@ -46,6 +48,7 @@
         <if test="score > -1"> score= #{score} ,</if>
         <if test="isvip != null and !&quot;&quot;.equals(isvip.trim())"> isvip = #{isvip} ,</if>
         <if test="accobalance != null and !&quot;&quot;.equals(accobalance.trim())"> accobalance = #{accobalance},</if>
+        <if test="codeimagepath != null and !&quot;&quot;.equals(codeimagepath.trim())"> codeimagepath = #{codeimagepath},</if>
         <if test="reverse != null"> reverse = #{reverse} </if>
         where accountid = #{accountid}
     </update>

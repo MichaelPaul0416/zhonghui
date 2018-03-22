@@ -2,12 +2,15 @@ package com.tibbers.zhonghui.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import org.apache.http.HttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
+import org.apache.http.protocol.HTTP;
 import org.apache.log4j.Logger;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.HashMap;
@@ -25,6 +28,7 @@ public class WxLoginUtil {
     private static Logger logger = Logger.getLogger(WxLoginUtil.class);
 
     private static final String URL = "https://api.weixin.qq.com/sns/jscode2session";
+    private static final String URL_CODE = "https://api.weixin.qq.com/wxa/getwxacode?access_token=8_nAuVD5NPuZUYjprrBUITCDGm9lPIUD9Scg_hvhOS1KXb19CVZZGF6P1KuDfk12zVH9KF2WbjdpRZQ2-BZuuGEV6eekYugI3V-oZ7x0RiN0JSGrjJEia7r9bqq7xpna4IB2c9X5Uo4FuC2iStUFVaADABMC";
 
     public static String sendPost(String url, Map<String, ?> paramMap) {
         PrintWriter out = null;
@@ -80,7 +84,6 @@ public class WxLoginUtil {
         }
         return result;
     }
-
     public static JSONObject doLoginAuth(String code){
 
         Map<String,String> requestParam = new HashMap<>();
@@ -94,7 +97,47 @@ public class WxLoginUtil {
         return jsonObject;
     }
 
-    public static void main(String args[]){
-        System.out.println(doLoginAuth("0033wPv024pqz01TSQv02RJPv023wPvn"));
+    public static String landAccountCodeImage(int hashcode) throws IOException {
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("scene", hashcode);
+        params.put("path", "/pages/index/index");
+        params.put("width", 430);
+
+        CloseableHttpClient httpClient = HttpClientBuilder.create().build();
+
+        HttpPost httpPost = new HttpPost(URL);
+        httpPost.addHeader(HTTP.CONTENT_TYPE, "application/json");
+        String body = JSON.toJSONString(params);
+        StringEntity entity;
+        entity = new StringEntity(body);
+        entity.setContentType("image/png");
+
+        httpPost.setEntity(entity);
+        HttpResponse response;
+
+        response = httpClient.execute(httpPost);
+        InputStream inputStream = response.getEntity().getContent();
+
+        File targetFile = new File("C:\\");
+        if(!targetFile.exists()){
+            targetFile.mkdirs();
+        }
+        String path =
+        FileOutputStream out = new FileOutputStream("C:\\Users\\Paul\\Desktop\\aaa.jpg");
+
+        byte[] buffer = new byte[8192];
+        int bytesRead ;
+        while((bytesRead = inputStream.read(buffer, 0, 8192)) != -1) {
+            out.write(buffer, 0, bytesRead);
+        }
+
+        out.flush();
+        out.close();
+    }
+
+    public static void main(String args[]) throws Exception{
+
+
     }
 }
