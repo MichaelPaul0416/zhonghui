@@ -54,4 +54,8 @@
         select t1.accountid,t1.recommander ,t2.isvip from trecommand t1,taccount t2
          where t1.recommander = t2.accountid and t1.accountid = #{_parameter}
     </select>
+
+    <select id="queryRecommandByAccountid" parameterType="java.lang.String" resultMap="RecommandResult">
+        select * from trecommand where accountid = #{_parameter}
+    </select>
 </mapper>

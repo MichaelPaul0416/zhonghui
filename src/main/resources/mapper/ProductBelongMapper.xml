@@ -32,4 +32,8 @@
             (#item.serialid,#{item.productid},#{item.accountid},#{item.salestate},#{remaindernum})
         </foreach>
     </insert>
+
+    <select id="queryBelongByProductid" parameterType="com.tibbers.zhonghui.model.ProductBelong" resultMap="SingleRelation">
+        select * from tproductbelong where productid = #{productid} and salestate = #{salestate}
+    </select>
 </mapper>
