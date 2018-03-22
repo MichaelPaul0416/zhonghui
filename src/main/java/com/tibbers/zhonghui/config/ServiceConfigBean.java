@@ -26,6 +26,17 @@ public class ServiceConfigBean {
     @Value("#{prop.refundScanSwitch}")
     private String refundScanSwitch;
 
+    @Value("#{prop.wxenvcodeImagePathPrefix}")
+    private String wxenvcodeImagePathPrefix;
+
+    public String getWxenvcodeImagePathPrefix() {
+        return wxenvcodeImagePathPrefix;
+    }
+
+    public void setWxenvcodeImagePathPrefix(String wxenvcodeImagePathPrefix) {
+        this.wxenvcodeImagePathPrefix = wxenvcodeImagePathPrefix;
+    }
+
     public String getRefundScanSwitch() {
         return refundScanSwitch;
     }

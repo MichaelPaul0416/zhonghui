@@ -28,7 +28,7 @@ public class WxLoginUtil {
     private static Logger logger = Logger.getLogger(WxLoginUtil.class);
 
     private static final String URL = "https://api.weixin.qq.com/sns/jscode2session";
-    private static final String URL_CODE = "https://api.weixin.qq.com/wxa/getwxacode?access_token=8_nAuVD5NPuZUYjprrBUITCDGm9lPIUD9Scg_hvhOS1KXb19CVZZGF6P1KuDfk12zVH9KF2WbjdpRZQ2-BZuuGEV6eekYugI3V-oZ7x0RiN0JSGrjJEia7r9bqq7xpna4IB2c9X5Uo4FuC2iStUFVaADABMC";
+    private static final String URL_CODE = "https://api.weixin.qq.com/wxa/getwxacode?access_token=";
 
     public static String sendPost(String url, Map<String, ?> paramMap) {
         PrintWriter out = null;
@@ -97,16 +97,17 @@ public class WxLoginUtil {
         return jsonObject;
     }
 
-    public static String landAccountCodeImage(int hashcode) throws IOException {
+    public static String landAccountCodeImage(String accountid,String personid,String accessToken,String basePath) throws IOException {
 
         Map<String, Object> params = new HashMap<>();
+        int hashcode = Math.abs((accountid + personid).hashCode());
         params.put("scene", hashcode);
         params.put("path", "/pages/index/index");
-        params.put("width", 430);
+        params.put("width", 400);
 
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();
 
-        HttpPost httpPost = new HttpPost(URL);
+        HttpPost httpPost = new HttpPost(URL_CODE + accessToken);
         httpPost.addHeader(HTTP.CONTENT_TYPE, "application/json");
         String body = JSON.toJSONString(params);
         StringEntity entity;
@@ -119,12 +120,13 @@ public class WxLoginUtil {
         response = httpClient.execute(httpPost);
         InputStream inputStream = response.getEntity().getContent();
 
-        File targetFile = new File("C:\\");
+        String path = basePath;
+        File targetFile = new File(path);
         if(!targetFile.exists()){
             targetFile.mkdirs();
         }
-        String path =
-        FileOutputStream out = new FileOutputStream("C:\\Users\\Paul\\Desktop\\aaa.jpg");
+        String finalPath = path + "\\" + accountid + ".jpg";
+        FileOutputStream out = new FileOutputStream(finalPath);
 
         byte[] buffer = new byte[8192];
         int bytesRead ;
@@ -134,10 +136,11 @@ public class WxLoginUtil {
 
         out.flush();
         out.close();
+
+        return finalPath;
     }
 
     public static void main(String args[]) throws Exception{
-
-
+//        landAccountCodeImage(367621639);
     }
 }

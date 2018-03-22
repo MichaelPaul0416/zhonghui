@@ -13,6 +13,7 @@ import com.tibbers.zhonghui.model.common.Response;
 import com.tibbers.zhonghui.service.IAccountService;
 import com.tibbers.zhonghui.service.IRecommandService;
 import com.tibbers.zhonghui.utils.StringUtil;
+import com.tibbers.zhonghui.utils.WxLoginUtil;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -56,36 +57,45 @@ public class AccountServiceController {
 
     @RequestMapping("/accountCodeID")
     @ResponseBody
-    public void accountCodeID(String accountid,HttpServletResponse httpServletResponse){
+    public void accountCodeID(HttpServletRequest request,HttpServletResponse httpServletResponse){
 
-        File codeImage;
-        if(!StringUtils.isEmpty(accountid)){
-            Account account = accountService.queryByAccountid(accountid);
-            if(account != null){
-                String codePath = account.getCodeImagepath();
-                if(!StringUtil.isEmpty(codePath)){
-                    codeImage = new File(codePath);
-                }else {
-                    int hashCode = Math.abs((account.getAccountid() + account.getPersonid()).hashCode());
-
-                }
-                if(!accountImage.exists()){
-                    accountImage = new File(serviceConfigBean.getDefaultImagePath());
-                }
-            }else {
-                accountImage = new File(serviceConfigBean.getDefaultImagePath());
-            }
-        }else{
-            accountImage = new File(serviceConfigBean.getDefaultImagePath());
-        }
+        File codeImage ;
+        String accountid = request.getParameter("accountid");
+        String access_token = request.getParameter("access_token");
         FileInputStream inputStream = null;
         OutputStream outputStream;
+
         try {
-            inputStream = new FileInputStream(accountImage);
-            byte[] data = new byte[(int)accountImage.length()];
+            if(!StringUtils.isEmpty(accountid)){
+                Account account = accountService.queryByAccountid(accountid);
+                if(account != null){
+                    String codePath = account.getCodeImagepath();
+                    if(!StringUtil.isEmpty(codePath)){
+                        codeImage = new File(codePath);
+                    }else {
+                        String path = WxLoginUtil.landAccountCodeImage(accountid,account.getPersonid(),access_token,serviceConfigBean.getWxenvcodeImagePathPrefix());
+                        Account update = new Account();
+                        update.setAccountid(accountid);
+                        update.setCodeImagepath(path);
+                        accountService.updateAccountInfo(new Gson().toJson(update));
+                        logger.info(String.format("账户[%s]的场景二维码存储成功[%s]",accountid,path));
+                        codeImage = new File(path);
+                    }
+                    if(!codeImage.exists()){
+                        codeImage = new File(serviceConfigBean.getDefaultImagePath());
+                    }
+                }else {
+                    codeImage = new File(serviceConfigBean.getDefaultImagePath());
+                }
+            }else{
+                codeImage = new File(serviceConfigBean.getDefaultImagePath());
+            }
+
+            inputStream = new FileInputStream(codeImage);
+            byte[] data = new byte[(int)codeImage.length()];
             inputStream.read(data);
-            response.setContentType("image/jpeg");
-            outputStream = response.getOutputStream();
+            httpServletResponse.setContentType("image/jpeg");
+            outputStream = httpServletResponse.getOutputStream();
             outputStream.write(data);
             outputStream.flush();
             outputStream.close();
