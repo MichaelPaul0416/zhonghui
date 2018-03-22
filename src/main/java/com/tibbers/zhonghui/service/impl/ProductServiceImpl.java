@@ -69,7 +69,7 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public void uploadImage(HttpServletRequest request, String[] productids) {
+    public List<String> uploadImage(HttpServletRequest request, String[] productids) {
         try {
             String localPath = serviceConfigBean.getAbsoluteProductPathPrefix();
             List<String> allPath = WxLoginUtil.upload(request,localPath);
@@ -100,6 +100,8 @@ public class ProductServiceImpl implements IProductService {
             }else {
                 throw new APIException("请上传图片");
             }
+
+            return allPath;
 
         } catch (Exception e) {
             throw new APIException(e.getCause());

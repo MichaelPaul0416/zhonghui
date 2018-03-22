@@ -19,7 +19,7 @@ public interface IProductService {
 
     void insertBatchProduct(List<Product> productList);
 
-    void uploadImage(HttpServletRequest request, String[] productids);
+    List<String> uploadImage(HttpServletRequest request, String[] productids);
 
     Map<String, Object> queryByProductId(String productId);
 

@@ -288,8 +288,13 @@ public class ProductController {
             String productids = request.getParameter("productids");
             if(!StringUtil.isEmpty(productids)) {
                 String[] pids = productids.split(",");
-                productService.uploadImage(request,pids);
-                response = new Response(true, "文件上传成功");
+                List<String> paths = productService.uploadImage(request,pids);
+                Map<String,Object> result = new HashMap<>();
+                result.put("flag",true);
+                result.put("size",paths.size());
+                result.put("msg","upload successfully");
+                result.put("paths",paths);
+                response = new Response(true, result);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE, response);
             }else {
                 response = new Response(false,"请输入需要更新图片的产品id");
