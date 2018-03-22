@@ -5,7 +5,7 @@ import com.tibbers.zhonghui.model.Product;
 import com.tibbers.zhonghui.model.common.Pager;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.InputStream;
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -19,7 +19,7 @@ public interface IProductService {
 
     void insertBatchProduct(List<Product> productList);
 
-    void uploadImage(InputStream inputStream,Product product);
+    void uploadImage(HttpServletRequest request, String[] productids);
 
     Map<String, Object> queryByProductId(String productId);
 

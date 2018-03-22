@@ -11,6 +11,7 @@ import com.tibbers.zhonghui.model.ProductBelong;
 import com.tibbers.zhonghui.model.common.Pager;
 import com.tibbers.zhonghui.service.IProductService;
 import com.tibbers.zhonghui.utils.StringUtil;
+import com.tibbers.zhonghui.utils.WxLoginUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +19,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -68,19 +69,38 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public void uploadImage(InputStream inputStream, Product product) {
-        String localPath = serviceConfigBean.getAbsoluteProductPathPrefix();
-        File dir = new File(localPath);
-        if(!dir.exists()){
-            logger.info(String.format("目录[%s]不存在，创建文件夹",localPath));
-        }
-        String storePath = localPath + "\\" + product.getProductid();
+    public void uploadImage(HttpServletRequest request, String[] productids) {
         try {
-            FileUtils.copyInputStreamToFile(inputStream,new File(storePath,product.getProductname()));
-            logger.info(String.format("文件[%s]落地完成",storePath));
-            product.setImagepath(storePath + "\\" + product.getProductname());
-            iProductDao.uploadImage(product);
-            logger.info(String.format("产品[%s]更新图片目录成功",product.getProductid()));
+            String localPath = serviceConfigBean.getAbsoluteProductPathPrefix();
+            List<String> allPath = WxLoginUtil.upload(request,localPath);
+            logger.info(String.format("文件[%s]落地完成",allPath));
+            if(allPath.size() > 0){
+                StringBuilder builder = new StringBuilder();
+                for (String path : allPath){
+                    builder.append(path).append("|");
+                }
+
+                builder.deleteCharAt(builder.length() - 1);
+                String imagePath = builder.toString().replaceAll("\\\\","\\/");
+                List<Product> products = new ArrayList<>();
+                for(String productid : productids){
+                    Product product = new Product();
+                    product.setProductid(productid);
+                    product.setImagepath(imagePath);
+                    products.add(product);
+                }
+
+
+                Map<String,Object> map = new HashMap<>();
+                map.put("imagepaths",imagePath);
+                map.put("list",products);
+                iProductDao.updateImages4Products(map);
+
+                logger.info(String.format("产品描述图片上传成功"));
+            }else {
+                throw new APIException("请上传图片");
+            }
+
         } catch (Exception e) {
             throw new APIException(e.getCause());
         }

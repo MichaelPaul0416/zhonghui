@@ -9,13 +9,15 @@ import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.protocol.HTTP;
 import org.apache.log4j.Logger;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.MultipartHttpServletRequest;
+import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.*;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @Author: wangqiang20995
@@ -140,6 +142,34 @@ public class WxLoginUtil {
         return finalPath;
     }
 
+
+    public static List<String> upload(HttpServletRequest request, String basePath) throws IOException {
+        //将当前上下文初始化给  CommonsMutipartResolver （多部分解析器）
+        CommonsMultipartResolver multipartResolver=new CommonsMultipartResolver(request.getSession().getServletContext());
+        List<String> list = new ArrayList<>();
+        //检查form中是否有enctype="multipart/form-data"
+        if(multipartResolver.isMultipart(request)){
+            //将request变成多部分request
+            MultipartHttpServletRequest multiRequest=(MultipartHttpServletRequest)request;
+            //获取multiRequest 中所有的文件名
+            Iterator iter=multiRequest.getFileNames();
+
+            while(iter.hasNext()){
+                //一次遍历所有文件
+                MultipartFile file=multiRequest.getFile(iter.next().toString());
+                if(file!=null){
+                    String path=basePath +"\\"+file.getOriginalFilename();
+                    //上传
+                    file.transferTo(new File(path));
+
+                    list.add(path);
+                }
+            }
+
+        }
+
+        return list;
+    }
     public static void main(String args[]) throws Exception{
 //        landAccountCodeImage(367621639);
     }

@@ -281,28 +281,23 @@ public class ProductController {
 
     @RequestMapping("/uploadImage")
     @ResponseBody
-    public String uploadFile(@RequestParam("upload") MultipartFile file, HttpServletRequest request) {
+    public String uploadFile(HttpServletRequest request) {
         APIResponse apiResponse;
         Response response;
         try {
-            if(file.getInputStream() != null) {
-                Product product = new Product();
-                product.setProductid(request.getParameter("productid"));
-                product.setProductname(file.getOriginalFilename());
-                productService.uploadImage(file.getInputStream(), product);
+            String productids = request.getParameter("productids");
+            if(!StringUtil.isEmpty(productids)) {
+                String[] pids = productids.split(",");
+                productService.uploadImage(request,pids);
                 response = new Response(true, "文件上传成功");
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE, response);
             }else {
-                response = new Response(false,"没有接收到上传的文件");
+                response = new Response(false,"请输入需要更新图片的产品id");
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
             }
         }catch (APIException e){
             logger.error(e.getMessage(),e);
             response = new Response(false, e.getMessage());
-            apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE, AppConstants.REQUEST_STATUS_MESSAGE, response);
-        } catch (IOException e) {
-            logger.error(e.getMessage(),e);
-            response = new Response(false, "读取上传的文件流失败");
             apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE, AppConstants.REQUEST_STATUS_MESSAGE, response);
         }
         return String.valueOf(JSONObject.toJSON(apiResponse));
@@ -311,34 +306,29 @@ public class ProductController {
     @RequestMapping("/productpidupload")
     public void productpidupload(HttpServletRequest request,HttpServletResponse response) throws Exception{
 
-        //将当前上下文初始化给  CommonsMutipartResolver （多部分解析器）
-        CommonsMultipartResolver multipartResolver=new CommonsMultipartResolver(
-                request.getSession().getServletContext());
-        //检查form中是否有enctype="multipart/form-data"
-        if(multipartResolver.isMultipart(request))
-        {
-            //将request变成多部分request
-            MultipartHttpServletRequest multiRequest=(MultipartHttpServletRequest)request;
-            //获取multiRequest 中所有的文件名
-            Iterator iter=multiRequest.getFileNames();
-
-            while(iter.hasNext())
-            {
-                //一次遍历所有文件
-                MultipartFile file=multiRequest.getFile(iter.next().toString());
-                if(file!=null)
-                {
-                    String path="E:/springUpload"+file.getOriginalFilename();
-                    //上传
-                    file.transferTo(new File(path));
-                }
-
-            }
-
-        }
-        response.getWriter().write("hello");
-        response.getWriter().flush();
-        response.getWriter().close();
+//        //将当前上下文初始化给  CommonsMutipartResolver （多部分解析器）
+//        CommonsMultipartResolver multipartResolver=new CommonsMultipartResolver(request.getSession().getServletContext());
+//        //检查form中是否有enctype="multipart/form-data"
+//        if(multipartResolver.isMultipart(request)){
+//            //将request变成多部分request
+//            MultipartHttpServletRequest multiRequest=(MultipartHttpServletRequest)request;
+//            //获取multiRequest 中所有的文件名
+//            Iterator iter=multiRequest.getFileNames();
+//
+//            while(iter.hasNext()){
+//                //一次遍历所有文件
+//                MultipartFile file=multiRequest.getFile(iter.next().toString());
+//                if(file!=null){
+//                    String path="E:/springUpload"+file.getOriginalFilename();
+//                    //上传
+//                    file.transferTo(new File(path));
+//                }
+//            }
+//
+//        }
+//        response.getWriter().write("hello");
+//        response.getWriter().flush();
+//        response.getWriter().close();
 
     }
 
