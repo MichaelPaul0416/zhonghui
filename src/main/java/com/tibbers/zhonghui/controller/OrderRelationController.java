@@ -109,13 +109,13 @@ public class OrderRelationController {
 
     @RequestMapping("/createSingleOrder")
     @ResponseBody
-    public String createSingleOrder(String orderinfo,String itemlist,String code,String clientip,String recommandinfo){
+    public String createSingleOrder(String orderinfo,String itemlist,String code,String clientip){
         APIResponse apiResponse ;
         Response response;
 
         if(StringUtil.argsNotEmpty(new String[]{orderinfo,itemlist,code,clientip})){
             try{
-                PayResult payResult = orderService.createOrder(orderinfo,itemlist,code,clientip,recommandinfo);
+                PayResult payResult = orderService.createOrder(orderinfo,itemlist,code,clientip);
                 response = new Response(true,payResult);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
             }catch (APIException e){

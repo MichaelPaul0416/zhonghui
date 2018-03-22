@@ -1,5 +1,6 @@
 package com.tibbers.zhonghui.dao;
 
+import com.tibbers.zhonghui.model.Product;
 import com.tibbers.zhonghui.model.ProductBelong;
 import org.springframework.stereotype.Repository;
 
@@ -19,4 +20,6 @@ public interface IProductBelongDao {
     void updateProductBelongRemaindernum(ProductBelong productBelong);
 
     void insertBatchRelation(List<ProductBelong> belongs);
+
+    ProductBelong queryBelongByProductid(ProductBelong productBelong);
 }

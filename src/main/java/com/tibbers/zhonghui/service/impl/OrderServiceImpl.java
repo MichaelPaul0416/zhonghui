@@ -13,21 +13,18 @@ import com.tibbers.zhonghui.dao.*;
 import com.tibbers.zhonghui.model.*;
 import com.tibbers.zhonghui.model.common.Pager;
 import com.tibbers.zhonghui.model.common.PayResult;
-import com.tibbers.zhonghui.service.IAccountService;
 import com.tibbers.zhonghui.service.IOrderService;
 import com.tibbers.zhonghui.utils.EncryptUtil;
 import com.tibbers.zhonghui.utils.StringUtil;
 import com.tibbers.zhonghui.utils.WxLoginUtil;
 import me.chanjar.weixin.common.exception.WxErrorException;
 import me.chanjar.weixin.mp.api.WxMpService;
-import me.chanjar.weixin.mp.bean.result.WxMpOAuth2AccessToken;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
-import javax.persistence.criteria.Order;
 import java.util.*;
 
 /**
@@ -74,8 +71,14 @@ public class OrderServiceImpl implements IOrderService {
     @Autowired
     private IRefundDao refundDao;
 
+    @Autowired
+    private IProductBelongDao productBelongDao;
+
+    @Autowired
+    private IRecommandDao recommandDao;
+
     @Override
-    public PayResult createOrder(String orderInfo, String itemlist, String code, String clientip, String recommandinfo) {
+    public PayResult createOrder(String orderInfo, String itemlist, String code, String clientip) {
         logger.info(String.format("根据[%s]获取鉴权信息",code));
         try {
             //根据payforbalance判断是余额支付还是微信支付，余额支付的话，查询是否有该账户，有的话继续
@@ -119,7 +122,9 @@ public class OrderServiceImpl implements IOrderService {
                         payResult = buildPayResult(orders);
                         prePaySerial(orders, orders.getOrderid(), payResult ,orders.getPaybybalance());
 
-                        generateRecommandRelation(recommandinfo, orders,orders.getPaybybalance());
+                        generateRecommandRelation(orders,orders.getPaybybalance());
+
+                        updateProductRemainder(orderItemsList,orders.getOrderid());
 
                         payResult.setOrderid(orders.getOrderid());
                         return payResult;
@@ -162,7 +167,10 @@ public class OrderServiceImpl implements IOrderService {
 
                             prePaySerial(orders, request.getOutTradeNo(), payResult,"0");
 
-                            generateRecommandRelation(recommandinfo, orders,"0");
+                            generateRecommandRelation(orders,"0");
+
+                            //根据订单明细，减少对应的产品库存
+                            updateProductRemainder(orderItemsList,orders.getOrderid());
 
                             //账户余额和积分等微信进行扣款成功通知之后在做修改
                         }
@@ -204,6 +212,27 @@ public class OrderServiceImpl implements IOrderService {
 
     }
 
+    private void updateProductRemainder(List<OrderItems> orderItems,String orderid){
+        logger.info(String.format("开始根据订单[%s]减少对应的产品库存",orderid));
+        for(OrderItems orderItem : orderItems){
+            ProductBelong productBelong = new ProductBelong();
+            productBelong.setProductid(orderItem.getProductid());
+            productBelong.setSalestate("1");
+            ProductBelong query = productBelongDao.queryBelongByProductid(productBelong);
+            int buy = orderItem.getPronumber();
+            int remainder = query.getRemaindernum();
+
+            if(buy > remainder){
+                throw new APIException(String.format("产品[%s]库存不足，订单内购买数量[%s]，库存余量[%s]",orderItem.getProductid(),buy,remainder));
+            }
+
+            remainder = remainder - buy;
+            productBelong.setRemaindernum(remainder);
+            productBelongDao.updateProductBelongRemaindernum(productBelong);
+            logger.info(String.format("产品[%s]更新库存余量为[%s]",productBelong.getProductid(),productBelong.getRemaindernum()));
+        }
+    }
+
     private void generateOrderItems(Orders orders, List<OrderItems> orderItemsList) {
         logger.info(String.format("客户[%s]的订单生成成功[%s]",orders.getAccountid(),orders));
         for(OrderItems orderItems : orderItemsList){
@@ -218,11 +247,15 @@ public class OrderServiceImpl implements IOrderService {
         logger.info(String.format("订单[%s]的明细已经生成",orders.getOrderid()));
     }
 
-    private void generateRecommandRelation(String recommandinfo, Orders orders,String paybybalance) {
-        //推荐人关系收益
-        if(!StringUtils.isEmpty(recommandinfo)){
-            RecommandIncome recommandIncome = JSONObject.parseObject(recommandinfo,RecommandIncome.class);
+    private void generateRecommandRelation( Orders orders,String paybybalance) {
+        logger.info(String.format("开始查询推荐[%s]的账户",orders.getAccountid()));
+        Recommand query = recommandDao.queryRecommandByAccountid(orders.getAccountid());
+        if(query != null && !StringUtil.isEmpty(query.getRecommander())){
+            String recommander = query.getRecommander();
+            RecommandIncome recommandIncome = new RecommandIncome();
             recommandIncome.setIncomeserialno(orders.getOrderid());//关联订单
+            recommandIncome.setAccountid(recommander);
+            recommandIncome.setComefrom(orders.getAccountid());
             double total = StringUtil.formatStr2Dobule(orders.getAmount());
             recommandIncome.setIncome(StringUtil.caculteIncome(total,Integer.parseInt(wxPayConfiguration.getRecommandfee())));
             recommandIncome.setIncomedatetime(StringUtil.currentDateTime());
@@ -238,6 +271,8 @@ public class OrderServiceImpl implements IOrderService {
             list.add(recommandIncome);
             recommandIncomeDao.insertRecommandIncomeOrBatch(list);
             logger.info(String.format("新增推荐人[%s]/被推荐人[%s]收益关系[%s]成功",recommandIncome.getAccountid(),recommandIncome.getComefrom(),recommandIncome));
+        }else {
+            logger.info(String.format("未找到[%s]是被谁推荐的",orders.getAccountid()));
         }
     }
 

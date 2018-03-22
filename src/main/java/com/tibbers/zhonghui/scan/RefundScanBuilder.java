@@ -6,6 +6,9 @@ import com.github.binarywang.wxpay.service.WxPayService;
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.config.ServiceConfigBean;
+import com.tibbers.zhonghui.dao.IProductBelongDao;
+import com.tibbers.zhonghui.model.Product;
+import com.tibbers.zhonghui.model.ProductBelong;
 import com.tibbers.zhonghui.model.Refund;
 import com.tibbers.zhonghui.service.IRefundService;
 import com.tibbers.zhonghui.utils.StringUtil;
@@ -34,6 +37,9 @@ public class RefundScanBuilder implements IScanBuilder{
 
     @Autowired
     private ServiceConfigBean serviceConfigBean;
+
+    @Autowired
+    private IProductBelongDao productBelongDao;
     @Override
     public void doScan() {
         if(!StringUtils.isEmpty(serviceConfigBean.getRefundScanSwitch()) && "1".equals(serviceConfigBean.getRefundScanSwitch())){
@@ -66,6 +72,16 @@ public class RefundScanBuilder implements IScanBuilder{
 
                                 logger.info(String.format("即将更新退款流水信息[%s]",updateRefund));
                                 refundService.updateRefundSerial(updateRefund);
+
+                                logger.info(String.format("更新产品[%s]的库存余量",unconfirmRefund.getProductid()));
+                                ProductBelong productBelong = new ProductBelong();
+                                productBelong.setProductid(unconfirmRefund.getProductid());
+                                productBelong.setSalestate("1");
+                                ProductBelong query = productBelongDao.queryBelongByProductid(productBelong);
+                                productBelong.setRemaindernum(unconfirmRefund.getNumber() + query.getRemaindernum());
+                                productBelongDao.updateProductBelongRemaindernum(productBelong);
+                                logger.info(String.format("更新产品[%s]的库存余量[%]为[%s]",unconfirmRefund.getProductid(),query.getRemaindernum(),productBelong.getRemaindernum()));
+
                             }else{
                                 //退款查询失败
                                 logger.error(String.format("商户退款流水号[%s]对应的退款流水查询失败，微信返回报错信息[%s]，等待下次查询",unconfirmRefund.getRefundserialid(),refundQueryResult.getErrCodeDes()));
