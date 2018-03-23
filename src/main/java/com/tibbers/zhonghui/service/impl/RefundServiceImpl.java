@@ -16,18 +16,17 @@ import com.tibbers.zhonghui.dao.IRefundDao;
 import com.tibbers.zhonghui.model.Orders;
 import com.tibbers.zhonghui.model.Refund;
 import com.tibbers.zhonghui.model.RefundCerts;
-import com.tibbers.zhonghui.service.IRefundCertsService;
 import com.tibbers.zhonghui.service.IRefundService;
 import com.tibbers.zhonghui.utils.EncryptUtil;
 import com.tibbers.zhonghui.utils.StringUtil;
-import org.apache.commons.io.FileUtils;
+import com.tibbers.zhonghui.utils.WxLoginUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
@@ -66,7 +65,7 @@ public class RefundServiceImpl implements IRefundService {
 
 
     @Override
-    public Map<String,Object> refundApply(MultipartFile[] files, String refundSerial) {
+    public Map<String,Object> refundApply(HttpServletRequest servletRequest, String refundSerial) {
         Refund refund = JSONObject.parseObject(refundSerial,Refund.class);
         WxPayRefundRequest refundRequest = assemblyRefundRequest(refund);
         Map<String,Object> resultMap = new HashMap<>();
@@ -94,21 +93,34 @@ public class RefundServiceImpl implements IRefundService {
                     }
 
                     List<RefundCerts> refundCertss = new ArrayList<>();
-                    for(MultipartFile multipartFile : files){
-                        String storePath = prefix + "\\" + refund.getRefundserialid();
-                        FileUtils.copyInputStreamToFile(multipartFile.getInputStream(),new File(storePath,multipartFile.getOriginalFilename()));
-                        logger.info(String.format("文件[%s]落地成功",storePath));
-
+                    List<String> paths = WxLoginUtil.upload(servletRequest,prefix);
+                    logger.info(String.format("退款凭证落地成功[%s]",paths));
+                    for(String certPath : paths){
                         RefundCerts refundCerts = new RefundCerts();
                         refundCerts.setSerialid(StringUtil.serialId());
                         refundCerts.setRefundserialid(refund.getRefundserialid());
                         refundCerts.setCertphotoid(StringUtil.generateUUID());
-                        refundCerts.setCertphotopath(storePath + "\\" + multipartFile.getOriginalFilename());
+                        refundCerts.setCertphotopath(certPath);
                         refundCerts.setReverse1("");
                         refundCerts.setReverse2("");
 
                         refundCertss.add(refundCerts);
                     }
+//                    for(MultipartFile multipartFile : files){
+//                        String storePath = prefix + "\\" + refund.getRefundserialid();
+//                        FileUtils.copyInputStreamToFile(multipartFile.getInputStream(),new File(storePath,multipartFile.getOriginalFilename()));
+//                        logger.info(String.format("文件[%s]落地成功",storePath));
+//
+//                        RefundCerts refundCerts = new RefundCerts();
+//                        refundCerts.setSerialid(StringUtil.serialId());
+//                        refundCerts.setRefundserialid(refund.getRefundserialid());
+//                        refundCerts.setCertphotoid(StringUtil.generateUUID());
+//                        refundCerts.setCertphotopath(storePath + "\\" + multipartFile.getOriginalFilename());
+//                        refundCerts.setReverse1("");
+//                        refundCerts.setReverse2("");
+//
+//                        refundCertss.add(refundCerts);
+//                    }
                     refundCertsDao.insertCertOrBatch(refundCertss);
                     logger.info(String.format("退款凭证信息插入成功,[%s]",refundCertss));
 

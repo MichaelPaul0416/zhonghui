@@ -2,8 +2,8 @@ package com.tibbers.zhonghui.service;
 
 import com.tibbers.zhonghui.model.Account;
 import com.tibbers.zhonghui.model.common.Pager;
-import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -18,7 +18,7 @@ public interface IAccountService {
 
     void updateAccountInfo(String account);
 
-    void uploadAccountImage(MultipartFile file, Account account);
+    List<String> uploadAccountImage(HttpServletRequest request);
 
     void updatePersonalInfo(String person);
 

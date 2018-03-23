@@ -10,15 +10,17 @@ import com.tibbers.zhonghui.model.common.Pager;
 import com.tibbers.zhonghui.service.IAccountService;
 import com.tibbers.zhonghui.utils.CacheUtil;
 import com.tibbers.zhonghui.utils.StringUtil;
+import com.tibbers.zhonghui.utils.WxLoginUtil;
 import org.apache.commons.io.FileUtils;
 import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -109,21 +111,26 @@ public class AccountServiceImpl implements IAccountService {
     }
 
     @Override
-    public void uploadAccountImage(MultipartFile file, Account account) {
+    public List<String> uploadAccountImage(HttpServletRequest request) {
         String localPath = serviceConfigBean.getAbsoluteAccountPathPrefix();
-        File dir = new File(localPath);
-        if(!dir.exists()){
-            logger.info(String.format("目录[%s]不存在，创建文件夹",localPath));
-        }
-        String storePath = localPath + "\\" + account.getAccountid();
+        String accountid = request.getParameter("accountid");
         try {
-            FileUtils.copyInputStreamToFile(file.getInputStream(),new File(storePath,file.getOriginalFilename()));
-            logger.info(String.format("文件[%s]落地完成",storePath));
-            account.setImagepath(storePath + "\\" + file.getOriginalFilename());
-            accountServiceDao.updateAccountInfo(account);
-            logger.info(String.format("产品[%s]更新图片目录成功",account.getAccountid()));
-        } catch (Exception e) {
-            throw new APIException(e.getCause());
+            List<String> landingPaths = WxLoginUtil.upload(request,localPath);
+            if(landingPaths.size() > 0){
+                logger.info(String.format("文件[%s]落地完成",landingPaths));
+                String imagepath = landingPaths.get(0).replaceAll("\\\\","\\/");
+                Account account = new Account();
+                account.setImagepath(imagepath);
+                account.setAccountid(accountid);
+
+                accountServiceDao.updateAccountInfo(account);
+                logger.info(String.format("账户[%s]的头像上传成功",accountid));
+                return landingPaths;
+            }else {
+                throw new APIException(String.format("本次请求中没有读取到图片，请为账户[%s]重新上传",accountid));
+            }
+        } catch (IOException e) {
+            throw new APIException(e.getMessage(),e);
         }
     }
 

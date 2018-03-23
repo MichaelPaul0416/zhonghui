@@ -40,7 +40,7 @@ public class WxLoginUtil {
         String param = "";
         Iterator<String> it = paramMap.keySet().iterator();
 
-        while(it.hasNext()) {
+        while (it.hasNext()) {
             String key = it.next();
             param += key + "=" + paramMap.get(key) + "&";
         }
@@ -70,36 +70,36 @@ public class WxLoginUtil {
                 result += line;
             }
         } catch (Exception e) {
-           logger.error(e.getMessage(), e);
-        }
-        finally{//使用finally块来关闭输出流、输入流
-            try{
-                if(out!=null){
+            logger.error(e.getMessage(), e);
+        } finally {//使用finally块来关闭输出流、输入流
+            try {
+                if (out != null) {
                     out.close();
                 }
-                if(in!=null){
+                if (in != null) {
                     in.close();
                 }
-            } catch(IOException ex){
+            } catch (IOException ex) {
                 ex.printStackTrace();
             }
         }
         return result;
     }
-    public static JSONObject doLoginAuth(String code){
 
-        Map<String,String> requestParam = new HashMap<>();
-        requestParam.put("appid","wxb4b01bcd56f57b44");
-        requestParam.put("secret","4db67ca43450e6ddd7f63cc71a87db35");
-        requestParam.put("js_code",code);
-        requestParam.put("grant_type","authorization_code");
+    public static JSONObject doLoginAuth(String code) {
 
-        JSONObject jsonObject = JSON.parseObject(sendPost(URL,requestParam));
+        Map<String, String> requestParam = new HashMap<>();
+        requestParam.put("appid", "wxb4b01bcd56f57b44");
+        requestParam.put("secret", "4db67ca43450e6ddd7f63cc71a87db35");
+        requestParam.put("js_code", code);
+        requestParam.put("grant_type", "authorization_code");
+
+        JSONObject jsonObject = JSON.parseObject(sendPost(URL, requestParam));
 
         return jsonObject;
     }
 
-    public static String landAccountCodeImage(String accountid,String personid,String accessToken,String basePath) throws IOException {
+    public static String landAccountCodeImage(String accountid, String personid, String accessToken, String basePath) throws IOException {
 
         Map<String, Object> params = new HashMap<>();
         int hashcode = Math.abs((accountid + personid).hashCode());
@@ -124,15 +124,15 @@ public class WxLoginUtil {
 
         String path = basePath;
         File targetFile = new File(path);
-        if(!targetFile.exists()){
+        if (!targetFile.exists()) {
             targetFile.mkdirs();
         }
         String finalPath = path + "\\" + accountid + ".jpg";
         FileOutputStream out = new FileOutputStream(finalPath);
 
         byte[] buffer = new byte[8192];
-        int bytesRead ;
-        while((bytesRead = inputStream.read(buffer, 0, 8192)) != -1) {
+        int bytesRead;
+        while ((bytesRead = inputStream.read(buffer, 0, 8192)) != -1) {
             out.write(buffer, 0, bytesRead);
         }
 
@@ -145,20 +145,24 @@ public class WxLoginUtil {
 
     public static List<String> upload(HttpServletRequest request, String basePath) throws IOException {
         //将当前上下文初始化给  CommonsMutipartResolver （多部分解析器）
-        CommonsMultipartResolver multipartResolver=new CommonsMultipartResolver(request.getSession().getServletContext());
+        CommonsMultipartResolver multipartResolver = new CommonsMultipartResolver(request.getSession().getServletContext());
         List<String> list = new ArrayList<>();
         //检查form中是否有enctype="multipart/form-data"
-        if(multipartResolver.isMultipart(request)){
+        if (multipartResolver.isMultipart(request)) {
             //将request变成多部分request
-            MultipartHttpServletRequest multiRequest=(MultipartHttpServletRequest)request;
+            MultipartHttpServletRequest multiRequest = (MultipartHttpServletRequest) request;
             //获取multiRequest 中所有的文件名
-            Iterator iter=multiRequest.getFileNames();
+            Iterator iter = multiRequest.getFileNames();
 
-            while(iter.hasNext()){
+            while (iter.hasNext()) {
                 //一次遍历所有文件
-                MultipartFile file=multiRequest.getFile(iter.next().toString());
-                if(file!=null){
-                    String path=basePath +"\\"+file.getOriginalFilename();
+                MultipartFile file = multiRequest.getFile(iter.next().toString());
+                if (file != null) {
+                    File directory = new File(basePath);
+                    if (!directory.exists()) {
+                        directory.mkdirs();
+                    }
+                    String path = basePath + "\\" + file.getOriginalFilename();
                     //上传
                     file.transferTo(new File(path));
 
@@ -170,7 +174,8 @@ public class WxLoginUtil {
 
         return list;
     }
-    public static void main(String args[]) throws Exception{
+
+    public static void main(String args[]) throws Exception {
 //        landAccountCodeImage(367621639);
     }
 }

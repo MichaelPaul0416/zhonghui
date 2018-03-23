@@ -1,7 +1,6 @@
 package com.tibbers.zhonghui.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.model.common.APIResponse;
 import com.tibbers.zhonghui.model.common.Response;
@@ -11,9 +10,7 @@ import org.apache.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -39,27 +36,50 @@ public class RefundController {
 
     @RequestMapping("/refundApply")
     @ResponseBody
-    public String refundApply(@RequestParam("refundcerts")MultipartFile[] file, String refundSerial){//退款productid的数量number需要前端传入，amount前端计算好
+    public String refundApply(HttpServletRequest httpServletRequest){
         APIResponse apiResponse;
         Response response;
 
-        if(StringUtil.argsNotEmpty(new String[]{refundSerial})){
-            try {
-                Map<String, Object> resultMap = refundService.refundApply(file, refundSerial);
+        String refundSerial = httpServletRequest.getParameter("refundSerial");
+        if(!StringUtil.isEmpty(refundSerial)){
+            try{
+                Map<String,Object> resultMap = refundService.refundApply(httpServletRequest,refundSerial);
                 response = new Response(true, resultMap);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE, response);
-            }catch (APIException e){
+            }catch (Exception e){
                 logger.error(e.getMessage(),e);
-                response = new Response(false,e.getMessage());
-                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+                response = new Response(false,e.getCause().getMessage());
+                apiResponse =new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
             }
-        }else{
+        }else {
             response = new Response(false,"退款流水信息不能为空");
-            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
         }
 
-        return String.valueOf(JSONObject.toJSON(apiResponse));
+        return JSONObject.toJSONString(apiResponse);
+
     }
+//    public String refundApply(@RequestParam("refundcerts")MultipartFile[] file, String refundSerial){//退款productid的数量number需要前端传入，amount前端计算好
+//        APIResponse apiResponse;
+//        Response response;
+//
+//        if(StringUtil.argsNotEmpty(new String[]{refundSerial})){
+//            try {
+//                Map<String, Object> resultMap = refundService.refundApply(file, refundSerial);
+//                response = new Response(true, resultMap);
+//                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE, response);
+//            }catch (APIException e){
+//                logger.error(e.getMessage(),e);
+//                response = new Response(false,e.getMessage());
+//                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+//            }
+//        }else{
+//            response = new Response(false,"退款流水信息不能为空");
+//            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+//        }
+//
+//        return String.valueOf(JSONObject.toJSON(apiResponse));
+//    }
 
     @RequestMapping("/refundNotifyResult")
     @ResponseBody

@@ -19,9 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -288,34 +286,62 @@ public class AccountServiceController {
 
     @RequestMapping("/uploadAccountImage")
     @ResponseBody
-    public String uploadAccountImage(@RequestParam("upload") MultipartFile file, HttpServletRequest request){
+    public String uploadAccountImage(HttpServletRequest servletRequest){
         APIResponse apiResponse;
         Response response;
+        String accountid = servletRequest.getParameter("accountid");
 
-        try {
-            if(file.getInputStream() != null){
-                String accountid = request.getParameter("accountid");
-                Account account = new Account();
-                account.setAccountid(accountid);
-                accountService.uploadAccountImage(file,account);
-                response = new Response(true,String.format("文件[%s]落地成功",file.getOriginalFilename()));
+        if(!StringUtil.isEmpty(accountid)){
+            try{
+                List<String> paths = accountService.uploadAccountImage(servletRequest);
+                Map<String,Object> map = new HashMap<>();
+                map.put("upload",true);
+                map.put("paths",paths);
+                map.put("size",paths.size());
+                map.put("msg","upload successfully");
+
+                response = new Response(true,map);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
-            }else{
-                response = new Response(false,"读取的文件为空，请先选择有效的文件");
-                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getCause().getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
             }
-        } catch (IOException e) {
-            logger.error(e.getMessage(),e);
-            response = new Response(false,"读取文件流失败,确认文件是否正确");
-            apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
-        }catch (Exception e){
-            logger.error(e.getMessage(),e);
-            response = new Response(false,e.getMessage());
-            apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+        }else {
+            response = new Response(false,"账户编号accountid不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
         }
 
-        return String.valueOf(JSONObject.toJSON(apiResponse));
+        return JSONObject.toJSONString(apiResponse);
     }
+//    public String uploadAccountImage(@RequestParam("upload") MultipartFile file, HttpServletRequest request){
+//        APIResponse apiResponse;
+//        Response response;
+//
+//        try {
+//            if(file.getInputStream() != null){
+//                String accountid = request.getParameter("accountid");
+//                Account account = new Account();
+//                account.setAccountid(accountid);
+//                accountService.uploadAccountImage(file,account);
+//                response = new Response(true,String.format("文件[%s]落地成功",file.getOriginalFilename()));
+//                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+//            }else{
+//                response = new Response(false,"读取的文件为空，请先选择有效的文件");
+//                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+//            }
+//        } catch (IOException e) {
+//            logger.error(e.getMessage(),e);
+//            response = new Response(false,"读取文件流失败,确认文件是否正确");
+//            apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+//        }catch (Exception e){
+//            logger.error(e.getMessage(),e);
+//            response = new Response(false,e.getMessage());
+//            apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+//        }
+//
+//        return String.valueOf(JSONObject.toJSON(apiResponse));
+//    }
 
     @RequestMapping("/updatePersonalInfo")
     @ResponseBody

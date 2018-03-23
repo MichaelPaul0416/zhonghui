@@ -1,8 +1,8 @@
 package com.tibbers.zhonghui.service;
 
 import com.tibbers.zhonghui.model.Refund;
-import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Map;
 
@@ -12,7 +12,7 @@ import java.util.Map;
  * @description:
  */
 public interface IRefundService {
-    Map<String,Object> refundApply(MultipartFile[] files,String refundSerial);
+    Map<String,Object> refundApply(HttpServletRequest servletRequest, String refundSerial);
 
     String dealWithNotifyRefund(String xmldata);
 
