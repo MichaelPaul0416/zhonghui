@@ -39,6 +39,12 @@
 
     </resultMap>
 
+
+    <resultMap id="imagesResult" type="java.util.Map">
+        <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
+    </resultMap>
+
     <insert id="insertSingleProduct" parameterType="com.tibbers.zhonghui.model.Product">
         insert into tproduct ( productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,transportfee,reverse1,reverse2)
         values(#{productid},#{unitprice},#{productname},#{note},#{itemid},#{imagepath},#{color},#{valuescore},#{productgrade},#{fieldmeaning},#{transportfee},#{reverse1},#{reverse2})
@@ -179,4 +185,12 @@
         <if test="transportfee != null and !&quot;&quot;.equals(transportfee)"> , transportfee = #{transportfee}</if>
         where productid = #{productid}
     </update>
+
+    <select id="queryImagesByProductids" resultMap="imagesResult">
+        select productid,imagepath from tproduct where productid in (
+          <foreach collection="list" item="item" separator="," index="index">
+              #{item}
+          </foreach>
+        )
+    </select>
 </mapper>

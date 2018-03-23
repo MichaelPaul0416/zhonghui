@@ -21,10 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * @author: Paul
@@ -74,32 +71,90 @@ public class ProductServiceImpl implements IProductService {
             String localPath = serviceConfigBean.getAbsoluteProductPathPrefix();
             List<String> allPath = WxLoginUtil.upload(request,localPath);
             logger.info(String.format("文件[%s]落地完成",allPath));
-            if(allPath.size() > 0){
-                StringBuilder builder = new StringBuilder();
-                for (String path : allPath){
-                    builder.append(path).append("|");
+
+            List<String> productList = Arrays.asList(productids);
+            List<Map<String,String>> proList = iProductDao.queryImagesByProductids(productList);
+
+
+            String index = request.getParameter("index");
+            String headImage = "";
+            StringBuilder otherPaths = new StringBuilder();
+            //筛选出是否有商品图片
+            for(String singlePath : allPath){
+                singlePath = singlePath.replaceAll("\\\\","\\/");
+
+                if("true".equals(index)){
+                    headImage = singlePath;
+                }else {
+                    otherPaths.append(singlePath).append("|");
                 }
-
-                builder.deleteCharAt(builder.length() - 1);
-                String imagePath = builder.toString().replaceAll("\\\\","\\/");
-                List<Product> products = new ArrayList<>();
-                for(String productid : productids){
-                    Product product = new Product();
-                    product.setProductid(productid);
-                    product.setImagepath(imagePath);
-                    products.add(product);
-                }
-
-
-                Map<String,Object> map = new HashMap<>();
-                map.put("imagepaths",imagePath);
-                map.put("list",products);
-                iProductDao.updateImages4Products(map);
-
-                logger.info(String.format("产品描述图片上传成功"));
-            }else {
-                throw new APIException("请上传图片");
             }
+
+            if(otherPaths.length() > 0) {
+                otherPaths.deleteCharAt(otherPaths.length() - 1);
+            }
+            String detailPaths = otherPaths.toString();//描述图片地址
+
+            List<Product> updatePros = new ArrayList<>();
+            for(Map<String,String> map : proList){
+                String productid = map.get("productid");
+                String imagepath = map.get("imagepath");
+
+                Product product = new Product();
+                product.setProductid(productid);
+                if(StringUtil.isEmpty(imagepath)){//之前没有上传
+                    if(StringUtil.isEmpty(headImage)){//没有产品图片
+                        throw new APIException(String.format("请先为产品[%s]上传产品图片",productid));
+                    }else {
+                        if(StringUtil.isEmpty(detailPaths)){
+                            product.setImagepath(headImage);
+                        }else {
+                            product.setImagepath(headImage + "|" + detailPaths);
+                        }
+                    }
+                }else {//之前有上传
+                    if(StringUtil.isEmpty(headImage)){//没有重新上传产品图片
+                        product.setImagepath(imagepath + "|" + detailPaths);
+                    }else {//上传了产品图片
+                        if(StringUtil.isEmpty(detailPaths)){
+                            product.setImagepath(headImage + "|" + imagepath);
+                        }else {
+                            product.setImagepath(headImage + "|" + imagepath + "|" + detailPaths);
+                        }
+                    }
+                }
+
+                updatePros.add(product);
+            }
+
+            Map<String,Object> map = new HashMap<>();
+            map.put("imagepaths",updatePros.get(0).getImagepath());
+            map.put("list",updatePros);
+            iProductDao.updateImages4Products(map);
+
+            logger.info(String.format("产品描述图片上传成功"));
+
+//            if(allPath.size() > 0){
+//                StringBuilder builder = new StringBuilder();
+//                for (String path : allPath){
+//                    builder.append(path).append("|");
+//                }
+//
+//                builder.deleteCharAt(builder.length() - 1);
+//                String imagePath = builder.toString().replaceAll("\\\\","\\/");
+//                List<Product> products = new ArrayList<>();
+//                for(String productid : productids){
+//                    Product product = new Product();
+//                    product.setProductid(productid);
+//                    product.setImagepath(imagePath);
+//                    products.add(product);
+////                }
+//
+//
+//
+//            }else {
+//                throw new APIException("请上传图片");
+//            }
 
             return allPath;
 

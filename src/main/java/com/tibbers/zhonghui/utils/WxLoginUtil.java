@@ -2,6 +2,7 @@ package com.tibbers.zhonghui.utils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.tibbers.zhonghui.config.APIException;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -170,6 +171,9 @@ public class WxLoginUtil {
                 }
             }
 
+            if(list.size() == 0){
+                throw new APIException("没有上传附件，请重新选择");
+            }
         }
 
         return list;

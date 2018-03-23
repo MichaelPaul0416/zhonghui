@@ -298,7 +298,7 @@ public class ProductController {
                 response = new Response(true, result);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE, response);
             }else {
-                response = new Response(false,"请输入需要更新图片的产品id");
+                response = new Response(false,"请输入需要更新图片的产品[productids]");
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
             }
         }catch (APIException e){

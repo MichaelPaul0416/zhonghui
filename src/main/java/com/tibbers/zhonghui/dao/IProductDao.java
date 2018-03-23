@@ -36,4 +36,6 @@ public interface IProductDao {
 
     void updateProductInfo(Product product);
 
+    List<Map<String,String>> queryImagesByProductids(List<String> list);
+
 }
