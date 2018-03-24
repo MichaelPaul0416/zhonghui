@@ -106,22 +106,24 @@ public class ProductServiceImpl implements IProductService {
                     if(StringUtil.isEmpty(headImage)){//没有产品图片
                         throw new APIException(String.format("请先为产品[%s]上传产品图片",productid));
                     }else {
-                        if(StringUtil.isEmpty(detailPaths)){
+//                        if(StringUtil.isEmpty(detailPaths)){
                             product.setImagepath(headImage);
-                        }else {
-                            product.setImagepath(headImage + "|" + detailPaths);
-                        }
+                            logger.info(String.format("产品图片路径[%s]",headImage));
+//                        }else {
+//                            product.setImagepath(headImage + "|" + detailPaths);
+//                        }
                     }
                 }else {//之前有上传
-                    if(StringUtil.isEmpty(headImage)){//没有重新上传产品图片
+//                    if(StringUtil.isEmpty(headImage)){//没有重新上传产品图片
                         product.setImagepath(imagepath + "|" + detailPaths);
-                    }else {//上传了产品图片
-                        if(StringUtil.isEmpty(detailPaths)){
-                            product.setImagepath(headImage + "|" + imagepath);
-                        }else {
-                            product.setImagepath(headImage + "|" + imagepath + "|" + detailPaths);
-                        }
-                    }
+                        logger.info(String.format("产品描述图片路径[%s]",detailPaths));
+//                    }else {//上传了产品图片
+//                        if(StringUtil.isEmpty(detailPaths)){
+//                            product.setImagepath(headImage + "|" + imagepath);
+//                        }else {
+//                            product.setImagepath(headImage + "|" + imagepath + "|" + detailPaths);
+//                        }
+//                    }
                 }
 
                 updatePros.add(product);
@@ -132,7 +134,7 @@ public class ProductServiceImpl implements IProductService {
             map.put("list",updatePros);
             iProductDao.updateImages4Products(map);
 
-            logger.info(String.format("产品描述图片上传成功"));
+            logger.info(String.format("图片上传成功"));
 
 //            if(allPath.size() > 0){
 //                StringBuilder builder = new StringBuilder();
@@ -159,7 +161,8 @@ public class ProductServiceImpl implements IProductService {
             return allPath;
 
         } catch (Exception e) {
-            throw new APIException(e.getCause());
+            logger.error(e.getMessage(),e);
+            throw new APIException(e.getMessage(),e);
         }
     }
 

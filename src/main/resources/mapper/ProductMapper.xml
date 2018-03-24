@@ -52,8 +52,8 @@
 
     <insert id="insertBatchProduct" parameterType="java.util.List">
         insert into tproduct ( productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,transportfee,reverse1,reverse2) values
-        <foreach collection="item" item="item" separator="," index="index">
-            (#{item.productid},#{item.unitprice},#{item.productname},#{item.note},#{item.itemid},#{item.imagepath},#{item.color},#{item.valuescore},#{item.productgrade},#{item.fieldmeaning},#{transportfee},#{item.reverse1},#{item.reverse2})
+        <foreach collection="list" item="item" separator="," index="index">
+            (#{item.productid},#{item.unitprice},#{item.productname},#{item.note},#{item.itemid},#{item.imagepath},#{item.color},#{item.valuescore},#{item.productgrade},#{item.fieldmeaning},#{item.transportfee},#{item.reverse1},#{item.reverse2})
         </foreach>
     </insert>
 

@@ -29,7 +29,7 @@
     <insert id="insertBatchRelation" parameterType="java.util.List">
         insert into tproductbelong values
         <foreach collection="list" index="index" separator="," item="item">
-            (#item.serialid,#{item.productid},#{item.accountid},#{item.salestate},#{remaindernum})
+            (#{item.serialid},#{item.productid},#{item.accountid},#{item.salestate},#{item.remaindernum})
         </foreach>
     </insert>
 

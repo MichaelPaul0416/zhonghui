@@ -461,12 +461,14 @@ public class ProductController {
     }
 
     @RequestMapping("/showProductImage")
-    public void showProductImage(String productid, HttpServletResponse response){
+    public void showProductImage(String productid, String index ,HttpServletResponse response){
         File image;
         if(!StringUtils.isEmpty(productid)){
             Map<String,Object> product = productService.queryByProductId(productid);
             if(product != null){
-                image = new File((String) product.get("imagepath"));
+                Integer number = Integer.parseInt(index);
+                String[] paths = String.valueOf(product.get("imagepath")).split("\\|");
+                image = new File(paths[number]);
                 if(!image.exists()){
                     image = new File(serviceConfigBean.getDefaultImagePath());
                 }

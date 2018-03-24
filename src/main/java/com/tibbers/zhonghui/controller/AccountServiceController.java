@@ -108,34 +108,6 @@ public class AccountServiceController {
                 }
             }
         }
-//        APIResponse apiResponse;
-//        Response response;
-//
-//        if(!StringUtil.isEmpty(accountid)){
-//            try{
-//                Account account = accountService.queryByAccountid(accountid);
-//                if(account != null && !StringUtil.isEmpty(account.getPersonid())){
-//                    int code = Math.abs((account.getAccountid() + account.getPersonid()).hashCode());
-//                    logger.info(String.format("账户[%s]的场景二维码值为[%s]",accountid,code));
-//                    Map<String,Object> map = new HashMap<>();
-//                    map.put("code",code);
-//
-//                    response = new Response(true,map);
-//                    apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
-//                }else {
-//                    throw new APIException(String.format("账户[%s]不存在或者未绑定微信",accountid));
-//                }
-//            }catch (Exception e){
-//                logger.error(e.getMessage(),e);
-//                response = new Response(false,e.getCause().getMessage());
-//                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
-//            }
-//        }else {
-//            response = new Response(false,"账户编号accountid不能为空");
-//            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
-//        }
-//
-//        return JSONObject.toJSONString(apiResponse);
     }
 
     @RequestMapping("/recommandByVip")
@@ -172,6 +144,7 @@ public class AccountServiceController {
 
         return JSONObject.toJSONString(apiResponse);
     }
+
     @RequestMapping("/queryAccountByOpenid")
     @ResponseBody
     public String queryAccountByOpenid(String openid,String imageUrl){
@@ -239,6 +212,7 @@ public class AccountServiceController {
         return JSONObject.toJSONString(apiResponse);
 
     }
+
     @RequestMapping("/registerAccount")
     @ResponseBody
     public String registerAccount(String personInfo,String accountInfo){
@@ -314,34 +288,7 @@ public class AccountServiceController {
 
         return JSONObject.toJSONString(apiResponse);
     }
-//    public String uploadAccountImage(@RequestParam("upload") MultipartFile file, HttpServletRequest request){
-//        APIResponse apiResponse;
-//        Response response;
-//
-//        try {
-//            if(file.getInputStream() != null){
-//                String accountid = request.getParameter("accountid");
-//                Account account = new Account();
-//                account.setAccountid(accountid);
-//                accountService.uploadAccountImage(file,account);
-//                response = new Response(true,String.format("文件[%s]落地成功",file.getOriginalFilename()));
-//                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
-//            }else{
-//                response = new Response(false,"读取的文件为空，请先选择有效的文件");
-//                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
-//            }
-//        } catch (IOException e) {
-//            logger.error(e.getMessage(),e);
-//            response = new Response(false,"读取文件流失败,确认文件是否正确");
-//            apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
-//        }catch (Exception e){
-//            logger.error(e.getMessage(),e);
-//            response = new Response(false,e.getMessage());
-//            apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
-//        }
-//
-//        return String.valueOf(JSONObject.toJSON(apiResponse));
-//    }
+
 
     @RequestMapping("/updatePersonalInfo")
     @ResponseBody
