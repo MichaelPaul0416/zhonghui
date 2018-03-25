@@ -25,6 +25,101 @@
         <result column="productname" jdbcType="VARCHAR" property="productname"/>
         <result column="unitprice" jdbcType="VARCHAR" property="unitprice"/>
     </resultMap>
+    
+    <resultMap id="hotproductResults" type="java.util.Map">
+        <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="unitprice" jdbcType="VARCHAR" property="unitprice"/>
+        <result column="productname" jdbcType="VARCHAR" property="productname"/>
+        <result column="note" jdbcType="VARCHAR" property="note"/>
+        <result column="itemid" jdbcType="VARCHAR" property="itemid"/>
+        <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
+        <result column="color" jdbcType="VARCHAR" property="color"/>
+        <result column="valuescore" jdbcType="INTEGER" property="valuescore"/>
+        <result column="productgrade" jdbcType="VARCHAR" property="productgrade"/>
+        <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
+        <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
+        <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
+        <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
+        <result column="totalsale" jdbcType="INTEGER" property="totalsale"/>
+        <result column="remaindernum" jdbcType="INTEGER" property="remaindernum"/>
+    </resultMap>
+
+    <resultMap id="consumeRecords" type="java.util.Map">
+        <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
+        <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="accountname" jdbcType="VARCHAR" property="accountname"/>
+        <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
+        <result column="bindphone" jdbcType="VARCHAR" property="bindphone"/>
+        <result column="score" jdbcType="INTEGER" property="score"/>
+        <result column="isvip" jdbcType="VARCHAR" property="isvip"/>
+        <result column="custtype" jdbcType="VARCHAR" property="custtype"/>
+        <result column="accobalance" jdbcType="VARCHAR" property="accobalance"/>
+        <result column="codeimagepath" jdbcType="VARCHAR" property="codeimagepath"/>
+        <result column="reverse" jdbcType="VARCHAR" property="reverse"/>
+        <result column="finalAmount" jdbcType="VARCHAR" property="finalAmount"/>
+    </resultMap>
+
+    <resultMap id="totalRecommander" type="java.util.Map">
+        <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
+        <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="accountname" jdbcType="VARCHAR" property="accountname"/>
+        <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
+        <result column="bindphone" jdbcType="VARCHAR" property="bindphone"/>
+        <result column="score" jdbcType="INTEGER" property="score"/>
+        <result column="isvip" jdbcType="VARCHAR" property="isvip"/>
+        <result column="custtype" jdbcType="VARCHAR" property="custtype"/>
+        <result column="accobalance" jdbcType="VARCHAR" property="accobalance"/>
+        <result column="codeimagepath" jdbcType="VARCHAR" property="codeimagepath"/>
+        <result column="reverse" jdbcType="VARCHAR" property="reverse"/>
+        <result column="total" jdbcType="VARCHAR" property="total"/>
+    </resultMap>
+    <select id="sumTotalRecommander" parameterType="java.util.Map" resultMap="totalRecommander">
+        select b.*,a.total from (select t1.recommander,count(*) as total from trecommand t1
+        where t1.recommanddate &gt; #{start}
+        and t1.recommanddate &lt; #{end}
+        group by t1.recommander) a, taccount b
+        where a.recommander = b.accountid
+        order by a.total desc
+        <if test="pager != null">
+            limit #{pager.startLine},#{pager.offset}
+        </if>
+    </select>
+    <select id="accountCustomRecordInFewMonths" parameterType="java.util.Map" resultMap="consumeRecords">
+        select n.*,m.finalAmount from (
+        select c.accountid ,(c.consume - c.refund) as finalAmount from(
+        select a.accountid,a.consume , IFNULL(b.refund,0) as refund from (
+        select t1.accountid,/*t1.orderid,*/ sum(CAST(t1.amount AS decimal(9,2)) + CAST(t1.transportfee AS decimal(9,2)))  as consume
+        from torders t1 where  t1.isvalid = '1'
+        and t1.createdatetime &gt; #{start} and t1.createdatetime &lt; #{end}
+        -- and t1.accountid = '210e512c68497189'
+        group by  t1.accountid /*,t1.orderid*/
+        -- order by consume desc
+        ) a LEFT JOIN
+        (
+        select t2.accountid,sum(CAST(t2.amount AS decimal(9,2))) as refund from trefund t2
+        where t2.applydatetime &gt; #{start} and t2.applydatetime &lt; #{end} and t2.agreestate = '2'
+        group by t2.accountid
+        ) b on a.accountid = b.accountid
+        ) c
+        )m,taccount n
+        where m.accountid = n.accountid
+        order by m.finalAmount desc
+        <if test="pager != null">
+            limit #{pager.startLine},#{pager.offset}
+        </if>
+    </select>
+    
+    <select id="hotProductsLastDays" parameterType="java.util.Map" resultMap="hotproductResults">
+        select c.*,a.totalsale,b.remaindernum From (
+            select t1.productid,sum(t1.pronumber) as totalsale from torderitem t1,torders t2
+            where t1.orderid = t2.orderid and t2.isvalid = '1' and t2.createdatetime &gt; #{start} and t2.createdatetime &lt; #{end}
+            group by t1.productid ) a,tproductbelong b,tproduct c
+            where a.productid = b.productid and a.productid  = c.productid and b.salestate = '1'
+        order by a.totalsale desc
+        <if test="pager != null">
+            limit #{pager.startLine},#{pager.offset}
+        </if>
+    </select>
 
     <insert id="createSingleAdmin" parameterType="com.tibbers.zhonghui.model.Administrator">
         insert into tadministrator values(#{serialid},#{adminid},#{adminname},#{adminpassword},#{createdatetime},#{lastmodifydatetime},#{identitytype},#{isvalid},#{reverse1},#{reverse2})

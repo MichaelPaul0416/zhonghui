@@ -4,6 +4,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.sun.istack.internal.Nullable;
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.AppConstants;
+import com.tibbers.zhonghui.model.Orders;
 import com.tibbers.zhonghui.model.common.APIResponse;
 import com.tibbers.zhonghui.model.common.Pager;
 import com.tibbers.zhonghui.model.common.PayResult;
@@ -22,6 +23,7 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -38,6 +40,38 @@ public class OrderRelationController {
 
     @Autowired
     private IOrderService orderService;
+
+    @RequestMapping("/updatePartOrderInfo")
+    @ResponseBody
+    public String updatePartOrderInfo(String updateOrderInfo){
+        APIResponse apiResponse;
+        Response response;
+
+        if(!StringUtil.isEmpty(updateOrderInfo)){
+            try{
+                Orders orders = JSONObject.parseObject(updateOrderInfo,Orders.class);
+                orderService.updateOrderInfo(orders);
+
+                Map<String,Object> map = new HashMap<>();
+                map.put("flag",true);
+                map.put("orderid",orders.getOrderid());
+                map.put("orderstate",orders.getOrderstate());
+                map.put("msg","update info successfully");
+
+                response = new Response(true,map);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            }
+        }else {
+            response = new Response(false,"更新的订单信息不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
+    }
 
     @RequestMapping("/salerOrderCenter")
     @ResponseBody

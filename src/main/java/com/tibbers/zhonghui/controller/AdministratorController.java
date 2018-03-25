@@ -18,6 +18,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -36,6 +37,101 @@ public class AdministratorController {
 
     @Autowired
     private IAdministratorService administratorService;
+
+    @TokenListen
+    @RequestMapping("/sumTotalRecommander")
+    @ResponseBody
+    public String sumTotalRecommander(HttpServletRequest request, @Nullable String startLine, @Nullable String offset){
+        APIResponse apiResponse;
+        Response response;
+        String actionAdminid = request.getParameter("actionAdminid");
+        String offsetMonth = request.getParameter("offsetMonth");
+        if(StringUtil.argsNotEmpty(new String[]{actionAdminid,offsetMonth})){
+            try {
+                Pager pager = null;
+
+                if (!StringUtil.isEmpty(startLine) && !StringUtil.isEmpty(offset)) {
+                    pager = new Pager(Integer.parseInt(startLine), Integer.parseInt(offset));
+                }
+
+                List<Map<String, Object>> list = administratorService.sumTotalRecommander(offsetMonth, pager);
+
+                response = new Response(true, list);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE, response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getCause().getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            }
+        }else {
+            response = new Response(false,"操作员adminid，月份偏移量offsetMonth不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
+    }
+
+    @TokenListen
+    @RequestMapping("/accountCustomRecordInFewMonths")
+    @ResponseBody
+    public String accountCustomRecordInFewMonths(String actionAdminid, String offsetMonth, @Nullable String startLine, @Nullable String offset){
+        APIResponse apiResponse ;
+        Response response;
+
+        if(StringUtil.argsNotEmpty(new String[]{actionAdminid,offsetMonth})){
+            try {
+                Pager pager = null;
+
+                if (!StringUtil.isEmpty(startLine) && !StringUtil.isEmpty(offset)) {
+                    pager = new Pager(Integer.parseInt(startLine), Integer.parseInt(offset));
+                }
+
+                List<Map<String, Object>> list = administratorService.accountCustomRecordInFewMonths(offsetMonth, pager);
+
+                response = new Response(true, list);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE, response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getCause().getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            }
+        }else {
+            response = new Response(false,"操作员adminid，月份偏移量offsetMonth不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
+    }
+
+    @TokenListen
+    @RequestMapping("/hotProductsLastDays")
+    @ResponseBody
+    public String hotProductsLastDays(String actionAdminid, String offsetDate, @Nullable String startLine, @Nullable String offset){
+        APIResponse apiResponse;
+        Response response;
+
+        if(StringUtil.argsNotEmpty(new String[]{actionAdminid,offsetDate})){
+            Pager pager = null;
+            if(!StringUtil.isEmpty(startLine) && !StringUtil.isEmpty(offset)){
+                pager = new Pager(Integer.parseInt(startLine),Integer.parseInt(offset));
+            }
+
+            try{
+                List<Map<String,Object>> result = administratorService.hotProductsLastDays(offsetDate,pager);
+                response = new Response(true,result);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getCause().getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            }
+        }else {
+            response = new Response(false,"操作员adminid，时间偏移量offsetDate不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
+    }
 
     @TokenListen
     @RequestMapping("/createAdmin")

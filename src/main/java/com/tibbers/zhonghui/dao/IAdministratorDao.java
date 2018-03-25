@@ -1,6 +1,7 @@
 package com.tibbers.zhonghui.dao;
 
 import com.tibbers.zhonghui.model.Administrator;
+import com.tibbers.zhonghui.model.common.Pager;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -25,4 +26,10 @@ public interface IAdministratorDao {
     void updateInfoAdmin(Administrator administrator);
 
     List<Map<String, String>> queryVIPSaleRecords(Map<String,Object> param);
+
+    List<Map<String,Object>> hotProductsLastDays(Map<String,Object> params);
+
+    List<Map<String,Object>> accountCustomRecordInFewMonths(Map<String,Object> params);
+
+    List<Map<String,Object>> sumTotalRecommander(Map<String,Object> params);
 }

@@ -10,6 +10,7 @@ import com.tibbers.zhonghui.model.Administrator;
 import com.tibbers.zhonghui.model.Orders;
 import com.tibbers.zhonghui.model.common.Pager;
 import com.tibbers.zhonghui.service.IAdministratorService;
+import com.tibbers.zhonghui.utils.DateUtil;
 import com.tibbers.zhonghui.utils.MD5Utils;
 import com.tibbers.zhonghui.utils.StringUtil;
 import org.apache.log4j.Logger;
@@ -17,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -146,5 +148,69 @@ public class AdministratorServiceImpl implements IAdministratorService {
             throw new APIException(String.format("账户体系中不存在accountid为[%s]的账户",accountid));
         }
 
+    }
+
+    @Override
+    public List<Map<String, Object>> hotProductsLastDays(String offsetDate, Pager pager) {
+        logger.info(String.format("开始查询最近[%s]天最热销的产品",offsetDate));
+        int offset = Integer.parseInt(offsetDate);
+        if(offset > 0){
+            throw new APIException("日期偏移量必须为负数");
+        }
+
+        String before = DateUtil.caculateDate(offset);
+        String current = StringUtil.currentDateTime();
+
+        Map<String,Object> param = new HashMap<>();
+        param.put("start",before);
+        param.put("end",current);
+        param.put("pager",pager);
+        List<Map<String,Object>> result = administratorDao.hotProductsLastDays(param);
+
+        logger.info(String.format("分页查询最近[%s]天的热销产品[%s]",offset,result));
+
+
+        return result;
+    }
+
+    @Override
+    public List<Map<String, Object>> accountCustomRecordInFewMonths(String offsetMonth, Pager pager) {
+        logger.info(String.format("开始查询最近[%s]月的消费记录",offsetMonth));
+        int month = Integer.parseInt(offsetMonth);
+        if(month > 0){
+            throw new APIException("月份偏移量必须小于零");
+        }
+
+        String current = StringUtil.currentDateTime();
+        String before = DateUtil.caculateDate(month * 30);
+
+        Map<String,Object> param = new HashMap<>();
+        param.put("start",before);
+        param.put("end",current);
+        param.put("pager",pager);
+
+        List<Map<String,Object>> result = administratorDao.accountCustomRecordInFewMonths(param);
+        logger.info(String.format("查询到最近[%s]个月的账户消费记录[%s]",offsetMonth,result));
+        return result;
+    }
+
+    @Override
+    public List<Map<String, Object>> sumTotalRecommander(String offsetMonth, Pager pager) {
+        logger.info(String.format("开始查询最近[%s]月VIP用户的推荐情况",offsetMonth));
+        int month = Integer.parseInt(offsetMonth);
+
+        if(month > 0){
+            throw new APIException("月份偏移量必须小于零");
+        }
+        String current = StringUtil.currentDateTime().substring(0,8);
+        String before = DateUtil.caculateDate(month * 30).substring(0,8);
+        Map<String,Object> param = new HashMap<>();
+        param.put("start",before);
+        param.put("end",current);
+        param.put("pager",pager);
+
+        List<Map<String,Object>> result = administratorDao.sumTotalRecommander(param);
+        logger.info(String.format("查询到最近[%s]个月VIP用户的推荐情况[%s]",offsetMonth,result));
+        return result;
     }
 }

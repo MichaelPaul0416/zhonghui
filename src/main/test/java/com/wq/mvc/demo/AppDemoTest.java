@@ -3,6 +3,7 @@ package com.wq.mvc.demo;
 import com.alibaba.fastjson.JSONObject;
 import com.tibbers.zhonghui.model.*;
 import com.tibbers.zhonghui.model.common.Pager;
+import com.tibbers.zhonghui.utils.DateUtil;
 import com.tibbers.zhonghui.utils.MD5Utils;
 import com.tibbers.zhonghui.utils.StringUtil;
 import org.apache.ibatis.io.Resources;
@@ -18,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
+import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
@@ -245,6 +247,16 @@ public class AppDemoTest {
         for (int i=0;i<100;i++){
             System.out.println(Math.abs("210e512c68497189".hashCode()));
         }
+    }
+
+    @Test
+    public void date(){
+        Calendar calendar = Calendar.getInstance();
+
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+        String datetime = simpleDateFormat.format(calendar.getTime());
+
+        System.out.println(DateUtil.caculateDate(10));
     }
 }
 

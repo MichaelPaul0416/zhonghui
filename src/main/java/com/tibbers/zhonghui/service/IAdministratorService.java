@@ -25,4 +25,10 @@ public interface IAdministratorService {
     Administrator queryAdmin(Administrator administrator);
 
     Map<String, List<Map<String, String>>> queryAccountTradeDetails(String accountid, Pager pager);
+
+    List<Map<String,Object>> hotProductsLastDays(String offsetDate,Pager pager);
+
+    List<Map<String,Object>> accountCustomRecordInFewMonths(String offsetMonth ,Pager pager);
+
+    List<Map<String,Object>> sumTotalRecommander(String offsetMonth,Pager pager);
 }

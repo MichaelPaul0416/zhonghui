@@ -17,6 +17,7 @@ public class PayResult {
     private String trade_type;
     private String prepay_id;
     private String orderid;
+    private String timestamp;
 
     @Override
     public String toString() {
@@ -32,7 +33,16 @@ public class PayResult {
                 ", trade_type='" + trade_type + '\'' +
                 ", prepay_id='" + prepay_id + '\'' +
                 ", orderid='" + orderid + '\'' +
+                ", timestamp='" + timestamp + '\'' +
                 '}';
+    }
+
+    public String getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(String timestamp) {
+        this.timestamp = timestamp;
     }
 
     public String getOrderid() {

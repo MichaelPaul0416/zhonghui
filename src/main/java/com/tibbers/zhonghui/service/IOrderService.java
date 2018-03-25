@@ -1,5 +1,6 @@
 package com.tibbers.zhonghui.service;
 
+import com.tibbers.zhonghui.model.Orders;
 import com.tibbers.zhonghui.model.common.Pager;
 import com.tibbers.zhonghui.model.common.PayResult;
 import org.springframework.stereotype.Repository;
@@ -22,4 +23,6 @@ public interface IOrderService {
     List<Map<String,Object>> accountOrderCenter(String accountid, String orderstate, Pager pager);
 
     List<Map<String,Object>> merchantQueryOrders(String accountid,String orderstate,Pager pager);
+
+    Orders updateOrderInfo(Orders orders);
 }

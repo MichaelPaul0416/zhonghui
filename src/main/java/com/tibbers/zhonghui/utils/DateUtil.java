@@ -5,6 +5,7 @@ import org.apache.log4j.Logger;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -56,6 +57,15 @@ public class DateUtil {
         Date date = new Date(lt);
         res = simpleDateFormat.format(date);
         return res;
+    }
+
+    public static String  caculateDate(int daysOffset){
+        Calendar calendar = Calendar.getInstance();
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+
+        calendar.add(Calendar.DAY_OF_YEAR,daysOffset);
+
+        return simpleDateFormat.format(calendar.getTime());
     }
 
 

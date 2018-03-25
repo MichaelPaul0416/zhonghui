@@ -93,7 +93,9 @@ public class OrderServiceImpl implements IOrderService {
                 }
             }else{
                 JSONObject jsonObject = WxLoginUtil.doLoginAuth(code);
-                openid = jsonObject.getString("opendid");
+                logger.info(String.format("微信鉴权接口返回信息[%s]",jsonObject.toJSONString()));
+//                openid = jsonObject.getString("opendid");
+                openid = (String) jsonObject.get("openid");
 //                openid = "oe9PL4qR5KW4gKxN0csK2n3LgdCE";
 
             }
@@ -181,6 +183,7 @@ public class OrderServiceImpl implements IOrderService {
                         payResult.setNonce_str(request.getNonceStr());
                         payResult.setSign("");
                         payResult.setPrepay_id("");
+                        payResult.setErr_code_msg("获取预支付id失败");
                         payResult.setTrade_type(AppConstants.TRADE_TYPE);
                     }
 
@@ -236,6 +239,9 @@ public class OrderServiceImpl implements IOrderService {
     private void generateOrderItems(Orders orders, List<OrderItems> orderItemsList) {
         logger.info(String.format("客户[%s]的订单生成成功[%s]",orders.getAccountid(),orders));
         for(OrderItems orderItems : orderItemsList){
+            if(StringUtil.isEmpty(orderItems.getProductid())){
+                throw new APIException("订单明细中的产品编号productid为必传字段");
+            }
             orderItems.setSerialid(StringUtil.serialId());
             orderItems.setOrderid(orders.getOrderid());
             orderItems.setReverse1(orders.getAddressid());
@@ -311,7 +317,7 @@ public class OrderServiceImpl implements IOrderService {
             }
         }
         if(shopcarids.size() > 0) {
-            logger.info(String.format("更新购物车中的明细记录"));
+            logger.info(String.format("更新购物车中的明细记录[%s]",orderItemsList));
             List<ShoppingCar> shoppingCarList = shoppingCarDao.queryListBySerialid(shopcarids);
             List<ShoppingCar> batchRemoveList = new ArrayList<>();
             for (ShoppingCar shoppingCar : shoppingCarList) {
@@ -450,6 +456,15 @@ public class OrderServiceImpl implements IOrderService {
         return list;
     }
 
+    @Override
+    public Orders updateOrderInfo(Orders orders) {
+        if(StringUtil.isEmpty(orders.getOrderid())){
+            throw new APIException("更新的订单编号orderid不能为空");
+        }
+        ordersDao.updatePartOrderMsg(orders);
+        return orders;
+    }
+
     private void updateAccountBanlaceAsRecommander(String recommandserialid){
         RecommandIncome recommandIncome = new RecommandIncome();
         recommandIncome.setIncomeserialno(recommandserialid);
@@ -552,6 +567,7 @@ public class OrderServiceImpl implements IOrderService {
         payResult.setNonce_str(StringUtil.generateUUID());
         payResult.setSign("");
         payResult.setPrepay_id(orders.getOrderid());
+        payResult.setTimestamp(String.valueOf(System.currentTimeMillis()));
         payResult.setTrade_type("balance");
 
         return payResult;
@@ -565,8 +581,7 @@ public class OrderServiceImpl implements IOrderService {
             payResult.setResult_code(result.getResultCode());
             payResult.setAppid(result.getAppid());
             payResult.setMchid(result.getMchId());
-            payResult.setNonce_str(result.getNonceStr());
-            payResult.setSign(result.getSign());
+            payResult.setSign(buildPaySignAfterPrePay(result, payResult));
             payResult.setErr_code(result.getErrCode());
             payResult.setErr_code_msg(result.getErrCodeDes());
             if(!StringUtils.isEmpty(result.getResultCode()) && AppConstants.RESULT_CODE.equals(result.getResultCode())) {
@@ -582,6 +597,28 @@ public class OrderServiceImpl implements IOrderService {
         }
 
         return payResult;
+    }
+
+    private String buildPaySignAfterPrePay(WxPayUnifiedOrderResult result, PayResult payResult){
+        Map<String,String> param = new TreeMap<>();
+        param.put("appId",wxPayConfiguration.getAppId());
+        String timestamp = String.valueOf(System.currentTimeMillis());
+        param.put("timeStamp",timestamp);
+        payResult.setTimestamp(timestamp);
+        String nonce = StringUtil.randomStr(32);
+        param.put("nonceStr",nonce);
+        payResult.setNonce_str(nonce);
+//        param.put("nonceStr",result.getNonceStr());
+        param.put("package","prepay_id="+result.getPrepayId());
+        param.put("signType","MD5");
+
+        String contactParams = EncryptUtil.contactParams(param);
+        logger.info(String.format("返回客户端之前需要签名的字段[%s]",contactParams));
+        contactParams += "key=" + wxPayConfiguration.getMchKey();
+        String sign = EncryptUtil.encodeMD5String(contactParams);
+        logger.info(String.format("预支付之后的sign[%s]",sign));
+
+        return sign;
     }
 
     private WxPayUnifiedOrderRequest assembelyOrderRequest(Map<String,Object> params){
