@@ -25,4 +25,6 @@ public interface IOrdersDao {
     List<Map<String,Object>> accountOrderCenter(Map<String,Object> params);
 
     List<Map<String,Object>> salerOrderCenter(Map<String,Object> params);
+
+    List<Map<String, Object>> analyseSalerAmountInOrder(String orderid);
 }

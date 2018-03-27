@@ -67,6 +67,28 @@
         where personid = #{personid}
     </update>
 
+    <update id="updateAccountIncomeBatch" parameterType="java.util.List">
+        insert into taccount (accountid,accoBalance) values
+        <foreach collection="list" index="index" separator="," item="item">
+            (#{account.accountid},#{account.accobalance})
+        </foreach>
+        on DUPLICATE KEY UPDATE accobalance=values(accobalance)
+
+    </update>
+
+    <select id="queryByOrderid" parameterType="java.lang.String" resultMap="AccountResult">
+        select t2.* from torders t1,taccount t2 where t1.accountid = t2.accountid and t1.orderid = #{_parameter}
+    </select>
+
+    <select id="queryByAccountids" parameterType="java.util.List" resultMap="AccountResult">
+        select accountid,accobalance from taccount where accountid IN (
+        <foreach collection="list" item="item" separator="," index="index">
+            #{item}
+        </foreach>
+        )
+
+    </select>
+
     <select id="queryByAccountid" parameterType="java.lang.String" resultMap="AccountResult">
         select * from taccount where accountid = #{_parameter}
     </select>

@@ -15,7 +15,7 @@ import java.util.Map;
  * @description:
  */
 public interface IProductService {
-    void insertSingleProduct(Product product, String accountid, Integer number);
+    Map<String, String> insertSingleProduct(Product product, String accountid, Integer number);
 
     void insertBatchProduct(List<Product> productList);
 
@@ -40,4 +40,6 @@ public interface IProductService {
     void updateImages4Products(MultipartFile[] files, String[] productids);
 
     void updateProductInfo(Product product);
+
+    Map<String, List<String>> insertProductsBatch(String productList, String accountid);
 }

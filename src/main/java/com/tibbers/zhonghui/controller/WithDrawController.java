@@ -36,7 +36,7 @@ public class WithDrawController {
 
     @RequestMapping("/applyWithDrawOrBatch")
     @ResponseBody
-    public String applyWithDrawOrBatch(String adminid,String withdraws){
+    public String applyWithDrawOrBatch(String withdraws){
         APIResponse apiResponse;
         Response response;
 

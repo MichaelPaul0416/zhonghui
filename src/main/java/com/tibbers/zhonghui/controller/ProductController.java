@@ -5,8 +5,10 @@ import com.sun.istack.internal.Nullable;
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.config.ServiceConfigBean;
+import com.tibbers.zhonghui.dao.IAuditingProsDao;
 import com.tibbers.zhonghui.dao.IProductBelongDao;
 import com.tibbers.zhonghui.model.Account;
+import com.tibbers.zhonghui.model.AuditingPros;
 import com.tibbers.zhonghui.model.Product;
 import com.tibbers.zhonghui.model.ProductBelong;
 import com.tibbers.zhonghui.model.common.APIResponse;
@@ -51,8 +53,6 @@ public class ProductController {
     @Autowired
     private ServiceConfigBean serviceConfigBean;
 
-    @Autowired
-    private IProductBelongDao productBelongDao;
 
     @RequestMapping("/updateProductInfo")
     @ResponseBody
@@ -214,8 +214,8 @@ public class ProductController {
                 product.setProductid(productId);
                 int number = Integer.parseInt(product.getReverse1());
                 product.setReverse1("");
-                productService.insertSingleProduct(product,accountid, number);
-                response = new Response(true, productId);
+                Map<String,String> map = productService.insertSingleProduct(product,accountid, number);
+                response = new Response(true, map);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE, response);
             } catch (Exception e) {
                 logger.error(e.getMessage(),e);
@@ -237,34 +237,11 @@ public class ProductController {
         Response response;
         if(!StringUtil.isEmpty(productList)){
             try{
-                List<String> productIdList = new ArrayList<>();
-                List<Product> products = JSONObject.parseArray(productList,Product.class);
-                List<ProductBelong> productBelongs = new ArrayList<>();
-                for(Product product : products){
-                    String productid = StringUtil.generateUUID();
-                    product.setProductid(productid);
-                    productIdList.add(productid);
-
-                    ProductBelong productBelong = new ProductBelong();
-                    productBelong.setSerialid(StringUtil.serialId());
-                    productBelong.setAccountid(accountid);
-                    productBelong.setRemaindernum(Integer.parseInt(product.getReverse1()));
-                    productBelong.setProductid(product.getProductid());
-                    productBelong.setSalestate("0");
-                    productBelongs.add(productBelong);
-
-                    product.setReverse1("");
-                }
-                logger.info(String.format("开始插入[%s]条产品记录",products.size()));
-                productService.insertBatchProduct(products);
-                logger.info(String.format("更新产品归属表，新增[%s]的上传产品记录",accountid));
-
-                productBelongDao.insertBatchRelation(productBelongs);
+                Map<String,List<String>> map = productService.insertProductsBatch(productList,accountid);
                 Map<String,Object> responseMap = new HashMap<>();
-                responseMap.put("size",productIdList.size());
-                responseMap.put("tip","批量插入产品ID");
-                responseMap.put("list",productIdList);
+                responseMap.put("tip","批量插入产品ID/批量产品审核申请ID");
                 responseMap.put("accountid",accountid);
+                responseMap.put("data",map);
                 response = new Response(true, responseMap);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE, response);
             }catch (Exception e){

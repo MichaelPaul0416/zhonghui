@@ -40,13 +40,32 @@ public class WithDrawServiceImpl implements IWithDrawService{
         try {
             for(WithDraw withDraw : withDraws){
                 withDraw.setSerialid(StringUtil.generateUUID());
+                String accountid = withDraw.getAccountid();
+                Account account = accountServiceDao.queryByAccountid(accountid);
+                if(account != null && !StringUtil.isEmpty(account.getPersonid())){
+                    if(account.getAccobalance().compareTo(withDraw.getAmount()) < 0){
+                        throw new APIException(String.format("账户余额[%s]小于提现金额[%s]",account.getAccobalance(),withDraw.getAmount()));
+                    }else {
+                        Account update = new Account();
+                        String balance = account.getAccobalance();
+                        double current = StringUtil.formatStr2Dobule(balance);
+                        current = current - StringUtil.formatStr2Dobule(withDraw.getAmount());
+                        update.setAccountid(accountid);
+                        update.setAccobalance(String.valueOf(current));
+                        logger.info(String.format("开始更新账户[%s]的账户余额",account.getAccountid()));
+                        accountServiceDao.updateAccountInfo(account);
+                        logger.info(String.format("冻结账户[%s]余额[%s]成功",account.getAccountid(),withDraw.getAmount()));
+                    }
+                }else {
+                    throw new APIException(String.format("账户[%s]不存在",accountid));
+                }
                 withDraw.setApplydatetime(StringUtil.currentDateTime());
             }
             withDrawDao.applyWithDrawOrBatch(withDraws);
             logger.info(String.format("批量插入提现申请结束"));
             return withDraws;
         }catch (Exception e){
-            throw new APIException(e.getMessage(),e);
+            throw new APIException(e.getCause().getMessage(),e);
         }
     }
 
@@ -57,21 +76,11 @@ public class WithDrawServiceImpl implements IWithDrawService{
 
             if("1".equals(withDraw.getApplystate())){
                 logger.info(String.format("管理员同意[%s]的提现申请，即将更新账户余额",withDraw.getAccountid()));
-                Account account = new Account();
+//                Account account = new Account();
                 Account query = accountServiceDao.queryByAccountid(withDraw.getAccountid());
                 if(query != null && !StringUtil.isEmpty(query.getPersonid())){
-                    String balance = query.getAccobalance();
-                    double current = StringUtil.formatStr2Dobule(balance);
-                    current = current - StringUtil.formatStr2Dobule(withDraw.getAmount());
-                    if(current < 0){
-                        throw new APIException(String.format("账户[%s]的余额[%s]小于提现金额[%s]，更新失败",withDraw.getAccountid(),query.getAccobalance(),withDraw.getAmount()));
-                    }
-                    account.setAccountid(withDraw.getAccountid());
-                    account.setAccobalance(String.valueOf(current));
-                    logger.info(String.format("开始更新账户[%s]的账户余额",account.getAccountid()));
-                    accountServiceDao.updateAccountInfo(account);
-                    logger.info(String.format("账户[%s]余额信息更新成功",account.getAccountid()));
                     withDrawDao.auditWithDraw(withDraw);
+                    logger.info(String.format("账户[%s]提现申请更新成功",withDraw.getSerialid()));
                 }else {
                     throw new APIException(String.format("账户[%s]不存在或者尚未绑定微信账号",withDraw.getAccountid()));
                 }

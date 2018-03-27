@@ -2,7 +2,9 @@ package com.tibbers.zhonghui.service.impl;
 
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.dao.IAuditingProsDao;
+import com.tibbers.zhonghui.dao.IProductBelongDao;
 import com.tibbers.zhonghui.model.AuditingPros;
+import com.tibbers.zhonghui.model.ProductBelong;
 import com.tibbers.zhonghui.model.common.Pager;
 import com.tibbers.zhonghui.service.IAuditingProsService;
 import com.tibbers.zhonghui.utils.StringUtil;
@@ -28,6 +30,9 @@ public class AuditingProsServiceImpl implements IAuditingProsService {
 
     @Autowired
     private IAuditingProsDao auditingProsDao;
+
+    @Autowired
+    private IProductBelongDao productBelongDao;
 
 
     @Override
@@ -60,6 +65,13 @@ public class AuditingProsServiceImpl implements IAuditingProsService {
             logger.info(String.format("管理员[%s]即将审核[%s]申请",auditor,serialid));
             auditingProsDao.auditProductApply(auditingPros);
             logger.info(String.format("审核申请[%s]状态修改成功,修改为[%s]",serialid,auditstate));
+            if("1".equals(auditstate)){
+                logger.info(String.format("开始更新产品[%s]的销售状态为[%s]",auditingPros.getProductid(),auditingPros));
+                ProductBelong productBelong = new ProductBelong();
+                productBelong.setProductid(auditingPros.getProductid());
+                productBelong.setSalestate("1");
+                productBelongDao.updateProductState(productBelong);
+            }
         }catch (Exception e){
             throw new APIException(e.getCause());
         }

@@ -71,6 +71,10 @@
         <result column="paybybalance" jdbcType="VARCHAR" property="paybybalance"/>
     </resultMap>
 
+    <resultMap id="salerAmountOrder" type="java.util.Map">
+        <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
+        <result column="money" jdbcType="VARCHAR" property="money"/>
+    </resultMap>
     <!--新增订单表记录-->
     <insert id="insertSingelOrder" parameterType="com.tibbers.zhonghui.model.Orders">
         insert into torders values(#{addressid},#{accountid},#{orderid},#{createdatetime},#{orderstate},#{isvalid},#{expressno},#{donedatetime},#{freetransport},#{transportfee},#{note},#{amount},#{paybybalance},#{reverse1},#{reverse2})
@@ -178,5 +182,17 @@
         <if test="pager != null">
             limit #{pager.startLine},#{pager.offset}
         </if>
+    </select>
+
+    <select id="analyseSalerAmountInOrder" parameterType="java.lang.String" resultMap="salerAmountOrder">
+        select a.accountid,sum(a.pronumber * CAST(b.unitprice AS DECIMAL(9,2))) as money from
+        (
+            select t5.orderid,t5.productid,t5.pronumber,t6.accountid from torderitem t5,tproductbelong t6
+            where t5.productid = t6.productid and t5.orderid = #{_parameter} and not exists (
+            select orderid from torders where isvalid = '0' and orderid = #{_parameter})
+        ) a,tproduct b
+        where a.productid = b.productid
+        group by a.accountid
+        order by money desc
     </select>
 </mapper>

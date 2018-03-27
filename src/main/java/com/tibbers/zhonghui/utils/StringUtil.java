@@ -7,6 +7,7 @@ import org.springframework.util.StringUtils;
 
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -114,8 +115,18 @@ public class StringUtil {
         return num;
     }
 
+    public static double multiply(String d1,String d2){
+        BigDecimal bigDecimal = new BigDecimal(d1);
+        return bigDecimal.multiply(new BigDecimal(d2)).doubleValue();
+    }
+
+    public static double multiply(double d1,double d2){
+        return multiply(String.valueOf(d1),String.valueOf(d2));
+    }
+
     public static String caculteIncome(double amount,int feePercent){
-        return String.valueOf(formatStr2Dobule(String.valueOf(amount * feePercent / 100)));
+        double percent = feePercent / 100.0;
+        return String.valueOf(formatStr2Dobule(String.valueOf(multiply(amount,percent))));
     }
 
     public static void main(String args[]){

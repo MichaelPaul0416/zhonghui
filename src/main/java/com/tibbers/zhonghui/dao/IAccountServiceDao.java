@@ -30,4 +30,10 @@ public interface IAccountServiceDao {
     List<Map<String,Object>> orderByScore(Map<String,Object> param);
 
     Account queryAccountByOpenid(String openid);
+
+    Account queryByOrderid(String orderid);
+
+    void updateAccountIncomeBatch(List<Account> list);
+
+    List<Account> queryByAccountids(List<String> list);
 }

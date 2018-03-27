@@ -18,4 +18,6 @@ public interface IAuditingProsDao {
     void auditProductApply(AuditingPros auditingPros);
 
     List<Map<String,String>> querySerialByAuditState(Map<String,Object> map);
+
+    void applyAudit4Products(List<AuditingPros> list);
 }

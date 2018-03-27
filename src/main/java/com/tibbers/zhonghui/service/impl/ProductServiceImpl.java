@@ -3,9 +3,11 @@ package com.tibbers.zhonghui.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.ServiceConfigBean;
+import com.tibbers.zhonghui.dao.IAuditingProsDao;
 import com.tibbers.zhonghui.dao.IProductBelongDao;
 import com.tibbers.zhonghui.dao.IProductDao;
 import com.tibbers.zhonghui.model.Account;
+import com.tibbers.zhonghui.model.AuditingPros;
 import com.tibbers.zhonghui.model.Product;
 import com.tibbers.zhonghui.model.ProductBelong;
 import com.tibbers.zhonghui.model.common.Pager;
@@ -43,10 +45,13 @@ public class ProductServiceImpl implements IProductService {
     @Autowired
     private ServiceConfigBean serviceConfigBean;
 
+    @Autowired
+    private IAuditingProsDao auditingProsDao;
+
 
     @Transactional()
     @Override
-    public void insertSingleProduct(Product product, String accountid, Integer number) {
+    public Map<String, String> insertSingleProduct(Product product, String accountid, Integer number) {
         iProductDao.insertSingleProduct(product);
         ProductBelong productBelong = new ProductBelong();
         productBelong.setSerialid(StringUtil.generateUUID());
@@ -56,7 +61,20 @@ public class ProductServiceImpl implements IProductService {
         productBelong.setRemaindernum(number);
         iProductBelongDao.insertSingleRelation(productBelong);
         logger.info(String.format("记录[%s]插入数据库成功",product));
+        AuditingPros auditingPros = new AuditingPros();
+        logger.info(String.format("添加产品[%s]的审核申请",product.getProductid()));
+        auditingPros.setProductid(product.getProductid());
+        auditingPros.setSerialid(StringUtil.generateUUID());
+        auditingPros.setApplydatetime(StringUtil.currentDateTime());
+        auditingPros.setAuditstate("0");
+        auditingPros.setRejectreason("");
+        auditingProsDao.applyAudit4Product(auditingPros);
 
+        Map<String,String> map = new HashMap<>();
+        map.put("pid",product.getProductid());
+        map.put("auditid",auditingPros.getSerialid());
+
+        return map;
     }
 
     @Override
@@ -317,6 +335,53 @@ public class ProductServiceImpl implements IProductService {
         logger.info(String.format("更新产品[%s]的信息",product.getProductid()));
         iProductDao.updateProductInfo(product);
         logger.info(String.format("更新产品[%s]信息[%s]成功",product.getProductid(),product));
+    }
+
+    @Override
+    public Map<String, List<String>> insertProductsBatch(String productList, String accountid) {
+        List<String> productIdList = new ArrayList<>();
+        List<Product> products = JSONObject.parseArray(productList,Product.class);
+        List<ProductBelong> productBelongs = new ArrayList<>();
+        List<AuditingPros> auditingProsList = new ArrayList<>();
+        List<String> auditings = new ArrayList<>();
+        for(Product product : products){
+            String productid = StringUtil.generateUUID();
+            product.setProductid(productid);
+            productIdList.add(productid);
+
+            ProductBelong productBelong = new ProductBelong();
+            productBelong.setSerialid(StringUtil.serialId());
+            productBelong.setAccountid(accountid);
+            productBelong.setRemaindernum(Integer.parseInt(product.getReverse1()));
+            productBelong.setProductid(product.getProductid());
+            productBelong.setSalestate("0");
+            productBelongs.add(productBelong);
+
+            product.setReverse1("");
+
+            AuditingPros auditingPros = new AuditingPros();
+            logger.info(String.format("添加产品[%s]的审核申请",productid));
+            auditingPros.setProductid(productid);
+            auditingPros.setSerialid(StringUtil.generateUUID());
+            auditingPros.setApplydatetime(StringUtil.currentDateTime());
+            auditingPros.setAuditstate("0");
+            auditingPros.setRejectreason("");
+            auditingProsList.add(auditingPros);
+            auditings.add(auditingPros.getSerialid());
+
+        }
+        logger.info(String.format("开始插入[%s]条产品记录",products.size()));
+        iProductDao.insertBatchProduct(products);
+        logger.info(String.format("更新产品归属表，新增[%s]的上传产品记录",accountid));
+        iProductBelongDao.insertBatchRelation(productBelongs);
+        logger.info(String.format("更新产品审核信息[%s]",auditingProsList));
+        auditingProsDao.applyAudit4Products(auditingProsList);
+
+        Map<String,List<String>> result = new HashMap<>();
+        result.put("pids",productIdList);
+        result.put("auditids",auditings);
+
+        return result;
     }
 
 }

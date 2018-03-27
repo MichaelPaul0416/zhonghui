@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tibbers.zhonghui.dao.IPrecentageDao">
+    <resultMap id="precentageResult" type="com.tibbers.zhonghui.model.Precentage">
+       <result property="serialid" jdbcType="VARCHAR" column="serialid"/>
+       <result property="orderid" jdbcType="VARCHAR" column="orderid"/>
+       <result property="precentage" jdbcType="VARCHAR" column="precentage"/>
+       <result property="donedatetime" jdbcType="VARCHAR" column="donedatetime"/>
+       <result property="reverse1" jdbcType="VARCHAR" column="reverse1"/>
+    </resultMap>
+
+
+    <insert id="insertSinglePrecentage" parameterType="java.util.List">
+        insert into tprecentage values
+        <foreach collection="list" index="index" separator="," item="item">
+            (#{item.serialid},#{item.orderid},#{item.precentage},#{item.donedatetime},#{item.reverse1})
+        </foreach>
+    </insert>
+
+</mapper>

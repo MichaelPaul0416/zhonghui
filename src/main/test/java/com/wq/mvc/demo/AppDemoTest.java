@@ -19,6 +19,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.Reader;
+import java.math.BigDecimal;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
@@ -257,6 +258,15 @@ public class AppDemoTest {
         String datetime = simpleDateFormat.format(calendar.getTime());
 
         System.out.println(DateUtil.caculateDate(10));
+    }
+
+    @Test
+    public void money(){
+//        double money = StringUtil.formatStr2Dobule("36.16");
+        BigDecimal bigDecimal = new BigDecimal("36.16");
+        double money = bigDecimal.multiply(new BigDecimal("100")).doubleValue();
+        System.out.println(money);
+
     }
 }
 

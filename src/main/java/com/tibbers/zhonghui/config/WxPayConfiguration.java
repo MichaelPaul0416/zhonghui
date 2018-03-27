@@ -43,6 +43,17 @@ public class WxPayConfiguration {
 	@Value("#{wxPayProperties.recommandfee}")
 	private String recommandfee;
 
+	@Value("#{wxPayProperties.precentage}")
+	private String precentage;
+
+	public String getPrecentage() {
+		return precentage;
+	}
+
+	public void setPrecentage(String precentage) {
+		this.precentage = precentage;
+	}
+
 	public String getRecommandfee() {
 		return recommandfee;
 	}

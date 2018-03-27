@@ -77,6 +77,9 @@ public class OrderServiceImpl implements IOrderService {
     @Autowired
     private IRecommandDao recommandDao;
 
+    @Autowired
+    private IPrecentageDao precentageDao;
+
     @Override
     public PayResult createOrder(String orderInfo, String itemlist, String code, String clientip) {
         logger.info(String.format("根据[%s]获取鉴权信息",code));
@@ -103,7 +106,8 @@ public class OrderServiceImpl implements IOrderService {
             if(!StringUtils.isEmpty(openid)){
 //            if(true){
                 logger.info(String.format("即将为客户生成一笔订单"));
-                orders.setAmount(caculateAmount(orders.getAccountid(),orders.getAmount()));
+                orders.setReverse1(orders.getAmount());//原先订单总金额存储在这里面
+//                orders.setAmount(caculateAmount(orders.getAccountid(),orders.getAmount()));
                 orders.setOrderid(StringUtil.serialId());
                 orders.setCreatedatetime(StringUtil.currentDateTime());
                 //订单状态 0未发货，1已发货待收货，2已收货，3退款
@@ -124,7 +128,13 @@ public class OrderServiceImpl implements IOrderService {
                         payResult = buildPayResult(orders);
                         prePaySerial(orders, orders.getOrderid(), payResult ,orders.getPaybybalance());
 
-                        generateRecommandRelation(orders,orders.getPaybybalance());
+                        double recommand = generateRecommandRelation(orders,orders.getPaybybalance());
+                        double fee = addOrderPrecentage(orders.getOrderid(), (int) (Double.parseDouble(orders.getAmount()) * 100));
+                        WxPayOrderNotifyResult result = new WxPayOrderNotifyResult();
+                        result.setOutTradeNo(orders.getOrderid());
+                        double money = Double.parseDouble(orders.getAmount());
+                        result.setTotalFee((int)(money * 100));
+                        caculateFinalIncome(fee,recommand,result);
 
                         updateProductRemainder(orderItemsList,orders.getOrderid());
 
@@ -253,7 +263,7 @@ public class OrderServiceImpl implements IOrderService {
         logger.info(String.format("订单[%s]的明细已经生成",orders.getOrderid()));
     }
 
-    private void generateRecommandRelation( Orders orders,String paybybalance) {
+    private double generateRecommandRelation( Orders orders,String paybybalance) {
         logger.info(String.format("开始查询推荐[%s]的账户",orders.getAccountid()));
         Recommand query = recommandDao.queryRecommandByAccountid(orders.getAccountid());
         if(query != null && !StringUtil.isEmpty(query.getRecommander())){
@@ -277,8 +287,10 @@ public class OrderServiceImpl implements IOrderService {
             list.add(recommandIncome);
             recommandIncomeDao.insertRecommandIncomeOrBatch(list);
             logger.info(String.format("新增推荐人[%s]/被推荐人[%s]收益关系[%s]成功",recommandIncome.getAccountid(),recommandIncome.getComefrom(),recommandIncome));
+            return Double.parseDouble(recommandIncome.getIncome());
         }else {
             logger.info(String.format("未找到[%s]是被谁推荐的",orders.getAccountid()));
+            return 0.0;
         }
     }
 
@@ -340,6 +352,13 @@ public class OrderServiceImpl implements IOrderService {
 
     @Override
     public String dealWithAsynNotifyOrder(String xmlData) {
+        /**
+         * 这个5%是优惠后价格的5%   （比如一件商品100元，卖给一个会员打九折，90元，买家付90，平台提取90的5%也就是4.5 ，如果有人推荐，再给推荐的人5%，实际到卖家账户就81元）
+         * 1.支付金额=订单总金额A*下单客户的身份对应的折扣率
+         * 2.支付成功后分发给卖家的总金额B=(1-平台提成)-VIP推荐收益
+         * 3.根据订单内产品的来源[统计列出产品来源于哪个VIP上传，根据VIP分类统计这些产品的总金额]为VIPSaleAmount[0,1,2,3,4...]
+         * 4.计算分到每个产品提供者的钱[ VIPSaleAmount/订单总金额A*支付成功后分发给卖家的总金额B ]
+         */
         String response;
         try {
             WxPayOrderNotifyResult result = this.payService.parseOrderNotifyResult(xmlData);
@@ -365,7 +384,12 @@ public class OrderServiceImpl implements IOrderService {
                     updateRecommandIncome(orderid);
 
                     //新增收益信息到账户余额中--对应recommandincome表中的一条记录
-                    updateAccountBanlaceAsRecommander(orderid);
+                    String recommandFee = updateAccountBanlaceAsRecommander(orderid);
+
+                    //新增商户平台的订单提成
+                    double fee = addOrderPrecentage(orderid,result.getTotalFee());
+                    caculateFinalIncome(fee, Double.parseDouble(recommandFee),result);
+
 
                 }else{
                     capitalSerial.setState("0");
@@ -388,6 +412,75 @@ public class OrderServiceImpl implements IOrderService {
         } catch (WxPayException e) {
             throw new APIException(e.getCause().getMessage());
         }
+    }
+
+    private void caculateFinalIncome(double platformFee,double recommandFee,WxPayOrderNotifyResult result){
+        logger.info(String.format("开始为订单[%s]计算各个商户的最终收益"));
+        double accountPay = result.getTotalFee() / 100.0;
+        double feeForSales = accountPay - platformFee - recommandFee;
+        String orderid = result.getOutTradeNo();
+        Orders query = new Orders();
+        query.setOrderid(orderid);
+        Map<String,Object> param = new HashMap<>();
+        param.put("order",query);
+        List<Map<String,String>> list = ordersDao.queryOrdersByPager(param);
+        if (list.size() > 1){
+            throw new APIException(String.format("订单[%s]重复",orderid));
+        }
+
+        if(list.size() == 0){
+            throw new APIException(String.format("订单[%s]不存在，请联系管理员",orderid));
+        }
+
+        Map<String,String> map = list.get(0);
+        String total = map.get("reverse1");//前端传过来总金额
+        //订单内根据销售产品的商户，分类计算各个商户在该订单内销售总金额
+        List<Map<String,Object>> analyseResults = ordersDao.analyseSalerAmountInOrder(orderid);
+        if(analyseResults.size() == 0){
+            throw new APIException("订单内的产品未找到相关上传人员，请联系管理员");
+        }
+
+        double totalMoney = Double.parseDouble(total);
+        List<String> updateAccounts = new ArrayList<>();
+        Map<String,Map<String,Object>> tmp = new HashMap<>();
+        for(Map<String,Object> singleMap : analyseResults){
+            double part = Double.parseDouble(String.valueOf(singleMap.get("money")));
+            double percent = part / totalMoney;
+            singleMap.put("percent",percent);
+            singleMap.put("receiveMoney",feeForSales * percent);
+            updateAccounts.add((String) singleMap.get("accountid"));
+            tmp.put((String) singleMap.get("accountid"),singleMap);
+        }
+
+
+        List<Account> accounts = accountService.queryByAccountids(updateAccounts);
+        for (Account account : accounts){
+            Map<String,Object> tempMap = tmp.get(account.getAccountid());
+            double receive = (double) tempMap.get("receiveMoney");
+            double balance = Double.parseDouble(account.getAccobalance());
+            balance += receive;
+            account.setAccobalance(String.valueOf(balance));
+        }
+        logger.info(String.format("需要批量更新的卖家余额以及信息[%s]",accounts));
+        accountService.updateAccountIncomeBatch(accounts);
+        logger.info(String.format("卖家余额批量更新成功"));
+
+
+    }
+
+    private double addOrderPrecentage(String orderid,int amount){
+        logger.info(String.format("订单[%s]扣款成功，开始计算平台抽取费用",orderid));
+        Precentage precentage = new Precentage();
+        precentage.setSerialid(StringUtil.generateUUID());
+        precentage.setOrderid(orderid);
+        double money = amount / 100;
+        money = money * Integer.parseInt(wxPayConfiguration.getPrecentage()) / 100;
+        precentage.setPrecentage(String.valueOf(money));
+        precentage.setDonedatetime(StringUtil.currentDateTime());
+
+        precentageDao.insertSinglePrecentage(precentage);
+        logger.info(String.format("平台从订单[%s]提取[%s]收益,插入成功",orderid,money));
+        return money;
     }
 
     @Override
@@ -465,7 +558,7 @@ public class OrderServiceImpl implements IOrderService {
         return orders;
     }
 
-    private void updateAccountBanlaceAsRecommander(String recommandserialid){
+    private String updateAccountBanlaceAsRecommander(String recommandserialid){
         RecommandIncome recommandIncome = new RecommandIncome();
         recommandIncome.setIncomeserialno(recommandserialid);
         Map<String,Object> param = new HashMap<>();
@@ -493,33 +586,47 @@ public class OrderServiceImpl implements IOrderService {
             } else {
                 throw new APIException("账户[%s]不存在");
             }
+
+            return amount;
+        } else if( queryResult.get(0) == null) {
+//            该笔订单的下单人，是自己进来系统的，不是被人推荐，所以不存在他下单的时候有收益流水。
+//            但是没有流水的话还需要查询recommand表判断一下，该用户是否是真的不是被推荐进来的，如果还是没有，则返回"0"
+            Account account = accountService.queryByOrderid(recommandserialid);
+            if(account == null){
+                throw new APIException(String.format("订单[%s]不存在，请联系管理员",recommandserialid));
+            }
+            if("1".equals(account)){
+                throw new APIException(String.format("账户[%s]被VIP推荐，但是尚未找到该账户的订单流水[%],请联系管理员",account.getAccountid(),recommandserialid));
+            }else {
+                return "0";
+            }
         }else {
-            throw new APIException(String.format("关于订单的[%s]的推荐流水不存在或者大于1条，请联系管理员",recommandserialid));
+            throw new APIException(String.format("关于订单的[%s]的推荐流水大于1条，请联系管理员",recommandserialid));
         }
     }
 
-    private String caculateAmount(String accountid,String amount){
-        logger.info(String.format("查询账户[%s]的详细信息",accountid));
-        Account account = accountService.queryByAccountid(accountid);
-        String finalAmount;
-        if(account != null && !StringUtil.isEmpty(account.getAccountname())){
-            Double oldAmount = StringUtil.formatStr2Dobule(amount);
-            double finalMoney;
-            if("1".equals(account.getIsvip())){
-                finalMoney = oldAmount * 90 / 100;
-            }else {
-                if("1".equals(account.getCusttype())){//被推荐用户
-                    finalMoney = oldAmount * 95 / 100;
-                }else {
-                    finalMoney = oldAmount;
-                }
-            }
-            finalAmount = String.valueOf(finalMoney);
-            return finalAmount;
-        }else {
-            throw new APIException("查询的账户[%s]不存在");
-        }
-    }
+//    private String caculateAmount(String accountid,String amount){
+//        logger.info(String.format("查询账户[%s]的详细信息",accountid));
+//        Account account = accountService.queryByAccountid(accountid);
+//        String finalAmount;
+//        if(account != null && !StringUtil.isEmpty(account.getAccountname())){
+//            Double oldAmount = StringUtil.formatStr2Dobule(amount);
+//            double finalMoney;
+//            if("1".equals(account.getIsvip())){
+//                finalMoney = oldAmount * 90 / 100;
+//            }else {
+//                if("1".equals(account.getCusttype())){//被推荐用户
+//                    finalMoney = oldAmount * 95 / 100;
+//                }else {
+//                    finalMoney = oldAmount;
+//                }
+//            }
+//            finalAmount = String.valueOf(finalMoney);
+//            return finalAmount;
+//        }else {
+//            throw new APIException("查询的账户[%s]不存在");
+//        }
+//    }
     private void updateRecommandIncome(String orderid) {
         RecommandIncome recommandIncome = new RecommandIncome();
         recommandIncome.setIncomeserialno(orderid);
@@ -634,7 +741,7 @@ public class OrderServiceImpl implements IOrderService {
         request.setSpbillCreateIp((String) params.get("clientip"));//客户端ip，小程序
         Orders orders = (Orders) params.get("orders");
         request.setOutTradeNo(orders.getOrderid());//商户订单号
-        request.setTotalFee((int) (StringUtil.formatStr2Dobule(orders.getAmount()) * 100));//订单总金额
+        request.setTotalFee((int) StringUtil.multiply(orders.getAmount(),"100"));//订单总金额
         request.setTradeType(AppConstants.TRADE_TYPE);
         request.setSignType(AppConstants.SIGN_TYPE_MD5);
 

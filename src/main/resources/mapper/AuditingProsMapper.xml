@@ -21,6 +21,13 @@
         insert into tauditingpros values (#{addressid},#{productid},#{auditor},#{auditstate},#{applydatetime},#{begindatetime},#{enddatetime},#{rejectreason})
     </insert>
 
+    <insert id="applyAudit4Products" parameterType="java.util.List">
+        insert into tauditingpros values(
+        <foreach collection="list" separator="," item="item" index="index">
+            #{addressid},#{productid},#{auditor},#{auditstate},#{applydatetime},#{begindatetime},#{enddatetime},#{rejectreason}
+        </foreach>
+        )
+    </insert>
     <update id="auditProductApply" parameterType="com.tibbers.zhonghui.model.AuditingPros">
         update tauditingpros set auditor = #{auditor},auditstate = #{auditstate},begindatetime = #{begindatetime},enddatetime = #{enddatetime},rejectreason = #{rejectreason} where addressid = #{addressid}
     </update>
