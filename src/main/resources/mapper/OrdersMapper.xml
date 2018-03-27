@@ -51,6 +51,7 @@
         <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
         <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
         <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
+        <result column="pronumber" jdbcType="INTEGER" property="pronumber"/>
     </resultMap>
 
     <!--商户订单中心-->
@@ -126,46 +127,48 @@
     </select>
 
     <select id="accountOrderCenter" parameterType="java.util.Map" resultMap="orderCenterObject">
+        select a.*,b.pronumber from (
         SELECT
-            t3.orderid,
-            t3.productid,
-            t4.accountid,
-            t4.createdatetime,
-            t4.orderstate,
-            t4.isvalid,
-            t4.freetransport,
-            t4.transportfee,
-            t4.amount,
-            t5.unitprice,
-            t5.productname,
-            t5.valuescore,
-            t5.productgrade,
-            t5.fieldmeaning,
-            t5.transportfee AS pertransportfee,
-            t5.imagepath
+        t3.orderid,
+        t3.productid,
+        t4.accountid,
+        t4.createdatetime,
+        t4.orderstate,
+        t4.isvalid,
+        t4.freetransport,
+        t4.transportfee,
+        t4.amount,
+        t5.unitprice,
+        t5.productname,
+        t5.valuescore,
+        t5.productgrade,
+        t5.fieldmeaning,
+        t5.transportfee AS pertransportfee,
+        t5.imagepath
         FROM
-            (
-                SELECT
-                    t1.orderid,
-                    t2.productid
-                FROM
-                    torders t1,
-                    torderitem t2
-                WHERE
-                    t1.orderid = t2.orderid
-                AND t1.accountid = #{accountid}
-                AND t1.isvalid = '1' and t1.orderstate != '3'
-                <if test="orderstate != null and !&quot;&quot;.equals(orderstate)">and  t1.orderstate = #{orderstate} </if>
-                GROUP BY
-                    t1.orderid,
-                    t2.productid
-            ) t3,
-            torders t4,
-            tproduct t5
+        (
+        SELECT
+        t1.orderid,
+        t2.productid
+        FROM
+        torders t1,
+        torderitem t2
         WHERE
-            t3.orderid = t4.orderid
+        t1.orderid = t2.orderid
+        AND t1.accountid = #{accountid}
+        AND t1.isvalid = '1' and t1.orderstate != '3'
+        <if test="orderstate != null and !&quot;&quot;.equals(orderstate)">and t1.orderstate = #{orderstate}</if>
+        GROUP BY
+        t1.orderid,
+        t2.productid
+        ) t3,
+        torders t4,
+        tproduct t5
+        WHERE
+        t3.orderid = t4.orderid
         AND t3.productid = t5.productid
-        order by t4.createdatetime DESC
+        ) a,torderitems b where a.orderid = b.orderid and a.productid = b.productid
+        order by a.createdatetime DESC
         <if test="pager != null">
             limit #{pager.startLine},#{pager.offset}
         </if>
@@ -173,12 +176,15 @@
     </select>
 
     <select id="salerOrderCenter" parameterType="java.util.Map" resultMap="salerOrderCenter">
-        select t1.accountid,t1.orderid,t1.freetransport,t1.transportfee,t1.createdatetime,t2.productid,t4.imagepath,t4.productname,t4.unitprice,t4.productgrade,t4.fieldmeaning,t2.pronumber,t1.amount,t1.paybybalance
+        select a.*,b.accountname,b.personid from (
+        select
+        t1.accountid,t1.orderid,t1.freetransport,t1.transportfee,t1.createdatetime,t2.productid,t4.imagepath,t4.productname,t4.unitprice,t4.productgrade,t4.fieldmeaning,t2.pronumber,t1.amount,t1.paybybalance
         from torders t1,torderitem t2,tproductbelong t3 ,tproduct t4
         where t1.orderid = t2.orderid and t2.productid = t3.productid and t2.productid = t4.productid
         <if test="orderstate != null and !&quot;&quot;.equals(orderstate)">and t1.orderstate = #{orderstate} </if>
         and t3.salestate = '1'
         and t3.accountid = #{accountid}
+        ) a,taccount b where a.accountid = b.accountid
         <if test="pager != null">
             limit #{pager.startLine},#{pager.offset}
         </if>
