@@ -214,6 +214,7 @@ public class ProductController {
                 product.setProductid(productId);
                 int number = Integer.parseInt(product.getReverse1());
                 product.setReverse1("");
+                product.setReverse2("");
                 Map<String,String> map = productService.insertSingleProduct(product,accountid, number);
                 response = new Response(true, map);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE, response);

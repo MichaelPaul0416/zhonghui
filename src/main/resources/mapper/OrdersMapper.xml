@@ -12,6 +12,7 @@
         <result column="orderstate" jdbcType="VARCHAR" property="orderstate"/>
         <result column="isvalid" jdbcType="VARCHAR" property="isvalid"/>
         <result column="expressno" jdbcType="VARCHAR" property="expressno"/>
+        <result column="expresscompany" jdbcType="VARCHAR" property="expresscompany"/>
         <result column="donedatetime" jdbcType="VARCHAR" property="donedatetime"/>
         <result column="freetransport" jdbcType="VARCHAR" property="freetransport"/>
         <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
@@ -41,6 +42,8 @@
         <result column="createdatetime" jdbcType="VARCHAR" property="createdatetime"/>
         <result column="orderstate" jdbcType="VARCHAR" property="orderstate"/>
         <result column="isvalid" jdbcType="VARCHAR" property="isvalid"/>
+        <result column="expressno" jdbcType="VARCHAR" property="expressno"/>
+        <result column="expresscompany" jdbcType="VARCHAR" property="expresscompany"/>
         <result column="freetransport" jdbcType="VARCHAR" property="freetransport"/>
         <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
         <result column="amount" jdbcType="VARCHAR" property="amount"/>
@@ -58,6 +61,9 @@
     <resultMap id="salerOrderCenter" type="java.util.Map">
         <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
         <result column="orderid" jdbcType="VARCHAR" property="orderid"/>
+        <result column="orderstate" jdbcType="VARCHAR" property="orderstate"/>
+        <result column="expressno" jdbcType="VARCHAR" property="expressno"/>
+        <result column="expresscompany" jdbcType="VARCHAR" property="expresscompany"/>
         <result column="freetransport" jdbcType="VARCHAR" property="freetransport"/>
         <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
         <result column="createdatetime" jdbcType="VARCHAR" property="createdatetime"/>
@@ -78,7 +84,7 @@
     </resultMap>
     <!--新增订单表记录-->
     <insert id="insertSingelOrder" parameterType="com.tibbers.zhonghui.model.Orders">
-        insert into torders values(#{addressid},#{accountid},#{orderid},#{createdatetime},#{orderstate},#{isvalid},#{expressno},#{donedatetime},#{freetransport},#{transportfee},#{note},#{amount},#{paybybalance},#{reverse1},#{reverse2})
+        insert into torders values(#{addressid},#{accountid},#{orderid},#{createdatetime},#{orderstate},#{isvalid},#{expressno},#{expresscompany},#{donedatetime},#{freetransport},#{transportfee},#{note},#{amount},#{paybybalance},#{reverse1},#{reverse2})
     </insert>
 
     <update id="updatePartOrderMsg" parameterType="com.tibbers.zhonghui.model.Orders">
@@ -96,7 +102,7 @@
 
     <!--Orders,Account,Pager-->
     <select id="queryOrdersByPager" parameterType="java.util.Map" resultMap="OrderResult">
-        select t1.accountid,t2.accountname,t1.orderid,t1.createdatetime,t1.orderstate,t1.isvalid,t1.expressno,t1.donedatetime,t1.freetransport,t1.transportfee,t1.note,t1.amount,t1.paybybalance,t1.reverse1,t1.reverse2
+        select t1.accountid,t2.accountname,t1.orderid,t1.createdatetime,t1.orderstate,t1.isvalid,t1.expressno,t1.expresscompany,t1.donedatetime,t1.freetransport,t1.transportfee,t1.note,t1.amount,t1.paybybalance,t1.reverse1,t1.reverse2
         from torders t1,taccount t2 where t1.accountid = t2.accountid
         <if test="orders != null">
             <if test="orders.accountid != null and !&quot;&quot;.equals(orders.accountid)">and t1.accountid = #{orders.accountid}</if>
@@ -135,6 +141,8 @@
         t4.createdatetime,
         t4.orderstate,
         t4.isvalid,
+        t4.expressno,
+        t4.expresscompany,
         t4.freetransport,
         t4.transportfee,
         t4.amount,
@@ -167,7 +175,7 @@
         WHERE
         t3.orderid = t4.orderid
         AND t3.productid = t5.productid
-        ) a,torderitems b where a.orderid = b.orderid and a.productid = b.productid
+        ) a,torderitem b where a.orderid = b.orderid and a.productid = b.productid
         order by a.createdatetime DESC
         <if test="pager != null">
             limit #{pager.startLine},#{pager.offset}
@@ -178,7 +186,7 @@
     <select id="salerOrderCenter" parameterType="java.util.Map" resultMap="salerOrderCenter">
         select a.*,b.accountname,b.personid from (
         select
-        t1.accountid,t1.orderid,t1.freetransport,t1.transportfee,t1.createdatetime,t2.productid,t4.imagepath,t4.productname,t4.unitprice,t4.productgrade,t4.fieldmeaning,t2.pronumber,t1.amount,t1.paybybalance
+        t1.accountid,t1.orderid,t1.orderstate,t1.expressno,t1.expresscompany,t1.freetransport,t1.transportfee,t1.createdatetime,t2.productid,t4.imagepath,t4.productname,t4.unitprice,t4.productgrade,t4.fieldmeaning,t2.pronumber,t1.amount,t1.paybybalance
         from torders t1,torderitem t2,tproductbelong t3 ,tproduct t4
         where t1.orderid = t2.orderid and t2.productid = t3.productid and t2.productid = t4.productid
         <if test="orderstate != null and !&quot;&quot;.equals(orderstate)">and t1.orderstate = #{orderstate} </if>

@@ -14,6 +14,7 @@ public class Orders {
     private String orderstate;
     private String isvalid;
     private String expressno;
+    private String expresscompany;
     private String donedatetime;
     private String freetransport;
     private String transportfee;
@@ -33,6 +34,7 @@ public class Orders {
                 ", orderstate='" + orderstate + '\'' +
                 ", isvalid='" + isvalid + '\'' +
                 ", expressno='" + expressno + '\'' +
+                ", expresscompany='" + expresscompany + '\'' +
                 ", donedatetime='" + donedatetime + '\'' +
                 ", freetransport='" + freetransport + '\'' +
                 ", transportfee='" + transportfee + '\'' +
@@ -42,6 +44,14 @@ public class Orders {
                 ", reverse1='" + reverse1 + '\'' +
                 ", reverse2='" + reverse2 + '\'' +
                 '}';
+    }
+
+    public String getExpresscompany() {
+        return expresscompany;
+    }
+
+    public void setExpresscompany(String expresscompany) {
+        this.expresscompany = expresscompany;
     }
 
     public String getPaybybalance() {

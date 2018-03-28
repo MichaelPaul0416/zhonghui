@@ -358,6 +358,7 @@ public class ProductServiceImpl implements IProductService {
             productBelongs.add(productBelong);
 
             product.setReverse1("");
+            product.setReverse2("");
 
             AuditingPros auditingPros = new AuditingPros();
             logger.info(String.format("添加产品[%s]的审核申请",productid));

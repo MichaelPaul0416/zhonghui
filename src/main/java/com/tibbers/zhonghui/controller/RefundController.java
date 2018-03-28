@@ -34,6 +34,24 @@ public class RefundController {
     private IRefundService refundService;
 
 
+    @RequestMapping("/auditRefundApply")
+    @ResponseBody
+    public String auditRefundApply(String refundserialid,String refundstate){
+        APIResponse apiResponse ;
+        Response response;
+
+        if(StringUtil.argsNotEmpty(new String[]{refundserialid,refundstate})){
+
+        }else {
+            response = new Response(false,"退款流水号refundserialid,退款确认标志refundstate不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+        }
+
+//        return JSONObject.toJSONString(apiResponse);
+        return null;
+
+    }
+
     @RequestMapping("/refundApply")
     @ResponseBody
     public String refundApply(HttpServletRequest httpServletRequest){

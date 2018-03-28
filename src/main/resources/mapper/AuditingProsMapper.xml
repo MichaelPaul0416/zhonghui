@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tibbers.zhonghui.dao.IAuditingProsDao">
     <resultMap id="AuditingProsResult" type="java.util.Map">
-        <id column="addressid" jdbcType="VARCHAR" property="addressid"/>
+        <id column="serialid" jdbcType="VARCHAR" property="serialid"/>
         <result column="productid" jdbcType="VARCHAR" property="productid"/>
         <result column="productname" jdbcType="VARCHAR" property="productname"/>
         <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
@@ -18,23 +18,22 @@
 
 
     <insert id="applyAudit4Product" parameterType="com.tibbers.zhonghui.model.AuditingPros">
-        insert into tauditingpros values (#{addressid},#{productid},#{auditor},#{auditstate},#{applydatetime},#{begindatetime},#{enddatetime},#{rejectreason})
+        insert into tauditingpros values (#{serialid},#{productid},#{auditor},#{auditstate},#{applydatetime},#{begindatetime},#{enddatetime},#{rejectreason})
     </insert>
 
     <insert id="applyAudit4Products" parameterType="java.util.List">
-        insert into tauditingpros values(
+        insert into tauditingpros values
         <foreach collection="list" separator="," item="item" index="index">
-            #{addressid},#{productid},#{auditor},#{auditstate},#{applydatetime},#{begindatetime},#{enddatetime},#{rejectreason}
+            (#{list.serialid},#{list.productid},#{list.auditor},#{list.auditstate},#{list.applydatetime},#{list.begindatetime},#{list.enddatetime},#{list.rejectreason})
         </foreach>
-        )
     </insert>
     <update id="auditProductApply" parameterType="com.tibbers.zhonghui.model.AuditingPros">
-        update tauditingpros set auditor = #{auditor},auditstate = #{auditstate},begindatetime = #{begindatetime},enddatetime = #{enddatetime},rejectreason = #{rejectreason} where addressid = #{addressid}
+        update tauditingpros set auditor = #{auditor},auditstate = #{auditstate},begindatetime = #{begindatetime},enddatetime = #{enddatetime},rejectreason = #{rejectreason} where serialid = #{serialid}
     </update>
 
     <!--审核的产品必须是未上架的，审核过了才可以上架-->
     <select id="querySerialByAuditState" parameterType="java.util.Map" resultMap="AuditingProsResult">
-        select t1.addressid,t1.productid,t2.productname,t2.imagepath,t1.auditor,t1.auditstate,t1.applydatetime,t1.begindatetime,t1.enddatetime,t1.rejectreason
+        select t1.serialid,t1.productid,t2.productname,t2.imagepath,t1.auditor,t1.auditstate,t1.applydatetime,t1.begindatetime,t1.enddatetime,t1.rejectreason
         from tauditingpros t1,tproduct t2,tproductbelong t3
         where t1.productid = t2.productid and t2.productid = t3.productid
         and t3.salestate = '0' and t1.auditstate = #{auditstate}
