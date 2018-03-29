@@ -38,6 +38,7 @@
     <resultMap id="orderCenterObject" type="java.util.Map">
         <result column="orderid" jdbcType="VARCHAR" property="orderid"/>
         <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="addressid" jdbcType="VARCHAR" property="addressid"/>
         <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
         <result column="createdatetime" jdbcType="VARCHAR" property="createdatetime"/>
         <result column="orderstate" jdbcType="VARCHAR" property="orderstate"/>
@@ -69,8 +70,8 @@
         <result column="createdatetime" jdbcType="VARCHAR" property="createdatetime"/>
         <result column="productid" jdbcType="VARCHAR" property="productid"/>
         <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
-        <result column="productname" jdbcType="VARCHAR" property="productname"/>
         <result column="addressid" jdbcType="VARCHAR" property="addressid"/>
+        <result column="productname" jdbcType="VARCHAR" property="productname"/>
         <result column="unitprice" jdbcType="VARCHAR" property="unitprice"/>
         <result column="productgrade" jdbcType="VARCHAR" property="productgrade"/>
         <result column="productname" jdbcType="VARCHAR" property="productname"/>
@@ -93,6 +94,7 @@
         <if test="orderstate != null and !&quot;&quot;.equals(orderstate)"> orderstate = #{orderstate}, </if>
         <if test="isvalid != null and !&quot;&quot;.equals(isvalid)"> isvalid = #{isvalid}, </if>
         <if test="expressno != null and !&quot;&quot;.equals(expressno)"> expressno = #{expressno}, </if>
+        <if test="expresscompany != null and !&quot;&quot;.equals(expresscompany)"> expresscompany = #{expresscompany}, </if>
         <if test="donedatetime != null and !&quot;&quot;.equals(donedatetime)"> donedatetime = #{donedatetime}, </if>
         <if test="transportfee != null and !&quot;&quot;.equals(transportfee)"> transportfee = #{transportfee}, </if>
         <if test="reverse1 != null "> reverse1 = #{reverse1}, </if>
@@ -138,6 +140,7 @@
         SELECT
         t3.orderid,
         t3.productid,
+        t4.addressid,
         t4.accountid,
         t4.createdatetime,
         t4.orderstate,

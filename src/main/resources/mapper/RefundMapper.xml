@@ -82,7 +82,7 @@
     </select>
 
     <insert id="insertSingelRefund" parameterType="com.tibbers.zhonghui.model.Refund">
-        insert into trefund values(#{refundserailid},#{accountid},#{orderid},#{productid},#{number},#{amount},#{itemid},#{applydatetime},#{agreestate},#{dealdatetime},#{agreedatetime},#{rejectreason},#{reverse1},#{reverse2})
+        insert into trefund values(#{refundserialid},#{accountid},#{orderid},#{productid},#{number},#{amount},#{itemid},#{detail},#{applydatetime},#{agreestate},#{dealdatetime},#{agreedatetime},#{rejectreason},#{reverse1},#{reverse2})
     </insert>
 
     <select id="queryRefundsByPager" parameterType="java.util.Map" resultMap="RefundResult">

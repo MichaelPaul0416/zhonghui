@@ -554,6 +554,7 @@ public class OrderServiceImpl implements IOrderService {
         if(StringUtil.isEmpty(orders.getOrderid())){
             throw new APIException("更新的订单编号orderid不能为空");
         }
+        orders.setReverse2("");
         ordersDao.updatePartOrderMsg(orders);
         return orders;
     }
