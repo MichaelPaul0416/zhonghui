@@ -12,11 +12,16 @@ import java.util.Map;
  * @description:
  */
 public interface IRefundService {
-    Map<String,Object> refundApply(HttpServletRequest servletRequest, String refundSerial);
+//    Map<String,Object> refundApply(HttpServletRequest servletRequest, String refundSerial);
 
-    String dealWithNotifyRefund(String xmldata);
+//    String dealWithNotifyRefund(String xmldata);
 
     List<Refund> queryUnconfirmRefunds(Map<String,Object> params);
 
     void updateRefundSerial(Refund refund);
+
+    String addRefundApply(HttpServletRequest servletRequest,String refundSerial);
+
+    Map<String, String> salerAuditRefundSerial(String refundSerialid, String state, String rejectreason);
+
 }

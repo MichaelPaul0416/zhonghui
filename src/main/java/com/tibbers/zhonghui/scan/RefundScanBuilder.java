@@ -101,7 +101,7 @@ public class RefundScanBuilder implements IScanBuilder{
     private List<Refund> queryUnconfirmRefund(){
         Map<String,Object> params = new HashMap<>();
         Refund refund = new Refund();
-        refund.setAgreestate("4");
+        refund.setAgreestate("1");//卖家同意退款之后，状态由4[申请退款中]-->1[同意退款]
         params.put("refund",refund);
         List<Refund> refundList = refundService.queryUnconfirmRefunds(params);
         return refundList;

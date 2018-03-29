@@ -23,4 +23,6 @@ public interface IRefundDao {
 
     //商户查看待退款流水
     List<Map<String,Object>> merchantQueryRefundOrders(Map<String,Object> params);
+
+    Refund queryRefundBySerialid(String refundserialid);
 }

@@ -63,116 +63,130 @@ public class RefundServiceImpl implements IRefundService {
     @Autowired
     private WxPayConfiguration wxPayConfiguration;
 
+    @Override
+    public String addRefundApply(HttpServletRequest servletRequest, String refundSerial) {
+        Refund refund = JSONObject.parseObject(refundSerial,Refund.class);
+        logger.info(String.format("接受用户[%s]的退款申请",refund.getAccountid()));
+        refund.setRefundserialid(StringUtil.serialId());
+        refund.setApplydatetime(StringUtil.currentDateTime());
+        //商家对于退款流水的状态[0：拒绝退款，1：同意退款，2：退款成功，3：退款失败，4：申请退款中]
+        refund.setAgreestate("4");
+
+        refundDao.insertSingelRefund(refund);
+        logger.info(String.format("退款流水[%s]插入成功，等待退款审核",refund));
+        logger.info("开始落地退款凭证");
+        String prefix = serviceConfigBean.getRefundcertsPathPrefix();
+        File dir = new File(prefix);
+        if(!dir.exists()){
+            logger.info(String.format("目录[%s]不存在，创建文件夹",prefix));
+        }
+
+        List<RefundCerts> refundCertss = new ArrayList<>();
+        List<String> paths ;
+        try {
+            paths = WxLoginUtil.upload(servletRequest,prefix);
+            logger.info(String.format("退款凭证落地成功[%s]",paths));
+            if(paths == null || paths.size() == 0){
+                throw new APIException(String.format("退款流水[%s]的退款凭证落地后路径为空，请联系管理员检查",refund.getRefundserialid()));
+            }
+
+            for(String certPath : paths){
+                RefundCerts refundCerts = new RefundCerts();
+                refundCerts.setSerialid(StringUtil.serialId());
+                refundCerts.setRefundserialid(refund.getRefundserialid());
+                refundCerts.setCertphotoid(StringUtil.generateUUID());
+                refundCerts.setCertphotopath(certPath);
+                refundCerts.setReverse1("");
+                refundCerts.setReverse2("");
+
+                refundCertss.add(refundCerts);
+            }
+            refundCertsDao.insertCertOrBatch(refundCertss);
+            logger.info(String.format("退款凭证信息插入成功,[%s]",refundCertss));
+
+            return refund.getRefundserialid();
+        } catch (IOException e) {
+            throw new APIException(e.getMessage(),e);
+        }
+
+    }
 
     @Override
-    public Map<String,Object> refundApply(HttpServletRequest servletRequest, String refundSerial) {
-        Refund refund = JSONObject.parseObject(refundSerial,Refund.class);
-        WxPayRefundRequest refundRequest = assemblyRefundRequest(refund);
-        Map<String,Object> resultMap = new HashMap<>();
-        logger.info(String.format("即将发送给微信的退款申请[%s]",refundRequest));
-        try {
-            WxPayRefundResult refundResult = wxPayService.refund(refundRequest);
-            logger.info(String.format("微信返回的退款信息[%s]",refundResult));
-            if(AppConstants.RETURN_CODE.equals(refundResult.getReturnCode())){
-                if(AppConstants.RESULT_CODE.equals(refundResult.getResultCode())){
-                    refund.setRefundserialid(StringUtil.serialId());
-                    refund.setApplydatetime(StringUtil.currentDateTime());
-                    //商家对于退款流水的状态[0：拒绝退款，1：同意退款，2：退款成功，3：退款失败，4：退款中]
-                    refund.setAgreestate("4");
-                    refund.setReverse1(refundResult.getRefundId());//微信退款单号
-                    refund.setReverse2(refundResult.getTransactionId());//微信订单号
-
-                    refundDao.insertSingelRefund(refund);
-                    logger.info(String.format("插入退款流水成功[%s]",refund));
-
-                    logger.info("开始落地退款凭证");
-                    String prefix = serviceConfigBean.getRefundcertsPathPrefix();
-                    File dir = new File(prefix);
-                    if(!dir.exists()){
-                        logger.info(String.format("目录[%s]不存在，创建文件夹",prefix));
-                    }
-
-                    List<RefundCerts> refundCertss = new ArrayList<>();
-                    List<String> paths = WxLoginUtil.upload(servletRequest,prefix);
-                    logger.info(String.format("退款凭证落地成功[%s]",paths));
-                    for(String certPath : paths){
-                        RefundCerts refundCerts = new RefundCerts();
-                        refundCerts.setSerialid(StringUtil.serialId());
-                        refundCerts.setRefundserialid(refund.getRefundserialid());
-                        refundCerts.setCertphotoid(StringUtil.generateUUID());
-                        refundCerts.setCertphotopath(certPath);
-                        refundCerts.setReverse1("");
-                        refundCerts.setReverse2("");
-
-                        refundCertss.add(refundCerts);
-                    }
-//                    for(MultipartFile multipartFile : files){
-//                        String storePath = prefix + "\\" + refund.getRefundserialid();
-//                        FileUtils.copyInputStreamToFile(multipartFile.getInputStream(),new File(storePath,multipartFile.getOriginalFilename()));
-//                        logger.info(String.format("文件[%s]落地成功",storePath));
-//
-//                        RefundCerts refundCerts = new RefundCerts();
-//                        refundCerts.setSerialid(StringUtil.serialId());
-//                        refundCerts.setRefundserialid(refund.getRefundserialid());
-//                        refundCerts.setCertphotoid(StringUtil.generateUUID());
-//                        refundCerts.setCertphotopath(storePath + "\\" + multipartFile.getOriginalFilename());
-//                        refundCerts.setReverse1("");
-//                        refundCerts.setReverse2("");
-//
-//                        refundCertss.add(refundCerts);
-//                    }
-                    refundCertsDao.insertCertOrBatch(refundCertss);
-                    logger.info(String.format("退款凭证信息插入成功,[%s]",refundCertss));
-
-                }else{
-                    logger.error(String.format("微信退款申请失败，错误原因[%s]",refundResult.getErrCodeDes()));
-                }
-                resultMap.put("errorcode",refundResult.getErrCode());
-                resultMap.put("errormsg",refundResult.getErrCodeDes());
-                resultMap.put("appid",refundResult.getAppid());
-                resultMap.put("mch_id",refundResult.getMchId());
-                resultMap.put("nonce_str",refundResult.getNonceStr());
-                resultMap.put("sign",refundResult.getSign());
-                resultMap.put("transaction_id",refundResult.getTransactionId());
-                resultMap.put("out_trade_no",refundResult.getOutTradeNo());
-                resultMap.put("out_refund_no",refundResult.getOutRefundNo());
-                resultMap.put("refund_id",refundResult.getRefundId());
-                resultMap.put("refund_fee",refundResult.getRefundFee());
-
-            }else{
-                resultMap.put("returncode",refundResult.getReturnCode());
-                resultMap.put("returnmsg",refundResult.getReturnMsg());
-            }
-        } catch (WxPayException e) {
-            logger.error(e.getMessage(),e);
-            String errorcode = e.getReturnCode(),errormsg = e.getReturnMsg();
-            if(StringUtils.isNoneEmpty(e.getErrCode())){
-                errorcode = e.getErrCode();
-                errormsg = e.getErrCodeDes();
-            }
-            String info = String.format("微信返回错误代码[%s],错误描述[%s]",errorcode,errormsg);
-            throw new APIException(info);
-        } catch (IOException e) {
-            throw new APIException(e.getCause().getMessage());
+    public Map<String, String> salerAuditRefundSerial(String refundSerialid, String state, String rejectreason) {
+        Refund refund = refundDao.queryRefundBySerialid(refundSerialid);
+        if(refund == null || StringUtil.isEmpty(refund.getOrderid())){
+            throw new APIException("退款流水" + refundSerialid + "不存在");
         }
+        Map<String,String> resultMap = new HashMap<>();
+        if("0".equals(state)){
+            logger.info(String.format("卖家拒绝退款流水[%s]的申请",refundSerialid));
+            Refund update = new Refund();
+            update.setRefundserialid(refundSerialid);
+            update.setAgreestate(state);
+            if(StringUtil.isEmpty(rejectreason)){
+                throw new APIException(String.format("拒绝退款流水[%s]的原因rejectreason不能为空",refundSerialid));
+            }
+            update.setRejectreason(rejectreason);
+            update.setDealdatetime(StringUtil.currentDateTime());
+            update.setAgreedatetime(StringUtil.currentDateTime());
+            update.setReverse1("");
+            update.setReverse2("");
+            resultMap.put("flag","ok");
+            resultMap.put("msg",String.format("退款申请[%s]已拒绝退款，更新成功",refundSerialid));
+        }else {
+            logger.info(String.format("卖家同意退款[%s]",refundSerialid));
+            WxPayRefundRequest refundRequest = assemblyRefundRequest(refund);
+
+            logger.info(String.format("即将发送给微信的退款申请[%s]",refundRequest));
+            Refund update = new Refund();
+            try {
+                WxPayRefundResult refundResult = wxPayService.refund(refundRequest);
+                logger.info(String.format("微信返回的退款信息[%s]",refundResult));
+                if(AppConstants.RETURN_CODE.equals(refundResult.getReturnCode())){
+                    update.setAgreedatetime(StringUtil.currentDateTime());
+                    update.setDealdatetime(StringUtil.currentDateTime());
+                    if(AppConstants.RESULT_CODE.equals(refundResult.getResultCode())){
+                        update.setAgreestate("1");
+                        update.setReverse1(refundResult.getRefundId());//微信退款单号
+                        update.setReverse2(refundResult.getTransactionId());//微信订单号
+                    }else{
+                        logger.error(String.format("微信退款申请失败，错误原因[%s]",refundResult.getErrCodeDes()));
+                        update.setAgreestate("3");
+                    }
+                    refundDao.uploadRefundSerialInfo(refund);
+                    logger.info(String.format("退款流水[%s]状态更新成功",refund));
+                    resultMap.put("errorcode",refundResult.getErrCode());
+                    resultMap.put("errormsg",refundResult.getErrCodeDes());
+                    resultMap.put("transaction_id",refundResult.getTransactionId());
+                    resultMap.put("out_trade_no",refundResult.getOutTradeNo());
+                    resultMap.put("out_refund_no",refundResult.getOutRefundNo());
+                    resultMap.put("refund_id",refundResult.getRefundId());
+                    resultMap.put("refund_fee",refundResult.getRefundFee());
+                    resultMap.put("flag","ok");
+                    resultMap.put("msg","微信退款申请成功");
+                }else{
+                    resultMap.put("flag","failed");
+                    resultMap.put("msg",String.format("微信退款申请通讯失败,请重新审核该笔退款[%s]",refundSerialid));
+                    resultMap.put("returncode",refundResult.getReturnCode());
+                    resultMap.put("returnmsg",refundResult.getReturnMsg());
+                }
+
+
+            } catch (WxPayException e) {
+                logger.error(e.getMessage(),e);
+                String errorcode = e.getReturnCode(),errormsg = e.getReturnMsg();
+                if(StringUtils.isNoneEmpty(e.getErrCode())){
+                    errorcode = e.getErrCode();
+                    errormsg = e.getErrCodeDes();
+                }
+                String info = String.format("微信返回错误代码[%s],错误描述[%s]",errorcode,errormsg);
+                throw new APIException(info);
+            }
+        }
+
         return resultMap;
     }
 
-    @Override
-    public String dealWithNotifyRefund(String xmldata) {
-        String response;
-        try {
-            WxPayRefundNotifyResult notifyResult = wxPayService.parseRefundNotifyResult(xmldata);
-            if(AppConstants.RETURN_CODE.equals(notifyResult.getReturnCode())){//SUCCESS
-                notifyResult.getReqInfo();
-            }else{
-
-            }
-        } catch (WxPayException e) {
-            throw new APIException(e.getMessage());
-        }
-        return null;
-    }
 
     @Override
     public List<Refund> queryUnconfirmRefunds(Map<String, Object> params) {
@@ -194,7 +208,7 @@ public class RefundServiceImpl implements IRefundService {
         refundRequest.setMchId(configuration.getMchId());
         refundRequest.setNonceStr(StringUtil.randomStr(32));
         refundRequest.setOutTradeNo(refund.getOrderid());
-        refundRequest.setOutRefundNo(StringUtil.serialId());
+        refundRequest.setOutRefundNo(refund.getRefundserialid());
 
         Map<String,Object> params = new HashMap<>();
         Orders orders = new Orders();

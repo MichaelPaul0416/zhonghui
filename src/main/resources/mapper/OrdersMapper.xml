@@ -70,6 +70,7 @@
         <result column="productid" jdbcType="VARCHAR" property="productid"/>
         <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
         <result column="productname" jdbcType="VARCHAR" property="productname"/>
+        <result column="addressid" jdbcType="VARCHAR" property="addressid"/>
         <result column="unitprice" jdbcType="VARCHAR" property="unitprice"/>
         <result column="productgrade" jdbcType="VARCHAR" property="productgrade"/>
         <result column="productname" jdbcType="VARCHAR" property="productname"/>
@@ -186,7 +187,7 @@
     <select id="salerOrderCenter" parameterType="java.util.Map" resultMap="salerOrderCenter">
         select a.*,b.accountname,b.personid from (
         select
-        t1.accountid,t1.orderid,t1.orderstate,t1.expressno,t1.expresscompany,t1.freetransport,t1.transportfee,t1.createdatetime,t2.productid,t4.imagepath,t4.productname,t4.unitprice,t4.productgrade,t4.fieldmeaning,t2.pronumber,t1.amount,t1.paybybalance
+        t1.accountid,t1.orderid,t1.orderstate,t1.expressno,t1.expresscompany,t1.freetransport,t1.transportfee,t1.createdatetime,t2.productid,t4.imagepath,t1.addressid,t4.productname,t4.unitprice,t4.productgrade,t4.fieldmeaning,t2.pronumber,t1.amount,t1.paybybalance
         from torders t1,torderitem t2,tproductbelong t3 ,tproduct t4
         where t1.orderid = t2.orderid and t2.productid = t3.productid and t2.productid = t4.productid
         <if test="orderstate != null and !&quot;&quot;.equals(orderstate)">and t1.orderstate = #{orderstate} </if>

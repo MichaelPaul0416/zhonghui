@@ -263,9 +263,13 @@ public class AppDemoTest {
     @Test
     public void money(){
 //        double money = StringUtil.formatStr2Dobule("36.16");
-        BigDecimal bigDecimal = new BigDecimal("36.16");
-        double money = bigDecimal.multiply(new BigDecimal("100")).doubleValue();
-        System.out.println(money);
+//        BigDecimal bigDecimal = new BigDecimal("36.16");
+//        double money = bigDecimal.multiply(new BigDecimal("100")).doubleValue();
+//        System.out.println(money);
+
+        BigDecimal bigDecimal = new BigDecimal("12");
+        double value = bigDecimal.divide(new BigDecimal("100")).doubleValue();
+        System.out.println(String.valueOf(value));
 
     }
 }

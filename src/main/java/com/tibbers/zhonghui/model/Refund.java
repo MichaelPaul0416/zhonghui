@@ -18,6 +18,7 @@ public class Refund {
     private String agreestate;
     private String dealdatetime;
     private String agreedatetime;
+    private String rejectreason;
     private String reverse1;
     private String reverse2;
 
@@ -36,9 +37,18 @@ public class Refund {
                 ", agreestate='" + agreestate + '\'' +
                 ", dealdatetime='" + dealdatetime + '\'' +
                 ", agreedatetime='" + agreedatetime + '\'' +
+                ", rejectreason='" + rejectreason + '\'' +
                 ", reverse1='" + reverse1 + '\'' +
                 ", reverse2='" + reverse2 + '\'' +
                 '}';
+    }
+
+    public String getRejectreason() {
+        return rejectreason;
+    }
+
+    public void setRejectreason(String rejectreason) {
+        this.rejectreason = rejectreason;
     }
 
     public int getNumber() {

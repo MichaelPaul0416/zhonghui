@@ -1,6 +1,7 @@
 package com.tibbers.zhonghui.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sun.istack.internal.Nullable;
 import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.model.common.APIResponse;
 import com.tibbers.zhonghui.model.common.Response;
@@ -14,9 +15,11 @@ import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.validation.constraints.Null;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -33,70 +36,87 @@ public class RefundController {
     @Autowired
     private IRefundService refundService;
 
+    /**
+     * 1、交易时间超过一年的订单无法提交退款
+     * 2、微信支付退款支持单笔交易分多次退款，多次退款需要提交原支付订单的商户订单号和设置不同的退款单号。申请退款总金额不能超过订单金额。 一笔退款失败后重新提交，请不要更换退款单号，请使用原商户退款单号
+     */
+
+    @RequestMapping("/addRefundApply")
+    @ResponseBody
+    public String addRefundApply(HttpServletRequest request,String refundSerial){
+        APIResponse apiResponse;
+        Response response;
+
+        if(!StringUtil.isEmpty(refundSerial)){
+            try{
+                String serial = refundService.addRefundApply(request,refundSerial);
+                Map<String,String> map = new HashMap<>();
+                map.put("flag","ok");
+                map.put("refundid",serial);
+                response = new Response(true,map);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getCause().getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            }
+        }else {
+            response = new Response( false,"退款流水refundSerial不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
+    }
 
     @RequestMapping("/auditRefundApply")
     @ResponseBody
-    public String auditRefundApply(String refundserialid,String refundstate){
+    public String auditRefundApply(String refundserialid, String refundstate, @Nullable String rejectreason){
         APIResponse apiResponse ;
         Response response;
 
         if(StringUtil.argsNotEmpty(new String[]{refundserialid,refundstate})){
-
-        }else {
-            response = new Response(false,"退款流水号refundserialid,退款确认标志refundstate不能为空");
-            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
-        }
-
-//        return JSONObject.toJSONString(apiResponse);
-        return null;
-
-    }
-
-    @RequestMapping("/refundApply")
-    @ResponseBody
-    public String refundApply(HttpServletRequest httpServletRequest){
-        APIResponse apiResponse;
-        Response response;
-
-        String refundSerial = httpServletRequest.getParameter("refundSerial");
-        if(!StringUtil.isEmpty(refundSerial)){
             try{
-                Map<String,Object> resultMap = refundService.refundApply(httpServletRequest,refundSerial);
-                response = new Response(true, resultMap);
-                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE, response);
+                Map<String,String> result = refundService.salerAuditRefundSerial(refundserialid,refundstate,rejectreason);
+                response = new Response(true,result);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
             }catch (Exception e){
                 logger.error(e.getMessage(),e);
                 response = new Response(false,e.getCause().getMessage());
-                apiResponse =new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
             }
         }else {
-            response = new Response(false,"退款流水信息不能为空");
+            response = new Response(false,"退款流水号refundserialid,退款确认标志refundstate不能为空");
             apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
         }
 
         return JSONObject.toJSONString(apiResponse);
 
     }
-//    public String refundApply(@RequestParam("refundcerts")MultipartFile[] file, String refundSerial){//退款productid的数量number需要前端传入，amount前端计算好
+
+//    @RequestMapping("/refundApply")
+//    @ResponseBody
+//    public String refundApply(HttpServletRequest httpServletRequest){
 //        APIResponse apiResponse;
 //        Response response;
 //
-//        if(StringUtil.argsNotEmpty(new String[]{refundSerial})){
-//            try {
-//                Map<String, Object> resultMap = refundService.refundApply(file, refundSerial);
+//        String refundSerial = httpServletRequest.getParameter("refundSerial");
+//        if(!StringUtil.isEmpty(refundSerial)){
+//            try{
+//                Map<String,Object> resultMap = refundService.refundApply(httpServletRequest,refundSerial);
 //                response = new Response(true, resultMap);
 //                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE, response);
-//            }catch (APIException e){
+//            }catch (Exception e){
 //                logger.error(e.getMessage(),e);
-//                response = new Response(false,e.getMessage());
-//                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+//                response = new Response(false,e.getCause().getMessage());
+//                apiResponse =new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
 //            }
-//        }else{
+//        }else {
 //            response = new Response(false,"退款流水信息不能为空");
-//            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+//            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
 //        }
 //
-//        return String.valueOf(JSONObject.toJSON(apiResponse));
+//        return JSONObject.toJSONString(apiResponse);
+//
 //    }
 
     @RequestMapping("/refundNotifyResult")

@@ -17,6 +17,25 @@
         <result column="agreestate" jdbcType="VARCHAR" property="agreestate"/>
         <result column="dealdatetime" jdbcType="VARCHAR" property="dealdatetime"/>
         <result column="agreedatetime" jdbcType="VARCHAR" property="agreedatetime"/>
+        <result column="rejectreason" jdbcType="VARCHAR" property="rejectreason"/>
+        <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
+        <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
+    </resultMap>
+
+    <resultMap id="RefundModel" type="com.tibbers.zhonghui.model.Refund">
+        <result column="refundserailid" jdbcType="VARCHAR" property="refundserailid"/>
+        <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
+        <result column="orderid" jdbcType="VARCHAR" property="orderid"/>
+        <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="productname" jdbcType="VARCHAR" property="productname"/>
+        <result column="number" jdbcType="INTEGER" property="number"/>
+        <result column="amount" jdbcType="VARCHAR" property="amount"/>
+        <result column="itemid" jdbcType="VARCHAR" property="itemid"/>
+        <result column="applydatetime" jdbcType="VARCHAR" property="applydatetime"/>
+        <result column="agreestate" jdbcType="VARCHAR" property="agreestate"/>
+        <result column="dealdatetime" jdbcType="VARCHAR" property="dealdatetime"/>
+        <result column="agreedatetime" jdbcType="VARCHAR" property="agreedatetime"/>
+        <result column="rejectreason" jdbcType="VARCHAR" property="rejectreason"/>
         <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
         <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
     </resultMap>
@@ -63,7 +82,7 @@
     </select>
 
     <insert id="insertSingelRefund" parameterType="com.tibbers.zhonghui.model.Refund">
-        insert into trefund values(#{refundserailid},#{accountid},#{orderid},#{productid},#{number},#{amount},#{itemid},#{applydatetime},#{agreestate},#{dealdatetime},#{agreedatetime},#{reverse1},#{reverse2})
+        insert into trefund values(#{refundserailid},#{accountid},#{orderid},#{productid},#{number},#{amount},#{itemid},#{applydatetime},#{agreestate},#{dealdatetime},#{agreedatetime},#{rejectreason},#{reverse1},#{reverse2})
     </insert>
 
     <select id="queryRefundsByPager" parameterType="java.util.Map" resultMap="RefundResult">
@@ -77,6 +96,7 @@
             <if test="refund.orderid != null and !&quot;&quot;.equals(refund.orderid)">and t1.orderid = #{refund.orderid}</if>
             <if test="refund.productid != null and !&quot;&quot;.equals(refund.productid)">and t1.productid = #{refund.productid}</if>
             <if test="product != null and product.productname != null and !&quot;&quot;.equals(product.productname)">and t3.productname like '%' #{product.productname} '%'</if>
+            <if test="rejectreason != null and refund.rejectreason != null and !&quot;&quot;.equals(refund.rejectreason)">and t1.rejectreason like '%' #{refund.rejectreason} '%'</if>
             <if test="refund.itemid != null and !&quot;&quot;.equals(refund.itemid)">and t1.itemid = #{refund.itemid}</if>
             <if test="refund.agreestate != null and !&quot;&quot;.equals(refund.agreestate)">and t1.agreestate = #{refund.agreestate}</if>
             <if test="refund.reverse1 != null "> and t1.reverse1 = #{refund.reverse1}</if>
@@ -92,6 +112,7 @@
         <if test="agreestate != null and !&quot;&quot;.equals(agreestate)">agreestate = #{agreestate},</if>
         <if test="dealdatetime != null and !&quot;&quot;.equals(dealdatetime)">dealdatetime = #{dealdatetime},</if>
         <if test="agreedatetime != null and !&quot;&quot;.equals(agreedatetime)">agreedatetime = #{agreedatetime},</if>
+        <if test="rejectreason != null and !&quot;&quot;.equals(rejectreason)">rejectreason = #{rejectreason},</if>
         <if test="reverse1 != null ">reverse1 = #{reverse1},</if>
         <if test="reverse2 != null ">reverse2 = #{reverse2}</if>
         where refundserailid = #{refundserailid}
@@ -104,5 +125,9 @@
         where a.orderid = b.orderid and a.productid = b.productid and b.orderid = c.orderid  and b.productid = d.productid
         and c.orderstate = '3' and c.isvalid = '1'
         <if test="pager != null">limit #{pager.startLine},#{pager.offset}</if>
+    </select>
+
+    <select id="queryRefundBySerialid" resultMap="RefundModel">
+        select * from trefund where serialid = #{_parameter}
     </select>
 </mapper>
