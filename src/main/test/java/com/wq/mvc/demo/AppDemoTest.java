@@ -272,5 +272,24 @@ public class AppDemoTest {
         System.out.println(String.valueOf(value));
 
     }
+
+    @Test
+    public void refundCerts(){
+        List<RefundCerts> listas = new ArrayList<>();
+        RefundCerts refundCerts = new RefundCerts();
+        refundCerts.setReverse2("");
+        refundCerts.setReverse1("");
+        refundCerts.setSerialid("2");
+        refundCerts.setCertphotopath("123");
+        refundCerts.setCertphotoid("a");
+        refundCerts.setUploaddatetime("201803291234233");
+        refundCerts.setRefundserialid("27389");
+        refundCerts.setDeleteflag("");
+
+        listas.add(refundCerts);
+        sqlSession.insert("insertCertOrBatch",listas);
+//        sqlSession.insert("insertRefundCert",refundCerts);
+        sqlSession.commit();
+    }
 }
 

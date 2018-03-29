@@ -11,8 +11,10 @@ public class RefundCerts {
     private String certphotoid;
     private String certphotopath;
     private String uploaddatetime;
+    private String deleteflag;
     private String reverse1;
     private String reverse2;
+
 
     @Override
     public String toString() {
@@ -22,9 +24,18 @@ public class RefundCerts {
                 ", certphotoid='" + certphotoid + '\'' +
                 ", certphotopath='" + certphotopath + '\'' +
                 ", uploaddatetime='" + uploaddatetime + '\'' +
+                ", deleteflag='" + deleteflag + '\'' +
                 ", reverse1='" + reverse1 + '\'' +
                 ", reverse2='" + reverse2 + '\'' +
                 '}';
+    }
+
+    public String getDeleteflag() {
+        return deleteflag;
+    }
+
+    public void setDeleteflag(String deleteflag) {
+        this.deleteflag = deleteflag;
     }
 
     public String getSerialid() {

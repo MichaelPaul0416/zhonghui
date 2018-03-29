@@ -13,7 +13,7 @@ import java.util.Map;
  */
 @Repository
 public interface IRefundCertsDao {
-    void insertCertOrBatch(List<RefundCerts> list);
+    void insertCertOrBatch(List<RefundCerts> refundCertss);
 
     List<RefundCerts> queryCertsByPager(Map<String,Object> params);
 }

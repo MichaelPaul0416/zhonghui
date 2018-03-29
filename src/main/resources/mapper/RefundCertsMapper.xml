@@ -17,9 +17,9 @@
 
 
     <insert id="insertCertOrBatch" parameterType="java.util.List">
-        insert into trefundcerts (serialid,refundserialid,certphotoid,certphotopath,uploaddatetime,deleteflag,reverse1,reverse2) values
-        <foreach collection="list" item="item" index="index" separator=",">
-            (#{item.serialid},#{item.refundserailid},#{item.certphotoid},#{item.certphotopath},#{item.uploaddatetime},#{item.deleteflag},#{item.reverse1},#{item.reverse2})
+        insert into trefundcerts values
+        <foreach collection="list" item="item" separator="," index="index">
+        (#{item.serialid},#{item.refundserialid},#{item.certphotoid},#{item.certphotopath},#{item.uploaddatetime},#{item.deleteflag},#{item.reverse1},#{item.reverse2})
         </foreach>
     </insert>
     <select id="queryCertsByPager" parameterType="java.util.Map" resultMap="RefundCertResult">
