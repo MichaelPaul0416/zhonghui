@@ -170,6 +170,7 @@
         AND t1.accountid = #{accountid}
         AND t1.isvalid = '1' and t1.orderstate != '3'
         <if test="orderstate != null and !&quot;&quot;.equals(orderstate)">and t1.orderstate = #{orderstate}</if>
+        AND t2.productid not in (select productid from trefund n where t1.orderid = n.orderid and t2.productid = n.productid and n.agreestate in ('1','2','4') )
         GROUP BY
         t1.orderid,
         t2.productid

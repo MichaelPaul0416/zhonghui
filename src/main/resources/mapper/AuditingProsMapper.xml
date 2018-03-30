@@ -24,7 +24,7 @@
     <insert id="applyAudit4Products" parameterType="java.util.List">
         insert into tauditingpros values
         <foreach collection="list" separator="," item="item" index="index">
-            (#{list.serialid},#{list.productid},#{list.auditor},#{list.auditstate},#{list.applydatetime},#{list.begindatetime},#{list.enddatetime},#{list.rejectreason})
+            (#{item.serialid},#{item.productid},#{item.auditor},#{item.auditstate},#{item.applydatetime},#{item.begindatetime},#{item.enddatetime},#{item.rejectreason})
         </foreach>
     </insert>
     <update id="auditProductApply" parameterType="com.tibbers.zhonghui.model.AuditingPros">

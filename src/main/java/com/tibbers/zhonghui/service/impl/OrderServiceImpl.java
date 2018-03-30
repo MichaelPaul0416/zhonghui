@@ -14,6 +14,7 @@ import com.tibbers.zhonghui.model.*;
 import com.tibbers.zhonghui.model.common.Pager;
 import com.tibbers.zhonghui.model.common.PayResult;
 import com.tibbers.zhonghui.service.IOrderService;
+import com.tibbers.zhonghui.utils.DateUtil;
 import com.tibbers.zhonghui.utils.EncryptUtil;
 import com.tibbers.zhonghui.utils.StringUtil;
 import com.tibbers.zhonghui.utils.WxLoginUtil;
@@ -495,9 +496,11 @@ public class OrderServiceImpl implements IOrderService {
             Map<String,Object> params = new HashMap<>();
             Refund refund = new Refund();
             refund.setAccountid(accountid);
-            refund.setAgreestate("4");
+//            refund.setAgreestate("4");
             params.put("refund",refund);
             params.put("pager",pager);
+            params.put("end",StringUtil.currentDateTime());
+            params.put("begin", DateUtil.caculateDate(-30));
             list.addAll(refundDao.refundSerialsInCenter(params));
         }else {
             Map<String,Object> map = new HashMap<>();
@@ -509,9 +512,11 @@ public class OrderServiceImpl implements IOrderService {
                 Map<String,Object> params = new HashMap<>();
                 Refund refund = new Refund();
                 refund.setAccountid(accountid);
-                refund.setAgreestate("4");
+//                refund.setAgreestate("4");
                 params.put("refund",refund);
                 params.put("pager",pager);
+                params.put("end",StringUtil.currentDateTime());
+                params.put("begin",DateUtil.caculateDate(-30));
                 list.addAll(refundDao.refundSerialsInCenter(params));
             }
         }

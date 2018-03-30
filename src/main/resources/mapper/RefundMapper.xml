@@ -57,27 +57,35 @@
         <result column="valuescore" jdbcType="INTEGER" property="valuescore"/>
         <result column="productgrade" jdbcType="VARCHAR" property="productgrade"/>
         <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
-        <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
         <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
+        <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
     </resultMap>
 
     <!--卖家查看待退款订单-->
     <resultMap id="salerRefundOrders" type="java.util.Map">
         <result column="refundserialid" jdbcType="VARCHAR" property="refundserialid"/>
-        <result column="productid" jdbcType="VARCHAR" property="productid"/>
         <result column="orderid" jdbcType="VARCHAR" property="orderid"/>
+        <result column="productid" jdbcType="VARCHAR" property="productid"/>
         <result column="amount" jdbcType="VARCHAR" property="amount"/>
+        <result column="agreestate" jdbcType="VARCHAR" property="agreestate"/>
         <result column="pronumber" jdbcType="INTEGER" property="pronumber"/>
         <result column="unitprice" jdbcType="VARCHAR" property="unitprice"/>
         <result column="productname" jdbcType="VARCHAR" property="productname"/>
+        <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
         <result column="productgrade" jdbcType="VARCHAR" property="productgrade"/>
         <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
+        <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
+        <result column="accountname" jdbcType="VARCHAR" property="accountname"/>
+        <result column="addressid" jdbcType="VARCHAR" property="addressid"/>
         <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
-        <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
+        <result column="createdatetime" jdbcType="VARCHAR" property="createdatetime"/>
     </resultMap>
     <select id="refundSerialsInCenter" parameterType="java.util.Map" resultMap="orderCenterObject">
-        select t1.refundserialid,t1.productid,t1.accountid,t1.applydatetime,t1.agreestate,t1.orderid,t1.itemid,t1.detail,t1.number,t1.amount,t2.unitprice,t2.productname,t2.valuescore,t2.productgrade,t2.fieldmeaning,t2.transportfee,t2.imagepath
-        from trefund t1,tproduct t2 where t1.productid = t2.productid and t1.accountid = #{refund.accountid} and t1.agreestate = #{refund.agreestate}
+        select t1.refundserialid,t1.productid,t1.accountid,t1.applydatetime,t1.agreestate,t1.orderid,t1.itemid,t1.detail,t1.number,t1.amount,t2.unitprice,t2.productname,t2.valuescore,t2.productgrade,t2.fieldmeaning,t2.imagepath,
+        ifnull((select a.transportfee from torders a where a.orderid = t1.orderid),0) as transportfee
+        from trefund t1,tproduct t2 where t1.productid = t2.productid and t1.accountid = #{refund.accountid}
+        and t1.applydatetime &gt; #{begin} and t1.applydatetime &lt; #{end}
+        order by t1.agreestate desc
         <if test="pager != null">limit #{pager.startLine},#{pager.offset}</if>
     </select>
 
@@ -119,15 +127,16 @@
     </update>
 
     <select id="merchantQueryRefundOrders" parameterType="java.util.Map" resultMap="salerRefundOrders">
-        select b.*,a.pronumber,d.unitprice,d.productname,d.imagepath,d.productgrade,d.fieldmeaning from torderitem a ,(
-        select t1.refundserialid,t1.orderid,t1.productid,t1.amount from trefund t1 ,tproductbelong t2 where t1.productid = t2.productid and t2.accountid = #{accountid} and t1.agreestate = '4'
-        ) b ,torders c,tproduct d
-        where a.orderid = b.orderid and a.productid = b.productid and b.orderid = c.orderid  and b.productid = d.productid
-        and c.orderstate = '3' and c.isvalid = '1'
+        select b.*,a.pronumber,d.unitprice,d.productname,d.imagepath,d.productgrade,d.fieldmeaning,c.accountid,e.accountname,c.addressid,c.transportfee,c.createdatetime
+        from torderitem a ,(
+        select t1.refundserialid,t1.orderid,t1.productid,t1.amount,t1.agreestate from trefund t1 ,tproductbelong t2 where t1.productid = t2.productid and t2.accountid = #{accountid} and t1.agreestate = '4'
+        ) b ,torders c,tproduct d,taccount e
+        where a.orderid = b.orderid and a.productid = b.productid and b.orderid = c.orderid  and b.productid = d.productid and c.accountid = e.accountid
+        and c.isvalid = '1'
         <if test="pager != null">limit #{pager.startLine},#{pager.offset}</if>
     </select>
 
     <select id="queryRefundBySerialid" resultMap="RefundModel">
-        select * from trefund where serialid = #{_parameter}
+        select * from trefund where refundserialid = #{_parameter}
     </select>
 </mapper>

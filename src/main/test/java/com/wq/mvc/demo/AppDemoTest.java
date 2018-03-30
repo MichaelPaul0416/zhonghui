@@ -291,5 +291,31 @@ public class AppDemoTest {
 //        sqlSession.insert("insertRefundCert",refundCerts);
         sqlSession.commit();
     }
+
+    @Test
+    public void query1(){
+        Map<String,Object> params = new HashMap<>();
+        Refund refund = new Refund();
+        refund.setAccountid("58c312bb54444038");
+        params.put("refund",refund);
+        params.put("end",StringUtil.currentDateTime());
+        params.put("begin",DateUtil.caculateDate(-30));
+        List<Map<String,Object>> list = sqlSession.selectList("refundSerialsInCenter",params);
+        System.out.println(list);
+    }
+
+    @Test
+    public void insert1(){
+        List<AuditingPros> auditingProsList = new ArrayList<>();
+        AuditingPros auditingPros = new AuditingPros();
+        auditingPros.setProductid("232342");
+        auditingPros.setSerialid(StringUtil.generateUUID());
+        auditingPros.setApplydatetime(StringUtil.currentDateTime());
+        auditingPros.setAuditstate("0");
+        auditingPros.setRejectreason("");
+        auditingProsList.add(auditingPros);
+
+        sqlSession.insert("applyAudit4Products",auditingProsList);
+    }
 }
 
