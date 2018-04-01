@@ -59,6 +59,7 @@
         <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
         <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
         <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
+        <result column="addressid" jdbcType="VARCHAR" property="addressid"/>
     </resultMap>
 
     <!--卖家查看待退款订单-->
@@ -81,11 +82,14 @@
         <result column="createdatetime" jdbcType="VARCHAR" property="createdatetime"/>
     </resultMap>
     <select id="refundSerialsInCenter" parameterType="java.util.Map" resultMap="orderCenterObject">
-        select t1.refundserialid,t1.productid,t1.accountid,t1.applydatetime,t1.agreestate,t1.orderid,t1.itemid,t1.detail,t1.number,t1.amount,t2.unitprice,t2.productname,t2.valuescore,t2.productgrade,t2.fieldmeaning,t2.imagepath,
+        select a.*,b.addressid from (
+        select
+        t1.refundserialid,t1.productid,t1.accountid,t1.applydatetime,t1.agreestate,t1.orderid,t1.itemid,t1.detail,t1.number,t1.amount,t2.unitprice,t2.productname,t2.valuescore,t2.productgrade,t2.fieldmeaning,t2.imagepath,
         ifnull((select a.transportfee from torders a where a.orderid = t1.orderid),0) as transportfee
         from trefund t1,tproduct t2 where t1.productid = t2.productid and t1.accountid = #{refund.accountid}
         and t1.applydatetime &gt; #{begin} and t1.applydatetime &lt; #{end}
-        order by t1.agreestate desc
+        ) a,torders b where a.orderid = b.orderid
+        order by a.agreestate desc
         <if test="pager != null">limit #{pager.startLine},#{pager.offset}</if>
     </select>
 

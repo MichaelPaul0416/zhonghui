@@ -446,9 +446,13 @@ public class ProductController {
             if(product != null){
                 Integer number = Integer.parseInt(index);
                 String[] paths = String.valueOf(product.get("imagepath")).split("\\|");
-                image = new File(paths[number]);
-                if(!image.exists()){
-                    image = new File(serviceConfigBean.getDefaultImagePath());
+                if(number >= paths.length){
+                    throw new APIException("请求的图片不存在");
+                }else {
+                    image = new File(paths[number]);
+                    if (!image.exists()) {
+                        image = new File(serviceConfigBean.getDefaultImagePath());
+                    }
                 }
             }else {
                 image = new File(serviceConfigBean.getDefaultImagePath());
