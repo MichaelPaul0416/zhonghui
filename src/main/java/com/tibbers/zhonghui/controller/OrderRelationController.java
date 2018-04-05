@@ -1,7 +1,7 @@
 package com.tibbers.zhonghui.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.sun.istack.internal.Nullable;
+
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.model.Orders;
@@ -75,7 +75,7 @@ public class OrderRelationController {
 
     @RequestMapping("/salerOrderCenter")
     @ResponseBody
-    public String salerOrderCenter(String accountid,@Nullable String orderstate,@Nullable String startLine,@Nullable String offset){
+    public String salerOrderCenter(String accountid, String orderstate, String startLine, String offset){
         APIResponse apiResponse;
         Response response;
 
@@ -109,7 +109,7 @@ public class OrderRelationController {
 
     @RequestMapping("/accountOrderCenter")
     @ResponseBody
-    public String accountOrderCenter(String accountid, @Nullable String orderstate,@Nullable String startLine,@Nullable String offset){
+    public String accountOrderCenter(String accountid,  String orderstate, String startLine, String offset){
         APIResponse apiResponse;
         Response response;
 

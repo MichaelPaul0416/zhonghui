@@ -1,7 +1,7 @@
 package com.tibbers.zhonghui.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.sun.istack.internal.Nullable;
+
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.model.common.APIResponse;
@@ -130,7 +130,7 @@ public class ShoppingCarController {
 
     @RequestMapping("/queryListByPager")
     @ResponseBody
-    public String queryListByPager(String accountid, String salestate, String deleteflag,@Nullable String startLine,@Nullable String offset){
+    public String queryListByPager(String accountid, String salestate, String deleteflag,String startLine,String offset){
         APIResponse apiResponse ;
         Response response;
         if(!StringUtils.isEmpty(accountid) && !StringUtils.isEmpty(salestate)){

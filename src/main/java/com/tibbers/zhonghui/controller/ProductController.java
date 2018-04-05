@@ -1,7 +1,7 @@
 package com.tibbers.zhonghui.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.sun.istack.internal.Nullable;
+
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.config.ServiceConfigBean;
@@ -84,7 +84,7 @@ public class ProductController {
 
     @RequestMapping("/salerQueryProductsByState")
     @ResponseBody
-    public String salerQueryProductsByState(String accountInfo,String productInfo,String salestates,@Nullable String startLine,@Nullable String offset){
+    public String salerQueryProductsByState(String accountInfo,String productInfo,String salestates, String startLine, String offset){
         APIResponse apiResponse;
         Response response;
 
@@ -140,7 +140,7 @@ public class ProductController {
 
     @RequestMapping("/vipQueryUploadProducts")
     @ResponseBody
-    public String vipQueryUploadProducts(@Nullable String productinfo,String accountinfo,@Nullable String startLine,@Nullable String offset){
+    public String vipQueryUploadProducts( String productinfo,String accountinfo, String startLine, String offset){
         APIResponse apiResponse;
         Response response;
         if(StringUtil.argsNotEmpty(new String[]{accountinfo})){
@@ -233,10 +233,10 @@ public class ProductController {
 
     @RequestMapping("/insertBatchProduct")
     @ResponseBody
-    public String insertBatchProduct(String productList,@Nullable String accountid){
+    public String insertBatchProduct(String productList, String accountid){
         APIResponse apiResponse;
         Response response;
-        if(!StringUtil.isEmpty(productList)){
+        if(!StringUtil.isEmpty(productList) && !StringUtil.isEmpty(accountid)){
             try{
                 Map<String,List<String>> map = productService.insertProductsBatch(productList,accountid);
                 Map<String,Object> responseMap = new HashMap<>();
@@ -251,7 +251,7 @@ public class ProductController {
                 apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE, AppConstants.REQUEST_STATUS_MESSAGE, response);
             }
         }else {
-            response = new Response(false,"没有传入产品的批量信息");
+            response = new Response(false,"产品的批量信息productList以及产品归属者accountid必传");
             apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
         }
 
@@ -390,7 +390,7 @@ public class ProductController {
 
     @RequestMapping("/queryByProductStates")
     @ResponseBody
-    public String queryByProductStates(String states, @Nullable String startLine,@Nullable String offset){
+    public String queryByProductStates(String states,  String startLine, String offset){
         APIResponse apiResponse;
         Response response;
         if(!StringUtils.isEmpty(states)){

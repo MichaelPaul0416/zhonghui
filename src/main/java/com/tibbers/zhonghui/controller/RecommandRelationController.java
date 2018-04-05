@@ -1,7 +1,7 @@
 package com.tibbers.zhonghui.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.sun.istack.internal.Nullable;
+
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.model.Recommand;
@@ -100,7 +100,7 @@ public class RecommandRelationController {
 
     @RequestMapping("/queryRecommandByPager")
     @ResponseBody
-    public String queryRecommandByPager(@Nullable String startLine,@Nullable String offset){
+    public String queryRecommandByPager( String startLine, String offset){
         APIResponse apiResponse;
         Response response;
         Pager pager = null;
@@ -122,7 +122,7 @@ public class RecommandRelationController {
 
     @RequestMapping("/queryMyRecommandAccounts")
     @ResponseBody
-    public String queryMyRecommandAccounts(String accountid,@Nullable String startLine,@Nullable String offset){
+    public String queryMyRecommandAccounts(String accountid, String startLine, String offset){
         APIResponse apiResponse;
         Response response;
         if(!StringUtil.isEmpty(accountid)){

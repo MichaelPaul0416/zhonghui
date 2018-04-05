@@ -1,7 +1,7 @@
 package com.tibbers.zhonghui.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.sun.istack.internal.Nullable;
+
 import com.tibbers.zhonghui.annotation.TokenListen;
 import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.model.Administrator;
@@ -41,7 +41,7 @@ public class AdministratorController {
     @TokenListen
     @RequestMapping("/sumTotalRecommander")
     @ResponseBody
-    public String sumTotalRecommander(HttpServletRequest request, @Nullable String startLine, @Nullable String offset){
+    public String sumTotalRecommander(HttpServletRequest request,  String startLine,  String offset){
         APIResponse apiResponse;
         Response response;
         String actionAdminid = request.getParameter("actionAdminid");
@@ -74,7 +74,7 @@ public class AdministratorController {
     @TokenListen
     @RequestMapping("/accountCustomRecordInFewMonths")
     @ResponseBody
-    public String accountCustomRecordInFewMonths(String actionAdminid, String offsetMonth, @Nullable String startLine, @Nullable String offset){
+    public String accountCustomRecordInFewMonths(String actionAdminid, String offsetMonth,  String startLine,  String offset){
         APIResponse apiResponse ;
         Response response;
 
@@ -106,7 +106,7 @@ public class AdministratorController {
     @TokenListen
     @RequestMapping("/hotProductsLastDays")
     @ResponseBody
-    public String hotProductsLastDays(String actionAdminid, String offsetDate, @Nullable String startLine, @Nullable String offset){
+    public String hotProductsLastDays(String actionAdminid, String offsetDate,  String startLine,  String offset){
         APIResponse apiResponse;
         Response response;
 
@@ -309,7 +309,7 @@ public class AdministratorController {
 
     @RequestMapping("/queryAccountTrades")
     @ResponseBody
-    public String queryAccountTrades(String accountid, @Nullable String startLine,@Nullable String offset){
+    public String queryAccountTrades(String accountid,  String startLine, String offset){
         APIResponse apiResponse;
         Response response;
 

@@ -1,7 +1,7 @@
 package com.tibbers.zhonghui.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.sun.istack.internal.Nullable;
+
 import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.model.WithDraw;
 import com.tibbers.zhonghui.model.common.APIResponse;
@@ -90,7 +90,7 @@ public class WithDrawController {
 
     @RequestMapping("/queryWithDraws")
     @ResponseBody
-    public String queryWithDraws(String adminid, @Nullable String withdrawinfo, @Nullable String startLine,@Nullable String offset){
+    public String queryWithDraws(String adminid,  String withdrawinfo,  String startLine, String offset){
         APIResponse apiResponse;
         Response response;
         try {

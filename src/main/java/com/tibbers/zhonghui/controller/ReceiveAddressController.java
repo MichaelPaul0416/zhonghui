@@ -1,7 +1,7 @@
 package com.tibbers.zhonghui.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.sun.istack.internal.Nullable;
+
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.model.ReceiveAddress;
@@ -36,7 +36,7 @@ public class ReceiveAddressController {
 
     @RequestMapping("/addOneReceiveAddress")
     @ResponseBody
-    public String addOneReceiveAddress(String addressinfo,@Nullable String isdefault){
+    public String addOneReceiveAddress(String addressinfo, String isdefault){
         APIResponse apiResponse;
         Response response;
         if(!StringUtils.isEmpty(addressinfo)){
@@ -109,7 +109,7 @@ public class ReceiveAddressController {
 
     @RequestMapping("/queryAddressByPager")
     @ResponseBody
-    public String queryAddressByPager(String accountid,@Nullable String startLine,@Nullable String offset){
+    public String queryAddressByPager(String accountid, String startLine, String offset){
         APIResponse apiResponse;
         Response response;
         if(!StringUtils.isEmpty(accountid)){

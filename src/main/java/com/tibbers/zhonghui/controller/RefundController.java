@@ -1,7 +1,7 @@
 package com.tibbers.zhonghui.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.sun.istack.internal.Nullable;
+
 import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.model.common.APIResponse;
 import com.tibbers.zhonghui.model.common.Response;
@@ -70,7 +70,7 @@ public class RefundController {
 
     @RequestMapping("/auditRefundApply")
     @ResponseBody
-    public String auditRefundApply(String refundserialid, String refundstate, @Nullable String rejectreason){
+    public String auditRefundApply(String refundserialid, String refundstate,  String rejectreason){
         APIResponse apiResponse ;
         Response response;
 

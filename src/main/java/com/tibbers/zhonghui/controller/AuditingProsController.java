@@ -1,7 +1,7 @@
 package com.tibbers.zhonghui.controller;
 
 import com.alibaba.fastjson.JSONObject;
-import com.sun.istack.internal.Nullable;
+
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.model.common.APIResponse;
@@ -81,7 +81,7 @@ public class AuditingProsController {
 
     @RequestMapping("/querySerialByAuditState")
     @ResponseBody
-    public String querySerialByAuditState(String auditstate, @Nullable String startLine,@Nullable String offset){
+    public String querySerialByAuditState(String auditstate,  String startLine, String offset){
         APIResponse apiResponse;
         Response response ;
         if(!StringUtil.isEmpty(auditstate)){

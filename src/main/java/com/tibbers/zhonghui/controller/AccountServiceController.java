@@ -2,7 +2,7 @@ package com.tibbers.zhonghui.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.google.gson.Gson;
-import com.sun.istack.internal.Nullable;
+
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.config.ServiceConfigBean;
@@ -187,7 +187,7 @@ public class AccountServiceController {
 
     @RequestMapping("/queryScore")
     @ResponseBody
-    public String queryScore(@Nullable String accountid){
+    public String queryScore(String accountid){
         APIResponse apiResponse;
         Response response;
         try {
@@ -356,7 +356,7 @@ public class AccountServiceController {
 
     @RequestMapping("/queryAccountTradeDetails")
     @ResponseBody
-    public String queryAccountTradeDetails(String accountid, @Nullable String startLine, @Nullable String offset){
+    public String queryAccountTradeDetails(String accountid,  String startLine,  String offset){
         APIResponse apiResponse ;
         Response response;
         if(!StringUtil.isEmpty(accountid)){
@@ -384,7 +384,7 @@ public class AccountServiceController {
 
     @RequestMapping("/adminQueryAccounts")
     @ResponseBody
-    public String adminQueryAccounts(String isvip,String termid,@Nullable String startLine,@Nullable String offset){
+    public String adminQueryAccounts(String isvip,String termid, String startLine, String offset){
         APIResponse apiResponse ;
         Response response;
 
