@@ -128,7 +128,7 @@ public class WxLoginUtil {
         if (!targetFile.exists()) {
             targetFile.mkdirs();
         }
-        String finalPath = path + "\\" + accountid + ".jpg";
+        String finalPath = path + "/" + accountid + ".jpg";
         FileOutputStream out = new FileOutputStream(finalPath);
 
         byte[] buffer = new byte[8192];
@@ -163,7 +163,7 @@ public class WxLoginUtil {
                     if (!directory.exists()) {
                         directory.mkdirs();
                     }
-                    String path = basePath + "\\" + file.getOriginalFilename();
+                    String path = basePath + "/" + file.getOriginalFilename();
                     //上传
                     file.transferTo(new File(path));
 

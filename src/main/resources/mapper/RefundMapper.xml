@@ -77,6 +77,8 @@
         <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
         <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
         <result column="accountname" jdbcType="VARCHAR" property="accountname"/>
+        <result column="isvip" jdbcType="VARCHAR" property="isvip"/>
+        <result column="custtype" jdbcType="VARCHAR" property="custtype"/>
         <result column="addressid" jdbcType="VARCHAR" property="addressid"/>
         <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
         <result column="createdatetime" jdbcType="VARCHAR" property="createdatetime"/>
@@ -131,7 +133,7 @@
     </update>
 
     <select id="merchantQueryRefundOrders" parameterType="java.util.Map" resultMap="salerRefundOrders">
-        select b.*,a.pronumber,d.unitprice,d.productname,d.imagepath,d.productgrade,d.fieldmeaning,c.accountid,e.accountname,c.addressid,c.transportfee,c.createdatetime
+        select b.*,a.pronumber,d.unitprice,d.productname,d.imagepath,d.productgrade,d.fieldmeaning,c.accountid,e.accountname,e.isvip,e.custtype,c.addressid,c.transportfee,c.createdatetime
         from torderitem a ,(
         select t1.refundserialid,t1.orderid,t1.productid,t1.amount,t1.agreestate from trefund t1 ,tproductbelong t2 where t1.productid = t2.productid and t2.accountid = #{accountid} and t1.agreestate = '4'
         ) b ,torders c,tproduct d,taccount e

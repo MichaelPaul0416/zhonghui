@@ -78,6 +78,10 @@
         <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
         <result column="amount" jdbcType="VARCHAR" property="amount"/>
         <result column="paybybalance" jdbcType="VARCHAR" property="paybybalance"/>
+        <result column="accountname" jdbcType="VARCHAR" property="accountname"/>
+        <result column="personid" jdbcType="VARCHAR" property="personid"/>
+        <result column="isvip" jdbcType="VARCHAR" property="isvip"/>
+        <result column="custtype" jdbcType="VARCHAR" property="custtype"/>
     </resultMap>
 
     <resultMap id="salerAmountOrder" type="java.util.Map">
@@ -189,7 +193,7 @@
     </select>
 
     <select id="salerOrderCenter" parameterType="java.util.Map" resultMap="salerOrderCenter">
-        select a.*,b.accountname,b.personid from (
+        select a.*,b.accountname,b.personid,b.isvip,b.custtype from (
         select
         t1.accountid,t1.orderid,t1.orderstate,t1.expressno,t1.expresscompany,t1.freetransport,t1.transportfee,t1.createdatetime,t2.productid,t4.imagepath,t1.addressid,t4.productname,t4.unitprice,t4.productgrade,t4.fieldmeaning,t2.pronumber,t1.amount,t1.paybybalance
         from torders t1,torderitem t2,tproductbelong t3 ,tproduct t4

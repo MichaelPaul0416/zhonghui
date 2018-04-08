@@ -132,16 +132,16 @@ public class ProductServiceImpl implements IProductService {
 //                        }
                     }
                 }else {//之前有上传
-//                    if(StringUtil.isEmpty(headImage)){//没有重新上传产品图片
+                    if(StringUtil.isEmpty(headImage)){//没有重新上传产品图片
                         product.setImagepath(imagepath + "|" + detailPaths);
                         logger.info(String.format("产品描述图片路径[%s]",detailPaths));
-//                    }else {//上传了产品图片
-//                        if(StringUtil.isEmpty(detailPaths)){
-//                            product.setImagepath(headImage + "|" + imagepath);
-//                        }else {
-//                            product.setImagepath(headImage + "|" + imagepath + "|" + detailPaths);
-//                        }
-//                    }
+                    }else {//上传了产品图片
+                        if(StringUtil.isEmpty(detailPaths)){
+                            product.setImagepath(headImage + "|" + imagepath);
+                        }else {
+                            product.setImagepath(headImage + "|" + imagepath + "|" + detailPaths);
+                        }
+                    }
                 }
 
                 updatePros.add(product);
@@ -300,7 +300,7 @@ public class ProductServiceImpl implements IProductService {
             StringBuilder builder = new StringBuilder();
             List<Product> products = new ArrayList<>();
             for(MultipartFile file : files){
-                String storePath = localPath + "\\" + file.getOriginalFilename();
+                String storePath = localPath + "/" + file.getOriginalFilename();
                 FileUtils.copyInputStreamToFile(file.getInputStream(),new File(storePath));
                 logger.info(String.format("文件[%s]落地完成",storePath));
                 builder.append(storePath).append("|");

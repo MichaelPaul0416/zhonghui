@@ -20,26 +20,26 @@
           factory-method="getInstance" init-method="initialize" destroy-method="shutDown">
         <property name="servers">
             <list>
-                <value>${memcached.server}</value>
+                <value>127.0.0.1:12345</value>
             </list>
         </property>
         <property name="initConn">
-            <value>${memcached.initConn}</value>
+            <value>20</value>
         </property>
         <property name="minConn">
-            <value>${memcached.minConn}</value>
+            <value>10</value>
         </property>
         <property name="maxConn">
-            <value>${memcached.maxConn}</value>
+            <value>50</value>
         </property>
         <property name="maintSleep">
-            <value>${memcached.maintSleep}</value>
+            <value>3000</value>
         </property>
         <property name="nagle">
-            <value>${memcached.nagle}</value>
+            <value>false</value>
         </property>
         <property name="socketTO">
-            <value>${memcached.socketTO}</value>
+            <value>3000</value>
         </property>
     </bean>
 </beans>
