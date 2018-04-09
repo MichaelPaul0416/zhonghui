@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.tibbers.zhonghui.dao.IRefundDao">
     <resultMap id="RefundResult" type="java.util.Map">
-        <result column="refundserailid" jdbcType="VARCHAR" property="refundserailid"/>
+        <result column="refundserialid" jdbcType="VARCHAR" property="refundserialid"/>
         <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
         <result column="accountname" jdbcType="VARCHAR" property="accountname"/>
         <result column="orderid" jdbcType="VARCHAR" property="orderid"/>
@@ -23,7 +23,7 @@
     </resultMap>
 
     <resultMap id="RefundModel" type="com.tibbers.zhonghui.model.Refund">
-        <result column="refundserailid" jdbcType="VARCHAR" property="refundserailid"/>
+        <result column="refundserialid" jdbcType="VARCHAR" property="refundserialid"/>
         <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
         <result column="orderid" jdbcType="VARCHAR" property="orderid"/>
         <result column="productid" jdbcType="VARCHAR" property="productid"/>
@@ -122,14 +122,14 @@
 
     <update id="uploadRefundSerialInfo" parameterType="com.tibbers.zhonghui.model.Refund">
         update trefund set
-        <if test="amount != null and !&quot;&quot;.equals(amount)">amout = #{amount},</if>
+        <if test="amount != null and !&quot;&quot;.equals(amount)">amount = #{amount},</if>
         <if test="agreestate != null and !&quot;&quot;.equals(agreestate)">agreestate = #{agreestate},</if>
         <if test="dealdatetime != null and !&quot;&quot;.equals(dealdatetime)">dealdatetime = #{dealdatetime},</if>
         <if test="agreedatetime != null and !&quot;&quot;.equals(agreedatetime)">agreedatetime = #{agreedatetime},</if>
         <if test="rejectreason != null and !&quot;&quot;.equals(rejectreason)">rejectreason = #{rejectreason},</if>
         <if test="reverse1 != null ">reverse1 = #{reverse1},</if>
         <if test="reverse2 != null ">reverse2 = #{reverse2}</if>
-        where refundserailid = #{refundserailid}
+        where refundserialid = #{refundserialid}
     </update>
 
     <select id="merchantQueryRefundOrders" parameterType="java.util.Map" resultMap="salerRefundOrders">

@@ -6,7 +6,7 @@
 
     <resultMap id="RefundCertResult" type="java.util.Map">
         <result column="addressid" jdbcType="VARCHAR" property="addressid"/>
-        <result column="refundserailid" jdbcType="VARCHAR" property="refundserailid"/>
+        <result column="refundserialid" jdbcType="VARCHAR" property="refundserialid"/>
         <result column="certphotoid" jdbcType="VARCHAR" property="certphotoid"/>
         <result column="certphotopath" jdbcType="VARCHAR" property="certphotopath"/>
         <result column="uploaddatetime" jdbcType="VARCHAR" property="uploaddatetime"/>

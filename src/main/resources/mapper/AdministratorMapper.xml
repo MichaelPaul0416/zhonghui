@@ -50,7 +50,7 @@
         <result column="accountname" jdbcType="VARCHAR" property="accountname"/>
         <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
         <result column="bindphone" jdbcType="VARCHAR" property="bindphone"/>
-        <result column="score" jdbcType="INTEGER" property="score"/>
+        <result column="score" jdbcType="VARCHAR" property="score"/>
         <result column="isvip" jdbcType="VARCHAR" property="isvip"/>
         <result column="custtype" jdbcType="VARCHAR" property="custtype"/>
         <result column="accobalance" jdbcType="VARCHAR" property="accobalance"/>
@@ -65,7 +65,7 @@
         <result column="accountname" jdbcType="VARCHAR" property="accountname"/>
         <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
         <result column="bindphone" jdbcType="VARCHAR" property="bindphone"/>
-        <result column="score" jdbcType="INTEGER" property="score"/>
+        <result column="score" jdbcType="VARCHAR" property="score"/>
         <result column="isvip" jdbcType="VARCHAR" property="isvip"/>
         <result column="custtype" jdbcType="VARCHAR" property="custtype"/>
         <result column="accobalance" jdbcType="VARCHAR" property="accobalance"/>

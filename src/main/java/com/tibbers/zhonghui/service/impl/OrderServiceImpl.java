@@ -88,8 +88,9 @@ public class OrderServiceImpl implements IOrderService {
             //根据payforbalance判断是余额支付还是微信支付，余额支付的话，查询是否有该账户，有的话继续
             Orders orders = JSONObject.parseObject(orderInfo,Orders.class);
             String openid;
+            Account account = null;
             if("1".equals(orders.getPaybybalance())) {//0--其他支付，1--余额支付
-                Account account = accountService.queryByAccountid(orders.getAccountid());
+                account = accountService.queryByAccountid(orders.getAccountid());
                 if(account != null && !StringUtil.isEmpty(account.getAccountname())){
                     openid = account.getAccountid();
                 }else {
@@ -139,6 +140,8 @@ public class OrderServiceImpl implements IOrderService {
 
                         updateProductRemainder(orderItemsList,orders.getOrderid());
 
+                        //更新用户的账户积分
+                        updateAccoutScoreByBalance(account,orders.getAmount());
                         payResult.setOrderid(orders.getOrderid());
                         return payResult;
                     }catch (Exception e){
@@ -224,6 +227,17 @@ public class OrderServiceImpl implements IOrderService {
             }
         }
 
+    }
+
+    private void updateAccoutScoreByBalance(Account queryAccount,String amount){
+        Account account = new Account();
+        account.setAccountid(queryAccount.getAccountid());
+        String oldScore = queryAccount.getScore();
+        String newScore = StringUtil.addNumber(oldScore,amount);
+        account.setScore(newScore);
+
+        accountService.updateAccountInfo(account);
+        logger.info(String.format("用户[%s]的积分信息通过余额支付更新成功，当前积分[%s]",account.getAccountid(),account.getScore()));
     }
 
     private void updateProductRemainder(List<OrderItems> orderItems,String orderid){
@@ -365,47 +379,64 @@ public class OrderServiceImpl implements IOrderService {
             WxPayOrderNotifyResult result = this.payService.parseOrderNotifyResult(xmlData);
             logger.info(String.format("微信支付异步通知结果[%s]",result));
             if(AppConstants.RETURN_CODE.equals(result.getReturnCode())){
-                CapitalSerial capitalSerial = new CapitalSerial();
                 String orderid = result.getOutTradeNo();//商户订单号
-                capitalSerial.setOrderid(orderid);
-                capitalSerial.setCapitaldatetime(StringUtil.currentDateTime());
+                Map<String,Object> map = new HashMap<>();
+                Orders order = new Orders();
+                order.setOrderid(orderid);
+                map.put("orders",order);
+                List<Map<String,String>> querys = ordersDao.queryOrdersByPager(map);
 
-                Orders orders = new Orders();
-                orders.setOrderid(orderid);
-                if(AppConstants.RESULT_CODE.equals(result.getResultCode())){
-                    //更新支付流水状态
-                    capitalSerial.setState("1");
-                    capitalSerial.setThirdpartmsg("微信支付成功");
+                map.remove("orders");
+                CapitalSerial queryCapitalSerial = new CapitalSerial();
+                queryCapitalSerial.setOrderid(orderid);
+                map.put("capital",queryCapitalSerial);
+                List<CapitalSerial> capitalSerials = capitalSerialDao.queryCapitalSerialByPager(map);
 
-                    orders.setIsvalid("1");
-                    //修改用户账户的积分(先根据orderid获取所有的产品，计算总积分，然后更新)
-                    changeAccountScore(orderid);
+                if("1".equals(querys.get(0).get("isvalid")) && "1".equals(capitalSerials.get(0).getState())) {
 
-                    //修改推荐收益流水信息(根据orderid)
-                    updateRecommandIncome(orderid);
+                    CapitalSerial capitalSerial = new CapitalSerial();
+                    capitalSerial.setOrderid(orderid);
+                    capitalSerial.setCapitaldatetime(StringUtil.currentDateTime());
 
-                    //新增收益信息到账户余额中--对应recommandincome表中的一条记录
-                    String recommandFee = updateAccountBanlaceAsRecommander(orderid);
+                    Orders orders = new Orders();
+                    orders.setOrderid(orderid);
+                    if (AppConstants.RESULT_CODE.equals(result.getResultCode())) {
+                        //更新支付流水状态
+                        capitalSerial.setState("1");
+                        capitalSerial.setThirdpartmsg("微信支付成功");
 
-                    //新增商户平台的订单提成
-                    double fee = addOrderPrecentage(orderid,result.getTotalFee());
-                    caculateFinalIncome(fee, Double.parseDouble(recommandFee),result);
+                        orders.setIsvalid("1");
+                        //修改用户账户的积分(先根据orderid获取所有的产品，计算总积分，然后更新)
+                        changeAccountScore(orderid);
+
+                        //修改推荐收益流水信息(根据orderid)
+                        updateRecommandIncome(orderid);
+
+                        //新增收益信息到账户余额中--对应recommandincome表中的一条记录
+                        String recommandFee = updateAccountBanlaceAsRecommander(orderid);
+
+                        //新增商户平台的订单提成
+                        double fee = addOrderPrecentage(orderid, result.getTotalFee());
+                        caculateFinalIncome(fee, Double.parseDouble(recommandFee), result);
 
 
-                }else{
-                    capitalSerial.setState("0");
-                    capitalSerial.setThirdpartmsg("微信支付失败");
+                    } else {
+                        capitalSerial.setState("0");
+                        capitalSerial.setThirdpartmsg("微信支付失败");
 
-                    orders.setIsvalid("0");
+                        orders.setIsvalid("0");
+                    }
+                    //更新流水信息
+                    capitalSerialDao.updateCapitalSerialInfo(capitalSerial);
+                    //修改订单状态
+                    ordersDao.updatePartOrderMsg(orders);
+
+                    logger.info(String.format("订单[%s]的流水信息更新成功[%s]", orderid, capitalSerial));
+
+                    response = AppConstants.NOTIFY_RESPONSE_SUCCESS;
+                }else {
+                    response = String.format("支付扣款[%s]重复通知",result.getTransactionId());
                 }
-                //更新流水信息
-                capitalSerialDao.updateCapitalSerialInfo(capitalSerial);
-                //修改订单状态
-                ordersDao.updatePartOrderMsg(orders);
-
-                logger.info(String.format("订单[%s]的流水信息更新成功[%s]",orderid,capitalSerial));
-
-                response = AppConstants.NOTIFY_RESPONSE_SUCCESS;
             }else{
                 response = String.format(AppConstants.NOTIFY_RESPONSE_FAILED_TEMPLATE,"报文为空");
             }
@@ -644,18 +675,18 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     private void changeAccountScore(String orderid) {
-        Map<String,Object> params = new HashMap<>();
-        OrderItems orderItems = new OrderItems();
-        orderItems.setOrderid(orderid);
-        params.put("orderitem",orderItems);
+//        Map<String,Object> params = new HashMap<>();
+//        OrderItems orderItems = new OrderItems();
+//        orderItems.setOrderid(orderid);
+//        params.put("orderitem",orderItems);
 
-        List<OrderItems> orderItemss = orderItemsDao.queryItemsByPager(params);
-        int totalScore = 0;
-        for(OrderItems items : orderItemss){
-            String productid = items.getProductid();
-            Map<String,Object> product = productDao.queryByProductId(productid);
-            totalScore += Integer.parseInt(String.valueOf(product.get("valuescore")));
-        }
+//        List<OrderItems> orderItemss = orderItemsDao.queryItemsByPager(params);
+//        int totalScore = 0;
+//        for(OrderItems items : orderItemss){
+//            String productid = items.getProductid();
+//            Map<String,Object> product = productDao.queryByProductId(productid);
+//            totalScore += Integer.parseInt(String.valueOf(product.get("valuescore")));
+//        }
         Map<String,Object> map = new HashMap<>();
         Orders orderQuery = new Orders();
         orderQuery.setOrderid(orderid);
@@ -663,9 +694,13 @@ public class OrderServiceImpl implements IOrderService {
         List<Map<String,String>> targetOrders = ordersDao.queryOrdersByPager(map);
         String accountid = targetOrders.get(0).get("accountid");
 
+        Account queryAccount = accountService.queryByAccountid(accountid);
+        String oldScore = queryAccount.getScore();
+        logger.info(String.format("根据账户id[%s]查询到原先的积分信息[%s]",queryAccount.getAccountid(),oldScore));
+
         Account account = new Account();
         account.setAccountid(accountid);
-        account.setScore((totalScore));
+        account.setScore(StringUtil.addNumber(oldScore,targetOrders.get(0).get("amount")));
         accountService.updateAccountInfo(account);
         logger.info(String.format("账户[%s]积分更新成功[%s]",accountid,account));
     }

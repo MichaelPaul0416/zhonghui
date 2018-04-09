@@ -11,7 +11,7 @@ public class Account {
     private String accountname;
     private String imagepath;
     private String bindphone;
-    private int score;
+    private String score;
     private String isvip;
     private String custtype;
     private String accobalance;
@@ -103,11 +103,11 @@ public class Account {
         this.bindphone = bindphone;
     }
 
-    public int getScore() {
+    public String getScore() {
         return score;
     }
 
-    public void setScore(int score) {
+    public void setScore(String score) {
         this.score = score;
     }
 

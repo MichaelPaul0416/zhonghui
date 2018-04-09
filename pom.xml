@@ -12,7 +12,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
         <!-- spring版本 -->
-        <spring.version>4.2.5.RELEASE</spring.version>
+        <spring.version>4.2.6.RELEASE</spring.version>
         <!-- mybatis版本 -->
         <mybatis.version>3.2.8</mybatis.version>
         <!-- mysql驱动版本 -->
@@ -251,10 +251,6 @@
                 <configuration>
                     <source>1.8</source>
                     <target>1.8</target>
-                    <!--<compilerArguments>
-                        <verbose />
-                        <bootclasspath>${java.home}/jre/lib/rt.jar${path.separator}${java.home}/jre/lib/jce.jar</bootclasspath>
-                    </compilerArguments>-->
                 </configuration>
             </plugin>
         </plugins>

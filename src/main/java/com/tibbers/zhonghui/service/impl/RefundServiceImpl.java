@@ -114,6 +114,9 @@ public class RefundServiceImpl implements IRefundService {
     @Override
     public Map<String, String> salerAuditRefundSerial(String refundSerialid, String state, String rejectreason) {
         Refund refund = refundDao.queryRefundBySerialid(refundSerialid);
+        if(refund.getReverse2() == null){
+            refund.setReverse2(" ");
+        }
         if(refund == null || StringUtil.isEmpty(refund.getOrderid())){
             throw new APIException("退款流水" + refundSerialid + "不存在");
         }

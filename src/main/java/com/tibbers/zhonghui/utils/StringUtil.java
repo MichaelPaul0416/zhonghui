@@ -129,6 +129,11 @@ public class StringUtil {
         return String.valueOf(formatStr2Dobule(String.valueOf(multiply(amount,percent))));
     }
 
+    public static String addNumber(String addone,String addTwo){
+        BigDecimal one = new BigDecimal(addone);
+        return String.valueOf(one.add(new BigDecimal(addTwo)));
+    }
+
     public static void main(String args[]){
         System.out.println(caculteIncome(12.2,2));
     }
