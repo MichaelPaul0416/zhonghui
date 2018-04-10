@@ -156,8 +156,8 @@ public class RefundServiceImpl implements IRefundService {
                         logger.error(String.format("微信退款申请失败，错误原因[%s]",refundResult.getErrCodeDes()));
                         update.setAgreestate("3");
                     }
-                    refundDao.uploadRefundSerialInfo(refund);
-                    logger.info(String.format("退款流水[%s]状态更新成功",refund));
+                    refundDao.uploadRefundSerialInfo(update);
+                    logger.info(String.format("退款流水[%s]状态更新成功",update));
                     resultMap.put("errorcode",refundResult.getErrCode());
                     resultMap.put("errormsg",refundResult.getErrCodeDes());
                     resultMap.put("transaction_id",refundResult.getTransactionId());

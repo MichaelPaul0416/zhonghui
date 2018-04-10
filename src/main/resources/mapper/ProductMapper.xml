@@ -36,7 +36,25 @@
         <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
         <result column="salestate" jdbcType="VARCHAR" property="salestate"/>
         <result column="remaindernum" jdbcType="INTEGER" property="remaindernum"/>
+    </resultMap>
 
+    <resultMap id="queryProductCustomer" type="java.util.Map">
+        <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="unitprice" jdbcType="VARCHAR" property="unitprice"/>
+        <result column="productname" jdbcType="VARCHAR" property="productname"/>
+        <result column="note" jdbcType="VARCHAR" property="note"/>
+        <result column="itemid" jdbcType="VARCHAR" property="itemid"/>
+        <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
+        <result column="color" jdbcType="VARCHAR" property="color"/>
+        <result column="valuescore" jdbcType="INTEGER" property="valuescore"/>
+        <result column="transportfee" jdbcType="INTEGER" property="transportfee"/>
+        <result column="productgrade" jdbcType="VARCHAR" property="productgrade"/>
+        <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
+        <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
+        <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
+        <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
+        <result column="salestate" jdbcType="VARCHAR" property="salestate"/>
+        <result column="remaindernum" jdbcType="INTEGER" property="remaindernum"/>
     </resultMap>
 
     <resultMap id="productQuery" type="java.util.Map">
@@ -79,8 +97,8 @@
         update tproduct set imagepath = #{imagepath} where productid = #{productid}
     </update>
 
-    <select id="queryByProductId" parameterType="java.lang.String" resultMap="customProductQuery">
-        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.transportfee,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum
+    <select id="queryByProductId" parameterType="java.lang.String" resultMap="queryProductCustomer">
+        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.transportfee,t1.productgrade,t1.fieldmeaning,t1.transportfee,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum
         from tproduct t1,tproductbelong t2
         where t1.productid = t2.productid and t1.productid = #{_parameter}
     </select>

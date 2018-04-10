@@ -595,6 +595,40 @@ public class OrderServiceImpl implements IOrderService {
         return orders;
     }
 
+    @Override
+    public String queryOrderState(String orderid) {
+        String appid = wxPayConfiguration.getAppId();
+        String mch_id = wxPayConfiguration.getMchId();
+        String out_trade_no = orderid;
+        String nonce_str = StringUtil.randomStr(32);
+
+        Map<String,String> urlparams = new TreeMap<>();
+        urlparams.put("appid",appid);
+        urlparams.put("mch_id",mch_id);
+        urlparams.put("out_trade_no",out_trade_no);
+        urlparams.put("nonce_str",nonce_str);
+        urlparams.put("sign_type","MD5");
+
+        String contactParams = EncryptUtil.contactParams(urlparams);
+        contactParams += "key=" + wxPayConfiguration.getMchKey();
+        logger.info(String.format("param[%s]",contactParams));
+        String sign = EncryptUtil.encodeMD5String(contactParams);
+
+        StringBuilder builder = new StringBuilder();
+        builder.append("<xml>").append("<appid>").append(appid).append("</appid>");
+        builder.append("<mch_id>").append(mch_id).append("</mch_id>");
+        builder.append("<nonce_str>").append(nonce_str).append("</nonce_str>");
+        builder.append("<out_trade_no>").append(out_trade_no).append("</out_trade_no>");
+        builder.append("<sign>").append(sign).append("</sign>");
+        builder.append("<sign_type>").append("MD5").append("</sign_type>").append("</xml>");
+
+        logger.info("xml-->" + builder.toString());
+        Map<String,String> map = new HashMap<>();
+        map.put("xml",builder.toString());
+        String response = WxLoginUtil.sendPost("https://api.mch.weixin.qq.com/pay/orderquery",map);
+        return response;
+    }
+
     private String updateAccountBanlaceAsRecommander(String recommandserialid){
         RecommandIncome recommandIncome = new RecommandIncome();
         recommandIncome.setIncomeserialno(recommandserialid);

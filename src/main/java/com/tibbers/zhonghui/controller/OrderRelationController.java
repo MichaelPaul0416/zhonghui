@@ -194,4 +194,11 @@ public class OrderRelationController {
             }
         }
     }
+
+    @RequestMapping("/queryOrderState")
+    @ResponseBody
+    public String queryOrderState(String orderid){
+        String response = orderService.queryOrderState(orderid);
+        return response;
+    }
 }

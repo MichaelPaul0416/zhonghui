@@ -25,4 +25,6 @@ public interface IOrderService {
     List<Map<String,Object>> merchantQueryOrders(String accountid,String orderstate,Pager pager);
 
     Orders updateOrderInfo(Orders orders);
+
+    String queryOrderState(String orderid);
 }

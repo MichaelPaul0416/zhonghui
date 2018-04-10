@@ -33,18 +33,27 @@ public class WxLoginUtil {
     private static final String URL = "https://api.weixin.qq.com/sns/jscode2session";
     private static final String URL_CODE = "https://api.weixin.qq.com/wxa/getwxacode?access_token=";
 
+    private static String dealByType(Map<String,?> map,boolean requestMethod){
+        if(requestMethod){
+            return (String) map.get("xml");
+        }else {
+            String param = "";
+            Iterator<String> it = map.keySet().iterator();
+
+            while (it.hasNext()) {
+                String key = it.next();
+                param += key + "=" + map.get(key) + "&";
+            }
+            return param;
+        }
+    }
+
     public static String sendPost(String url, Map<String, ?> paramMap) {
         PrintWriter out = null;
         BufferedReader in = null;
         String result = "";
 
-        String param = "";
-        Iterator<String> it = paramMap.keySet().iterator();
-
-        while (it.hasNext()) {
-            String key = it.next();
-            param += key + "=" + paramMap.get(key) + "&";
-        }
+        String param = dealByType(paramMap,paramMap.containsKey("xml"));
 
         try {
             URL realUrl = new URL(url);
