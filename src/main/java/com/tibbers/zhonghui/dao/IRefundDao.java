@@ -15,7 +15,7 @@ import java.util.Map;
 public interface IRefundDao {
     void insertSingelRefund(Refund refund);
 
-    List<Refund> queryRefundsByPager(Map<String,Object> params);
+    List<Map<String,Object>> queryRefundsByPager(Map<String,Object> params);
 
     void uploadRefundSerialInfo(Refund refund);//部分字段允许修改
 

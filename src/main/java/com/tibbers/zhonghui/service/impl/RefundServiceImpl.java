@@ -1,7 +1,6 @@
 package com.tibbers.zhonghui.service.impl;
 
 import com.alibaba.fastjson.JSONObject;
-import com.github.binarywang.wxpay.bean.notify.WxPayRefundNotifyResult;
 import com.github.binarywang.wxpay.bean.request.WxPayRefundRequest;
 import com.github.binarywang.wxpay.bean.result.WxPayRefundResult;
 import com.github.binarywang.wxpay.exception.WxPayException;
@@ -156,6 +155,7 @@ public class RefundServiceImpl implements IRefundService {
                         logger.error(String.format("微信退款申请失败，错误原因[%s]",refundResult.getErrCodeDes()));
                         update.setAgreestate("3");
                     }
+                    update.setRefundserialid(refundSerialid);
                     refundDao.uploadRefundSerialInfo(update);
                     logger.info(String.format("退款流水[%s]状态更新成功",update));
                     resultMap.put("errorcode",refundResult.getErrCode());
@@ -190,11 +190,40 @@ public class RefundServiceImpl implements IRefundService {
         return resultMap;
     }
 
+    @Override
+    public String queryRefundResult(String refundid) {
+        Map<String,String> map = new TreeMap<>();
+        map.put("appid",wxPayConfiguration.getAppId());
+        map.put("mch_id",wxPayConfiguration.getMchId());
+        map.put("nonce_str",StringUtil.randomStr(32));
+        map.put("out_refund_no",refundid);
+        map.put("sign_type","MD5");
+
+        String contactParams = EncryptUtil.contactParams(map);
+        contactParams += "key=" + wxPayConfiguration.getMchKey();
+        logger.info(String.format("param[%s]",contactParams));
+        String sign = EncryptUtil.encodeMD5String(contactParams);
+        StringBuilder builder = new StringBuilder();
+
+        builder.append("<xml>").append("<appid>").append(map.get("appid")).append("</appid>");
+        builder.append("<mch_id>").append(map.get("mch_id")).append("</mch_id>");
+        builder.append("<nonce_str>").append(map.get("nonce_str")).append("</nonce_str>");
+        builder.append("<out_refund_no>").append(map.get("out_refund_no")).append("</out_refund_no>");
+        builder.append("<sign>").append(sign).append("</sign>");
+        builder.append("<sign_type>").append("MD5").append("</sign_type>").append("</xml>");
+
+        logger.info("xml-->" + builder.toString());
+        Map<String,String> param = new HashMap<>();
+        param.put("xml",builder.toString());
+        String response = WxLoginUtil.sendPost("https://api.mch.weixin.qq.com/pay/refundquery",param);
+        return response;
+    }
+
 
     @Override
-    public List<Refund> queryUnconfirmRefunds(Map<String, Object> params) {
+    public List<Map<String, Object>> queryUnconfirmRefunds(Map<String, Object> params) {
         logger.info(String.format("开始查询未明确的退款流水，查询参数[%s]",params));
-        List<Refund> resultList = refundDao.queryRefundsByPager(params);
+        List<Map<String,Object>> resultList = refundDao.queryRefundsByPager(params);
         logger.info(String.format("未明确的退款流水如下[%s]",resultList));
         return resultList;
     }

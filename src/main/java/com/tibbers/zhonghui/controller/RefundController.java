@@ -93,6 +93,12 @@ public class RefundController {
 
     }
 
+    @RequestMapping("/queryRefundResult")
+    @ResponseBody
+    public String queryRefundResult(String refundid){
+        return refundService.queryRefundResult(refundid);
+    }
+
 //    @RequestMapping("/refundApply")
 //    @ResponseBody
 //    public String refundApply(HttpServletRequest httpServletRequest){

@@ -322,11 +322,13 @@ public class OrderServiceImpl implements IOrderService {
         capitalSerial.setReverse1(orders.getAmount());//设置为订单金额
         capitalSerial.setReverse2("");
         capitalSerials.add(capitalSerial);
+//        1扣款成功，0扣款失败，2微信用户已经支付，但是微信后台没有通知到api
         if("1".equals(paybybalance)){
             capitalSerial.setState("1");
             capitalSerial.setThirdpartmsg("使用账户余额支付成功");
         }else {
             capitalSerial.setThirdpartmsg("获取预支付ID成功");
+            capitalSerial.setState("2");
         }
         capitalSerialDao.insertCapitalSerialOrBatch(capitalSerials);
     }

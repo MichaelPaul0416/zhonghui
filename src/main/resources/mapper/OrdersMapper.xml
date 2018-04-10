@@ -185,6 +185,7 @@
         t3.orderid = t4.orderid
         AND t3.productid = t5.productid
         ) a,torderitem b where a.orderid = b.orderid and a.productid = b.productid
+        and EXISTS (select 1 from tcapitalserial m where a.orderid = m.orderid and m.state = '1')
         order by a.createdatetime DESC
         <if test="pager != null">
             limit #{pager.startLine},#{pager.offset}
@@ -202,6 +203,7 @@
         and t3.salestate = '1'
         and t3.accountid = #{accountid}
         ) a,taccount b where a.accountid = b.accountid
+        and EXISTS(select 1 from tcapitalserial c where a.orderid = c.orderid and c.state = '1')
         <if test="pager != null">
             limit #{pager.startLine},#{pager.offset}
         </if>
