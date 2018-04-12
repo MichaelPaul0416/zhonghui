@@ -16,6 +16,7 @@
         <result column="productgrade" jdbcType="VARCHAR" property="productgrade"/>
         <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
         <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
+        <result column="limitcustomfee" jdbcType="VARCHAR" property="limitcustomfee"/>
         <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
         <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
     </resultMap>
@@ -32,6 +33,7 @@
         <result column="productgrade" jdbcType="VARCHAR" property="productgrade"/>
         <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
         <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
+        <result column="limitcustomfee" jdbcType="VARCHAR" property="limitcustomfee"/>
         <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
         <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
         <result column="salestate" jdbcType="VARCHAR" property="salestate"/>
@@ -51,6 +53,7 @@
         <result column="productgrade" jdbcType="VARCHAR" property="productgrade"/>
         <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
         <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
+        <result column="limitcustomfee" jdbcType="VARCHAR" property="limitcustomfee"/>
         <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
         <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
         <result column="salestate" jdbcType="VARCHAR" property="salestate"/>
@@ -69,6 +72,7 @@
         <result column="productgrade" jdbcType="VARCHAR" property="productgrade"/>
         <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
         <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
+        <result column="limitcustomfee" jdbcType="VARCHAR" property="limitcustomfee"/>
         <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
         <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
         <result column="salestate" jdbcType="VARCHAR" property="salestate"/>
@@ -91,14 +95,14 @@
     </select>
 
     <insert id="insertSingleProduct" parameterType="com.tibbers.zhonghui.model.Product">
-        insert into tproduct ( familyid,productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,transportfee,reverse1,reverse2)
-        values(#{familyid},#{productid},#{unitprice},#{productname},#{note},#{itemid},#{imagepath},#{color},#{valuescore},#{productgrade},#{fieldmeaning},#{transportfee},#{reverse1},#{reverse2})
+        insert into tproduct ( familyid,productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,transportfee,limitcustomfee,reverse1,reverse2)
+        values(#{familyid},#{productid},#{unitprice},#{productname},#{note},#{itemid},#{imagepath},#{color},#{valuescore},#{productgrade},#{fieldmeaning},#{transportfee},#{limitcustomfee},{reverse1},#{reverse2})
     </insert>
 
     <insert id="insertBatchProduct" parameterType="java.util.List">
-        insert into tproduct ( familyid,productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,transportfee,reverse1,reverse2) values
+        insert into tproduct ( familyid,productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,transportfee,limitcustomfee,reverse1,reverse2) values
         <foreach collection="list" item="item" separator="," index="index">
-            (#{item.familyid},#{item.productid},#{item.unitprice},#{item.productname},#{item.note},#{item.itemid},#{item.imagepath},#{item.color},#{item.valuescore},#{item.productgrade},#{item.fieldmeaning},#{item.transportfee},#{item.reverse1},#{item.reverse2})
+            (#{item.familyid},#{item.productid},#{item.unitprice},#{item.productname},#{item.note},#{item.itemid},#{item.imagepath},#{item.color},#{item.valuescore},#{item.productgrade},#{item.fieldmeaning},#{item.transportfee},#{item.limitcustomfee},#{item.reverse1},#{item.reverse2})
         </foreach>
     </insert>
 
@@ -107,17 +111,17 @@
     </update>
 
     <select id="queryByProductId" parameterType="java.lang.String" resultMap="queryProductCustomer">
-        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.transportfee,t1.productgrade,t1.fieldmeaning,t1.transportfee,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum
+        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.transportfee,t1.productgrade,t1.fieldmeaning,t1.transportfee,t1.limitcustomfee,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum
         from tproduct t1,tproductbelong t2
         where t1.productid = t2.productid and t1.productid = #{_parameter}
     </select>
 
     <select id="queryProductByPage" parameterType="com.tibbers.zhonghui.model.common.Pager" resultMap="ProductResult">
-        select  productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,transportfee,reverse1,reverse2 from tproduct limit  #{startLine},#{offset}
+        select  productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,transportfee,limitcustomfee,reverse1,reverse2 from tproduct limit  #{startLine},#{offset}
     </select>
 
     <select id="queryByProductStates" parameterType="java.util.Map" resultMap="customProductQuery">
-        select  t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.transportfee,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum from tproduct t1,tproductbelong t2
+        select  t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.transportfee,t1.limitcustomfee,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum from tproduct t1,tproductbelong t2
         where t1.productid = t2.productid and t1.productid in (select productid from tproductbelong
         <where>
             <if test="states.length != 0">
@@ -135,7 +139,7 @@
     </select>
 
     <select id="queryProducts" parameterType="java.util.Map" resultMap="ProductResult">
-        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.transportfee,t1.reverse1,t1.reverse2,t2.remaindernum
+        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.transportfee,t1.limitcustomfee,t1.reverse1,t1.reverse2,t2.remaindernum
         from tproduct t1,tproductbelong t2
         WHERE t1.productid = t2.productid and t1.productid in (select productid from tproductbelong
         <where>
@@ -164,7 +168,7 @@
     <!--会员查询自己的上传产品的列表-->
     <select id="vipQueryUploadProducts" parameterType="java.util.Map" resultMap="productQuery">
         select a.*,b.auditstate from (
-        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum
+        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.transpotfee,t1.limitcustomfee,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum
         from tproduct t1,tproductbelong t2,taccount t3
         where t1.productid = t2.productid and t2.accountid = t3.accountid
         <if test="product != null">
@@ -188,7 +192,7 @@
     </select>
 
     <select id="salerQueryProductsByState" parameterType="java.util.Map" resultMap="customProductQuery">
-        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum
+        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.limitcustomfee,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum
         from tproduct t1,tproductbelong t2,taccount t3
         where t1.productid = t2.productid and t2.accountid = t3.accountid
         <if test="product != null">

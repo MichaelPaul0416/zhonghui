@@ -18,6 +18,7 @@ public class Product {
     private String productgrade;
     private String fieldmeaning;
     private String transportfee;
+    private String limitcustomfee;
     private String reverse1;
     private String reverse2;
 
@@ -36,9 +37,18 @@ public class Product {
                 ", productgrade='" + productgrade + '\'' +
                 ", fieldmeaning='" + fieldmeaning + '\'' +
                 ", transportfee='" + transportfee + '\'' +
+                ", limitcustomfee='" + limitcustomfee + '\'' +
                 ", reverse1='" + reverse1 + '\'' +
                 ", reverse2='" + reverse2 + '\'' +
                 '}';
+    }
+
+    public String getLimitcustomfee() {
+        return limitcustomfee;
+    }
+
+    public void setLimitcustomfee(String limitcustomfee) {
+        this.limitcustomfee = limitcustomfee;
     }
 
     public String getFamilyid() {
