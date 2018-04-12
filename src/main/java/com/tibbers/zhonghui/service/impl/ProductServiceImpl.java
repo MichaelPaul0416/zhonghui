@@ -339,6 +339,22 @@ public class ProductServiceImpl implements IProductService {
 
     @Override
     public Map<String, List<String>> insertProductsBatch(String productList, String accountid) {
+        logger.info(String.format("开始检验用户[%s]在此之前是否上传过产品，并且该产品有效[未上架|销售中|售罄，待补货|下架]",accountid));
+        List<Map<String,String>> resultList = iProductDao.checkOnlyUploadOneProduct(accountid);
+        String familyid ;
+        Map<String,List<String>> result = new HashMap<>();
+        if(resultList.size() > 1){
+            throw new APIException(String.format("账户[%s]已经上传过产品了,平台规定一个VIP用户只能上传一种产品（产品规格可以不同）",accountid));
+        }
+        if(resultList.size() == 1){
+            String info = String.format("用户[%s]之前已经上传过产品，本次上传的产品可能不是同一种产品，予以警示，管理员需严格审核",accountid);
+            logger.warn(info);
+            familyid = resultList.get(0).get("familyid");
+            result.put("warn",new ArrayList<>());
+        }else {
+            familyid = StringUtil.generateUUID();
+        }
+
         List<String> productIdList = new ArrayList<>();
         List<Product> products = JSONObject.parseArray(productList,Product.class);
         List<ProductBelong> productBelongs = new ArrayList<>();
@@ -347,6 +363,7 @@ public class ProductServiceImpl implements IProductService {
         for(Product product : products){
             String productid = StringUtil.generateUUID();
             product.setProductid(productid);
+            product.setFamilyid(familyid);
             productIdList.add(productid);
 
             ProductBelong productBelong = new ProductBelong();
@@ -378,11 +395,24 @@ public class ProductServiceImpl implements IProductService {
         logger.info(String.format("更新产品审核信息[%s]",auditingProsList));
         auditingProsDao.applyAudit4Products(auditingProsList);
 
-        Map<String,List<String>> result = new HashMap<>();
+
         result.put("pids",productIdList);
         result.put("auditids",auditings);
 
         return result;
+    }
+
+    @Override
+    public String checkOnlyUploadOneProduct(String accountid) {
+        logger.info(String.format("开始查询账户[%s]是否已经上传过产品，并且该产品有效[未上架|销售中|售罄，待补货|下架]",accountid));
+        List<Map<String,String>> result = iProductDao.checkOnlyUploadOneProduct(accountid);
+        if(result.size() > 1){
+            throw new APIException(String.format("账户[%s]已经上传过产品了,平台规定一个VIP用户只能上传一种产品（产品规格可以不同）",accountid));
+        }
+        if(result.size() == 1){
+            return result.get(0).get("familyid");
+        }
+        return "";
     }
 
 }

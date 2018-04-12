@@ -8,6 +8,7 @@ package com.tibbers.zhonghui.model;
 public class Product {
     private String productid;
     private String productname;
+    private String familyid;
     private String unitprice;
     private String note;
     private String itemid;
@@ -25,6 +26,7 @@ public class Product {
         return "Product{" +
                 "productid='" + productid + '\'' +
                 ", productname='" + productname + '\'' +
+                ", familyid='" + familyid + '\'' +
                 ", unitprice='" + unitprice + '\'' +
                 ", note='" + note + '\'' +
                 ", itemid='" + itemid + '\'' +
@@ -37,6 +39,14 @@ public class Product {
                 ", reverse1='" + reverse1 + '\'' +
                 ", reverse2='" + reverse2 + '\'' +
                 '}';
+    }
+
+    public String getFamilyid() {
+        return familyid;
+    }
+
+    public void setFamilyid(String familyid) {
+        this.familyid = familyid;
     }
 
     public String getTransportfee() {

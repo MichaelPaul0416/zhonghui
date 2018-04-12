@@ -81,15 +81,24 @@
         <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
     </resultMap>
 
+    <resultMap id="onlyOneResult" type="java.util.Map">
+        <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="familyid" jdbcType="VARCHAR" property="familyid"/>
+    </resultMap>
+
+    <select id="checkOnlyUploadOneProduct" resultMap="onlyOneResult" >
+        select productid,familyid from tproduct where productid in (select productid from tproductbelong where accountid = #{_parameter} and salestate != '4') group by familyid
+    </select>
+
     <insert id="insertSingleProduct" parameterType="com.tibbers.zhonghui.model.Product">
-        insert into tproduct ( productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,transportfee,reverse1,reverse2)
-        values(#{productid},#{unitprice},#{productname},#{note},#{itemid},#{imagepath},#{color},#{valuescore},#{productgrade},#{fieldmeaning},#{transportfee},#{reverse1},#{reverse2})
+        insert into tproduct ( familyid,productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,transportfee,reverse1,reverse2)
+        values(#{familyid},#{productid},#{unitprice},#{productname},#{note},#{itemid},#{imagepath},#{color},#{valuescore},#{productgrade},#{fieldmeaning},#{transportfee},#{reverse1},#{reverse2})
     </insert>
 
     <insert id="insertBatchProduct" parameterType="java.util.List">
-        insert into tproduct ( productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,transportfee,reverse1,reverse2) values
+        insert into tproduct ( familyid,productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,transportfee,reverse1,reverse2) values
         <foreach collection="list" item="item" separator="," index="index">
-            (#{item.productid},#{item.unitprice},#{item.productname},#{item.note},#{item.itemid},#{item.imagepath},#{item.color},#{item.valuescore},#{item.productgrade},#{item.fieldmeaning},#{item.transportfee},#{item.reverse1},#{item.reverse2})
+            (#{item.familyid},#{item.productid},#{item.unitprice},#{item.productname},#{item.note},#{item.itemid},#{item.imagepath},#{item.color},#{item.valuescore},#{item.productgrade},#{item.fieldmeaning},#{item.transportfee},#{item.reverse1},#{item.reverse2})
         </foreach>
     </insert>
 

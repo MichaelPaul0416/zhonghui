@@ -208,14 +208,27 @@ public class ProductController {
         Response response;
         if(!StringUtils.isEmpty(productInfo)) {
             try {
+                String familyid = productService.checkOnlyUploadOneProduct(accountid);
+                boolean alreadyUpload = false;
+                if(StringUtil.isEmpty(familyid)){
+                    logger.info(String.format("用户[%s]未上传过产品，生成新的产品组id"));
+                    familyid = StringUtil.generateUUID();
+                }else {
+                    alreadyUpload = true;
+                }
                 Product product = JSONObject.parseObject(productInfo,Product.class);
                 String productId = StringUtil.generateUUID();
                 logger.info(String.format("为产品[%s]生成序列id[%s]",product.getProductname(),productId));
                 product.setProductid(productId);
+                product.setFamilyid(familyid);
                 int number = Integer.parseInt(product.getReverse1());
                 product.setReverse1("");
                 product.setReverse2("");
                 Map<String,String> map = productService.insertSingleProduct(product,accountid, number);
+                if(alreadyUpload){
+                    String info = String.format("用户[%s]之前已经上传过产品，根据众惠平台规定，一个VIP用户只能上传一种产品（规格可以不同），本次上传的产品可能不是同一种产品，予以警示，管理员会严格审核",accountid);
+                    map.put("warn",info);
+                }
                 response = new Response(true, map);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE, response);
             } catch (Exception e) {
@@ -243,6 +256,10 @@ public class ProductController {
                 responseMap.put("tip","批量插入产品ID/批量产品审核申请ID");
                 responseMap.put("accountid",accountid);
                 responseMap.put("data",map);
+                if(map.get("warn") != null){
+                    String info = String.format("用户[%s]之前已经上传过产品，根据众惠平台规定，一个VIP用户只能上传一种产品（规格可以不同），本次上传的产品可能不是同一种产品，予以警示，管理员会严格审核",accountid);
+                    responseMap.put("warn",info);
+                }
                 response = new Response(true, responseMap);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE, response);
             }catch (Exception e){

@@ -13,6 +13,7 @@
         <result column="number" jdbcType="INTEGER" property="number"/>
         <result column="amount" jdbcType="VARCHAR" property="amount"/>
         <result column="itemid" jdbcType="VARCHAR" property="itemid"/>
+        <result column="detail" jdbcType="VARCHAR" property="detail"/>
         <result column="applydatetime" jdbcType="VARCHAR" property="applydatetime"/>
         <result column="agreestate" jdbcType="VARCHAR" property="agreestate"/>
         <result column="dealdatetime" jdbcType="VARCHAR" property="dealdatetime"/>
@@ -100,7 +101,7 @@
     </insert>
 
     <select id="queryRefundsByPager" parameterType="java.util.Map" resultMap="RefundResult">
-        select t1.refundserialid,t1.accountid,t2.accountname,t1.orderid,t1.productid,t3.productname,t1.number,t1.amount,t1.itemid,t1.applydatetime,t1.agreestate,t1.dealdatetime,t1.agreedatetime,t1.reverse1,t1.reverse2
+        select t1.refundserialid,t1.accountid,t2.accountname,t1.orderid,t1.productid,t3.productname,t1.number,t1.amount,t1.itemid,t1.detail,t1.applydatetime,t1.agreestate,t1.dealdatetime,t1.agreedatetime,t1.reverse1,t1.reverse2
         from trefund t1,taccount t2,tproduct t3
         where t1.accountid = t2.accountid and t1.productid = t3.productid
         <if test="refund != null">

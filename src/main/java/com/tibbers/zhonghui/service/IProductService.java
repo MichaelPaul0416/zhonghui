@@ -42,4 +42,6 @@ public interface IProductService {
     void updateProductInfo(Product product);
 
     Map<String, List<String>> insertProductsBatch(String productList, String accountid);
+
+    String checkOnlyUploadOneProduct(String accountid);
 }

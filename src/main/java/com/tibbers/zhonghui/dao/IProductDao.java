@@ -38,4 +38,6 @@ public interface IProductDao {
 
     List<Map<String,String>> queryImagesByProductids(List<String> list);
 
+    List<Map<String,String>> checkOnlyUploadOneProduct(String accountid);
+
 }

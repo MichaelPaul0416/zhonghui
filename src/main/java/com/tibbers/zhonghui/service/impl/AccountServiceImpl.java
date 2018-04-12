@@ -196,15 +196,15 @@ public class AccountServiceImpl implements IAccountService {
         param.put("refund",refund);
         param.put("pager",pager);
 
-        List<Refund> refundList = refundDao.queryRefundsByPager(param);
+        List<Map<String,Object>> refundList = refundDao.queryRefundsByPager(param);
         List<Map<String,Object>> refundResults = new ArrayList<>();
-        for(Refund singleRefund : refundList){
+        for(Map<String,Object> singleRefund : refundList){
             Map<String,Object> refundMap = new HashMap<>();
-            refundMap.put("emcapitalserialno",singleRefund.getRefundserialid());
-            refundMap.put("orderid",singleRefund.getOrderid());
-            refundMap.put("refunddatetime",singleRefund.getAgreedatetime());
-            refundMap.put("amount",singleRefund.getAmount());
-            refundMap.put("message",singleRefund.getDetail());
+            refundMap.put("emcapitalserialno",singleRefund.get("refundserialid"));
+            refundMap.put("orderid",singleRefund.get("orderid"));
+            refundMap.put("refunddatetime",singleRefund.get("agreedatetime"));
+            refundMap.put("amount",singleRefund.get("amount"));
+            refundMap.put("message",singleRefund.get("detail"));
 
             refundResults.add(refundMap);
             logger.info(String.format("查询到退款流水[%s]",refundMap));
