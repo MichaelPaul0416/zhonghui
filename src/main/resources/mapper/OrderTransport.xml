@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.tibbers.zhonghui.dao.IOrderTransport">
+    <resultMap id="OrderTransport" type="com.tibbers.zhonghui.model.OrderTransport">
+        <result property="serialid" jdbcType="VARCHAR" column="serialid"/>
+        <result property="accountid" jdbcType="VARCHAR" column="accountid"/>
+        <result property="orderid" jdbcType="VARCHAR" column="orderid"/>
+        <result property="familyid" jdbcType="VARCHAR" column="familyid"/>
+        <result property="costamount" jdbcType="VARCHAR" column="costamount"/>
+        <result property="limitcustomfee" jdbcType="VARCHAR" column="limitcustomfee"/>
+        <result property="orderdatetime" jdbcType="VARCHAR" column="orderdatetime"/>
+        <result property="transportfee" jdbcType="VARCHAR" column="transportfee"/>
+        <result property="isvalid" jdbcType="VARCHAR" column="isvalid"/>
+        <result property="reverse1" jdbcType="VARCHAR" column="reverse1"/>
+        <result property="reverse2" jdbcType="VARCHAR" column="reverse2"/>
+    </resultMap>
+
+
+    <insert id="insertSingleOrderTrasportRelation" parameterType="com.tibbers.zhonghui.model.OrderTransport">
+        insert into tordertransport values(#{serialid},#{accountid},#{orderid},#{familyid},#{costamount},#{limitcustomfee},#{orderdatetime},#{transportfee},#{isvalid},#{reverse1},#{reverse2})
+    </insert>
+
+    <update id="updateRelationState" parameterType="com.tibbers.zhonghui.model.OrderTransport">
+        update tordertransport set isvalid = #{isvalid} where serialid = #{serialid}
+    </update>
+
+    <select id="queryOrderTransportfees" parameterType="java.util.Map" resultMap="OrderTransport">
+        select * from tordertransport
+        <where>
+            <if test="serialid != null and !&quot;&quot;.equals(serialid)"> serialid = #{serialid} and </if>
+            <if test="accountid != null and !&quot;&quot;.equals(accountid)"> accountid = #{accountid} and </if>
+            <if test="orderid != null and !&quot;&quot;.equals(orderid)"> orderid = #{orderid} and </if>
+            <if test="familyid != null and !&quot;&quot;.equals(familyid)"> familyid = #{familyid} and </if>
+            <if test="costamount != null and !&quot;&quot;.equals(costamount)"> costamount = #{costamount} and </if>
+            <if test="limitcustomfee != null and !&quot;&quot;.equals(limitcustomfee)"> limitcustomfee = #{limitcustomfee} and </if>
+            <if test="orderdatetime != null and !&quot;&quot;.equals(orderdatetime)"> orderdatetime = #{orderdatetime} and </if>
+            <if test="transportfee != null and !&quot;&quot;.equals(transportfee)"> transportfee = #{transportfee} and </if>
+            <if test="isvalid != null and !&quot;&quot;.equals(isvalid)"> isvalid = #{isvalid} and </if>
+            <if test="isvalid != null "> isvalid = #{isvalid} and </if>
+            isvalid = #{isvalid}
+        </where>
+        <if test="pager != null">
+            limit #{startLine},#{offset}
+        </if>
+    </select>
+</mapper>
