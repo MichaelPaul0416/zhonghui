@@ -80,6 +80,7 @@
         <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
         <result column="amount" jdbcType="VARCHAR" property="amount"/>
         <result column="paybybalance" jdbcType="VARCHAR" property="paybybalance"/>
+        <result column="detailamount" jdbcType="VARCHAR" property="detailamount"/>
         <result column="accountname" jdbcType="VARCHAR" property="accountname"/>
         <result column="personid" jdbcType="VARCHAR" property="personid"/>
         <result column="isvip" jdbcType="VARCHAR" property="isvip"/>
