@@ -23,4 +23,6 @@ public interface IOrderTransportDao {
     List<OrderTransport> queryOrderTransportfees(Map<String,String> param);
 
     List<Map<String,String>> queryDetailTransportFeeInOrder(String orderid);
+
+    void updateRelationStateByOrderid(OrderTransport orderTransport);
 }

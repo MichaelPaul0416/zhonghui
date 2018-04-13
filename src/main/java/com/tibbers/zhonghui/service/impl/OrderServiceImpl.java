@@ -134,12 +134,33 @@ public class OrderServiceImpl implements IOrderService {
                         prePaySerial(orders, orders.getOrderid(), payResult ,orders.getPaybybalance());
 
                         double recommand = generateRecommandRelation(orders,orders.getPaybybalance());
-                        double fee = addOrderPrecentage(orders.getOrderid(), (int) (Double.parseDouble(orders.getAmount()) * 100));
+                        double payAmount = Double.parseDouble(orders.getAmount()) - Double.parseDouble(orders.getTransportfee());//抽成需要减去总的邮费
+//                        double fee = addOrderPrecentage(orders.getOrderid(), (int) (Double.parseDouble(orders.getAmount()) * 100));
+                        double fee = addOrderPrecentage(orders.getOrderid(), (int) StringUtil.multiply(payAmount,100));
                         WxPayOrderNotifyResult result = new WxPayOrderNotifyResult();
                         result.setOutTradeNo(orders.getOrderid());
                         double money = Double.parseDouble(orders.getAmount());
-                        result.setTotalFee((int)(money * 100));
-                        caculateFinalIncome(fee,recommand,result);
+//                        result.setTotalFee((int)(money * 100));
+                        result.setTotalFee((int) StringUtil.multiply(money,100));
+
+                        //余额支付的话，需要先计算各个familyid需要支付的邮费
+                        List<OrderTransport> orderTransports = JSONObject.parseArray(itemtransportlist,OrderTransport.class);
+                        Map<String,String> feeMap = new HashMap<>();
+                        for (OrderTransport transport : orderTransports){
+                            feeMap.put(transport.getAccountid(),transport.getTransportfee());//各家商店应支付的运费
+                            transport.setSerialid(StringUtil.serialId());
+                            transport.setOrderid(orders.getOrderid());
+                            transport.setOrderdatetime(StringUtil.currentDateTime());
+                            transport.setIsvalid("1");//直接置为到账
+                            transport.setReverse1("");
+                            transport.setReverse2("");
+                        }
+                        feeMap.put("total",orders.getTransportfee());//总运费
+
+                        caculateFinalIncome(fee,recommand,result,feeMap);
+
+                        logger.info(String.format("更新订单[%s]的运费明细，由于是余额支付，直接将运费明细状态置为钱已到账"));
+                        orderTransportDao.insertatchOrderTransportRelation(orderTransports);
 
                         updateProductRemainder(orderItemsList,orders.getOrderid());
 
@@ -427,6 +448,7 @@ public class OrderServiceImpl implements IOrderService {
 
                     Orders orders = new Orders();
                     orders.setOrderid(orderid);
+                    String isvalid ;
                     if (AppConstants.RESULT_CODE.equals(result.getResultCode())) {
                         //更新支付流水状态
                         capitalSerial.setState("1");
@@ -443,16 +465,28 @@ public class OrderServiceImpl implements IOrderService {
                         String recommandFee = updateAccountBanlaceAsRecommander(orderid);
 
                         //新增商户平台的订单提成
-                        double fee = addOrderPrecentage(orderid, result.getTotalFee());
-                        caculateFinalIncome(fee, Double.parseDouble(recommandFee), result);
+                        double payAmount = result.getTotalFee() - StringUtil.multiply(querys.get(0).get("transportfee"),"100");//总支付金额-邮费，此时单位是分
+                        double fee = addOrderPrecentage(orderid, (int) payAmount);
+                        caculateFinalIncome(fee, Double.parseDouble(recommandFee), result,null);
 
+                        isvalid = "1";
 
                     } else {
                         capitalSerial.setState("0");
                         capitalSerial.setThirdpartmsg("微信支付失败");
 
                         orders.setIsvalid("0");
+
+                        isvalid = "2";
                     }
+
+                    //更新运费订单明细表中的运费明细状态
+                    OrderTransport orderTransport = new OrderTransport();
+                    orderTransport.setOrderid(orderid);
+                    orderTransport.setIsvalid(isvalid);
+                    logger.info(String.format("更新订单[%s]的运费订单明细[%]",orderid,orderTransport));
+                    orderTransportDao.updateRelationStateByOrderid(orderTransport);
+
                     //更新流水信息
                     capitalSerialDao.updateCapitalSerialInfo(capitalSerial);
                     //修改订单状态
@@ -473,29 +507,38 @@ public class OrderServiceImpl implements IOrderService {
         }
     }
 
-    private void caculateFinalIncome(double platformFee,double recommandFee,WxPayOrderNotifyResult result){
+    private void caculateFinalIncome(double platformFee,double recommandFee,WxPayOrderNotifyResult result,Map<String,String> feeMap){
         /**
          * 先查询订单运费表，获取各个familyid对应的邮费，然后支付金额减去订单总邮费得到钱A
          * 平台抽成从钱A中抽取
          * 抽完成之后，分钱按照之前的规则计算
          */
         String orderid = result.getOutTradeNo();
-        logger.info(String.format("开始查询订单[%s]内各个商户的邮费"));
-        List<Map<String,String>> merchantTransports = orderTransportDao.queryDetailTransportFeeInOrder(orderid);
-        Map<String,String> merchantFees = new HashMap<>();
-        if(merchantTransports.size() <= 1){
-            throw new APIException(String.format("运费订单明细中未查询到订单[%s]的相关运费明细，请联系管理员",orderid));
-        }else {
-            logger.info(String.format("查询到订单[%s]的运费明细[%s]",orderid,merchantTransports));
-            logger.info(String.format("过滤订单[%]的运费明细中的第一行信息汇总信息",orderid));
-            Map<String,String> temp;
-            for(int i = 1;i<merchantTransports.size();i++){
-                temp = merchantTransports.get(i);
-                merchantFees.put(temp.get("accountid"),temp.get("transportfee"));
+        double totalTransPortFee;
+        Map<String,String> merchantFees;
+        if(feeMap == null) {
+            logger.info(String.format("开始查询订单[%s]内各个商户的邮费"));
+            List<Map<String, String>> merchantTransports = orderTransportDao.queryDetailTransportFeeInOrder(orderid);
+            merchantFees = new HashMap<>();
+            if (merchantTransports.size() <= 1) {
+                throw new APIException(String.format("运费订单明细中未查询到订单[%s]的相关运费明细，请联系管理员", orderid));
+            } else {
+                logger.info(String.format("查询到订单[%s]的运费明细[%s]", orderid, merchantTransports));
+                logger.info(String.format("过滤订单[%]的运费明细中的第一行信息汇总信息", orderid));
+                Map<String, String> temp;
+                for (int i = 1; i < merchantTransports.size(); i++) {
+                    temp = merchantTransports.get(i);
+                    merchantFees.put(temp.get("accountid"), temp.get("transportfee"));
+                }
+
             }
-            logger.info(String.format("订单[%s]内的运费明细[%s]",orderid,merchantFees));
+            totalTransPortFee = Double.parseDouble(merchantTransports.get(0).get("transportfee"));//总运费
+        }else {
+            merchantFees = feeMap;
+            totalTransPortFee = Double.parseDouble(feeMap.get("total"));
+            merchantFees.remove("total");
         }
-        double totalTransPortFee = Double.parseDouble(merchantTransports.get(0).get("transportfee"));//总运费
+        logger.info(String.format("订单[%s]内的运费明细[%s]", orderid, merchantFees));
         logger.info(String.format("开始为订单[%s]计算各个商户的最终收益"));
 //        double accountPay = result.getTotalFee() / 100.0;
         double accountPay = StringUtil.divide(result.getTotalFee(),100);

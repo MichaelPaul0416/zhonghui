@@ -38,6 +38,9 @@
         update tordertransport set isvalid = #{isvalid} where serialid = #{serialid}
     </update>
 
+    <update id="updateRelationStateByOrderid" parameterType="com.tibbers.zhonghui.model.OrderTransport">
+        update tordertransport set isvalid = #{isvalid} where orderid = #{orderid}
+    </update>
     <select id="queryOrderTransportfees" parameterType="java.util.Map" resultMap="OrderTransport">
         select * from tordertransport
         <where>
