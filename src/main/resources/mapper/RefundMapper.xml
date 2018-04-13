@@ -88,7 +88,7 @@
         select a.*,b.addressid from (
         select
         t1.refundserialid,t1.productid,t1.accountid,t1.applydatetime,t1.agreestate,t1.orderid,t1.itemid,t1.detail,t1.number,t1.amount,t2.unitprice,t2.productname,t2.valuescore,t2.productgrade,t2.fieldmeaning,t2.imagepath,
-        ifnull((select a.transportfee from torders a where a.orderid = t1.orderid),0) as transportfee
+        ifnull((select a.transportfee from tordertransport a where a.orderid = t1.orderid and a.familyid = t2.familyid),0) as transportfee
         from trefund t1,tproduct t2 where t1.productid = t2.productid and t1.accountid = #{refund.accountid}
         and t1.applydatetime &gt; #{begin} and t1.applydatetime &lt; #{end}
         ) a,torders b where a.orderid = b.orderid
@@ -134,7 +134,9 @@
     </update>
 
     <select id="merchantQueryRefundOrders" parameterType="java.util.Map" resultMap="salerRefundOrders">
-        select b.*,a.pronumber,d.unitprice,d.productname,d.imagepath,d.productgrade,d.fieldmeaning,c.accountid,e.accountname,e.isvip,e.custtype,c.addressid,c.transportfee,c.createdatetime
+        select b.*,a.pronumber,d.unitprice,d.productname,d.imagepath,d.productgrade,d.fieldmeaning,c.accountid,e.accountname,e.isvip,e.custtype,c.addressid,
+        (select transportfee from tordertransport m where m.orderid = c.orderid and m.familyid = d.familyid and m.isvalid = '1') as transportfee,
+        c.createdatetime
         from torderitem a ,(
         select t1.refundserialid,t1.orderid,t1.productid,t1.amount,t1.agreestate from trefund t1 ,tproductbelong t2 where t1.productid = t2.productid and t2.accountid = #{accountid} and t1.agreestate = '4'
         ) b ,torders c,tproduct d,taccount e

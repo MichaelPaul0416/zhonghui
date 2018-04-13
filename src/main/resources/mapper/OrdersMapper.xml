@@ -53,9 +53,11 @@
         <result column="valuescore" jdbcType="INTEGER" property="valuescore"/>
         <result column="productgrade" jdbcType="VARCHAR" property="productgrade"/>
         <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
-        <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
+        <result column="familyid" jdbcType="VARCHAR" property="familyid"/>
+        <result column="pertransportfee" jdbcType="VARCHAR" property="pertransportfee"/>
         <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
         <result column="pronumber" jdbcType="INTEGER" property="pronumber"/>
+        <result column="detailamount" jdbcType="VARCHAR" property="detailamount"/>
     </resultMap>
 
     <!--商户订单中心-->
@@ -140,7 +142,7 @@
     </select>
 
     <select id="accountOrderCenter" parameterType="java.util.Map" resultMap="orderCenterObject">
-        select a.*,b.pronumber from (
+        select a.*,b.pronumber,b.detailamount from (
         SELECT
         t3.orderid,
         t3.productid,
@@ -159,7 +161,8 @@
         t5.valuescore,
         t5.productgrade,
         t5.fieldmeaning,
-        t5.transportfee AS pertransportfee,
+        t5.familyid,
+        (select transportfee from tordertransport p where p.orderid = t3.orderid and p.familyid = t5.familyid and p.isvalid = '0') as pertransportfee,
         t5.imagepath
         FROM
         (
@@ -196,7 +199,9 @@
     <select id="salerOrderCenter" parameterType="java.util.Map" resultMap="salerOrderCenter">
         select a.*,b.accountname,b.personid,b.isvip,b.custtype from (
         select
-        t1.accountid,t1.orderid,t1.orderstate,t1.expressno,t1.expresscompany,t1.freetransport,t1.transportfee,t1.createdatetime,t2.productid,t4.imagepath,t1.addressid,t4.productname,t4.unitprice,t4.productgrade,t4.fieldmeaning,t2.pronumber,t1.amount,t1.paybybalance
+        t1.accountid,t1.orderid,t1.orderstate,t1.expressno,t1.expresscompany,t1.freetransport,
+        (select transportfee from tordertransport m where m.orderid = t1.orderid and m.familyid = t4.familyid and m.isvalid = '1') as transportfee,
+        t1.createdatetime,t2.productid,t4.imagepath,t1.addressid,t4.productname,t4.unitprice,t4.productgrade,t4.fieldmeaning,t2.pronumber,t1.amount,t1.paybybalance,t2.detailamount
         from torders t1,torderitem t2,tproductbelong t3 ,tproduct t4
         where t1.orderid = t2.orderid and t2.productid = t3.productid and t2.productid = t4.productid
         <if test="orderstate != null and !&quot;&quot;.equals(orderstate)">and t1.orderstate = #{orderstate} </if>
