@@ -13,10 +13,14 @@ import java.util.Map;
  * @Resource:
  */
 @Repository
-public interface IOrderTransport {
+public interface IOrderTransportDao {
     void insertSingleOrderTrasportRelation(OrderTransport orderTransport);
+
+    void insertatchOrderTransportRelation(List<OrderTransport> list);
 
     void updateRelationState(String serialid,String state);
 
     List<OrderTransport> queryOrderTransportfees(Map<String,String> param);
+
+    List<Map<String,String>> queryDetailTransportFeeInOrder(String orderid);
 }

@@ -10,11 +10,12 @@
         <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
         <result column="salestate" jdbcType="VARCHAR" property="salestate"/>
         <result column="remaindernum" jdbcType="INTEGER" property="remaindernum"/>
+        <result column="familyid" jdbcType="VARCHAR" property="familyid"/>
     </resultMap>
 
 
     <insert id="insertSingleRelation" parameterType="com.tibbers.zhonghui.model.ProductBelong">
-        insert into tproductbelong values(#{serialid},#{productid},#{accountid},#{salestate},#{remaindernum})
+        insert into tproductbelong values(#{serialid},#{productid},#{accountid},#{salestate},#{remaindernum},#{familyid})
     </insert>
 
 
@@ -29,7 +30,7 @@
     <insert id="insertBatchRelation" parameterType="java.util.List">
         insert into tproductbelong values
         <foreach collection="list" index="index" separator="," item="item">
-            (#{item.serialid},#{item.productid},#{item.accountid},#{item.salestate},#{item.remaindernum})
+            (#{item.serialid},#{item.productid},#{item.accountid},#{item.salestate},#{item.remaindernum},#{item.familyid})
         </foreach>
     </insert>
 

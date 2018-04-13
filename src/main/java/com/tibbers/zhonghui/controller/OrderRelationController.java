@@ -143,13 +143,13 @@ public class OrderRelationController {
 
     @RequestMapping("/createSingleOrder")
     @ResponseBody
-    public String createSingleOrder(String orderinfo,String itemlist,String code,String clientip){
+    public String createSingleOrder(String orderinfo,String itemlist,String itemtransportlist,String code,String clientip){
         APIResponse apiResponse ;
         Response response;
 
-        if(StringUtil.argsNotEmpty(new String[]{orderinfo,itemlist,code,clientip})){
+        if(StringUtil.argsNotEmpty(new String[]{orderinfo,itemlist,itemtransportlist,code,clientip})){
             try{
-                PayResult payResult = orderService.createOrder(orderinfo,itemlist,code,clientip);
+                PayResult payResult = orderService.createOrder(orderinfo,itemlist, itemtransportlist, code, clientip);
                 response = new Response(true,payResult);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
             }catch (APIException e){
@@ -157,7 +157,7 @@ public class OrderRelationController {
                 apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
             }
         }else{
-            response = new Response(false,"订单信息[orderinfo],订单明细[itemlist],小程序code[code],客户端ip[clientip]不能为空");
+            response = new Response(false,"订单信息[orderinfo],订单明细[itemlist],运费明细[itemtransportlist],小程序code[code],客户端ip[clientip]不能为空");
             apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
         }
 

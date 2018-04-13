@@ -134,6 +134,16 @@ public class StringUtil {
         return String.valueOf(one.add(new BigDecimal(addTwo)));
     }
 
+    public static double divide(double amount,int number){
+        BigDecimal one = new BigDecimal(amount);
+        return one.divide(new BigDecimal((double)number)).doubleValue();
+    }
+
+    public static double divide(double amount,double number){
+        BigDecimal one = new BigDecimal(amount);
+        return one.divide(new BigDecimal(number)).doubleValue();
+    }
+
     public static void main(String args[]){
         System.out.println(caculteIncome(12.2,2));
     }

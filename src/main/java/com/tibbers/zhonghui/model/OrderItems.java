@@ -13,6 +13,7 @@ public class OrderItems {
     private String shopcarid;
     private int discount;
     private String note;
+    private String detailamount;//订单内购买某一个具体规格的product所花费的金额
     private String reverse1;//这个属性值用来作为订单明细的收货地址，具体到某一条明细的收货地址
     private String reverse2;
 
@@ -27,9 +28,18 @@ public class OrderItems {
                 ", shopcarid='" + shopcarid + '\'' +
                 ", discount=" + discount +
                 ", note='" + note + '\'' +
+                ", detailamount='" + detailamount + '\'' +
                 ", reverse1='" + reverse1 + '\'' +
                 ", reverse2='" + reverse2 + '\'' +
                 '}';
+    }
+
+    public String getDetailamount() {
+        return detailamount;
+    }
+
+    public void setDetailamount(String detailamount) {
+        this.detailamount = detailamount;
     }
 
     public String getShopcarid() {

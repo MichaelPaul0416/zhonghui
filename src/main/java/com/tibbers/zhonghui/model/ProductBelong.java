@@ -16,6 +16,9 @@ public class ProductBelong {
 
     private int remaindernum;
 
+    private String familyid;
+
+
     @Override
     public String toString() {
         return "ProductBelong{" +
@@ -24,7 +27,16 @@ public class ProductBelong {
                 ", accountid='" + accountid + '\'' +
                 ", salestate='" + salestate + '\'' +
                 ", remaindernum=" + remaindernum +
+                ", familyid='" + familyid + '\'' +
                 '}';
+    }
+
+    public String getFamilyid() {
+        return familyid;
+    }
+
+    public void setFamilyid(String familyid) {
+        this.familyid = familyid;
     }
 
     public String getSerialid() {

@@ -16,7 +16,7 @@ import java.util.Map;
 @Repository
 public interface IOrderService {
 
-    PayResult createOrder(String orderInfo, String itemlist, String code, String clientip);
+    PayResult createOrder(String orderInfo, String itemlist, String itemtransportlist, String code, String clientip);
 
     String dealWithAsynNotifyOrder(String xmlData);
 

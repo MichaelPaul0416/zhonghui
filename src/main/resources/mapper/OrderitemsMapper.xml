@@ -13,6 +13,7 @@
         <result column="discount" jdbcType="VARCHAR" property="discount"/>
         <result column="shopcarid" jdbcType="VARCHAR" property="shopcarid"/>
         <result column="note" jdbcType="VARCHAR" property="note"/>
+        <result column="detailamount" jdbcType="VARCHAR" property="detailamount"/>
         <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
         <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
     </resultMap>
@@ -21,12 +22,12 @@
     <insert id="insertItemsBatch" parameterType="java.util.List">
         insert into torderitem VALUES
         <foreach collection="list" index="index" item="item" separator=",">
-            (#{item.serialid},#{item.orderid},#{item.productid},#{item.pronumber},#{item.discount},#{item.shopcarid},#{item.note},#{item.reverse1},#{item.reverse2})
+            (#{item.serialid},#{item.orderid},#{item.productid},#{item.pronumber},#{item.discount},#{item.shopcarid},#{item.note},#{item.detailamount},#{item.reverse1},#{item.reverse2})
         </foreach>
     </insert>
 
     <select id="queryItemsByPager" parameterType="java.util.Map">
-        select t1.serialid,t1.orderid,t1.productid,t2.productname,t1.pronumber,t1.discount,t1.shopcarid,t1.note,t1.reverse1,t1.reverse1
+        select t1.serialid,t1.orderid,t1.productid,t2.productname,t1.pronumber,t1.discount,t1.shopcarid,t1.note,t1.detailamount,t1.reverse1,t1.reverse2
         from torderitem t1,tproduct t2
         where t1.productid = t2.productid
         <if test="orderitem != null">

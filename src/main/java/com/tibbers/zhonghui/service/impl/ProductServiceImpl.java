@@ -59,6 +59,7 @@ public class ProductServiceImpl implements IProductService {
         productBelong.setAccountid(accountid);
         productBelong.setSalestate("0");
         productBelong.setRemaindernum(number);
+        productBelong.setFamilyid(product.getFamilyid());
         iProductBelongDao.insertSingleRelation(productBelong);
         logger.info(String.format("记录[%s]插入数据库成功",product));
         AuditingPros auditingPros = new AuditingPros();
@@ -372,6 +373,7 @@ public class ProductServiceImpl implements IProductService {
             productBelong.setRemaindernum(Integer.parseInt(product.getReverse1()));
             productBelong.setProductid(product.getProductid());
             productBelong.setSalestate("0");
+            productBelong.setFamilyid(product.getFamilyid());
             productBelongs.add(productBelong);
 
             product.setReverse1("");

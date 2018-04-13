@@ -209,14 +209,24 @@
         </if>
     </select>
 
+    <!--<select id="analyseSalerAmountInOrder" parameterType="java.lang.String" resultMap="salerAmountOrder">-->
+        <!--select a.accountid,sum(a.pronumber * CAST(b.unitprice AS DECIMAL(9,2))) as money from-->
+        <!--(-->
+            <!--select t5.orderid,t5.productid,t5.pronumber,t6.accountid from torderitem t5,tproductbelong t6-->
+            <!--where t5.productid = t6.productid and t5.orderid = #{_parameter} and not exists (-->
+            <!--select orderid from torders where isvalid = '0' and orderid = #{_parameter})-->
+        <!--) a,tproduct b-->
+        <!--where a.productid = b.productid-->
+        <!--group by a.accountid-->
+        <!--order by money desc-->
+    <!--</select>-->
     <select id="analyseSalerAmountInOrder" parameterType="java.lang.String" resultMap="salerAmountOrder">
-        select a.accountid,sum(a.pronumber * CAST(b.unitprice AS DECIMAL(9,2))) as money from
-        (
-            select t5.orderid,t5.productid,t5.pronumber,t6.accountid from torderitem t5,tproductbelong t6
-            where t5.productid = t6.productid and t5.orderid = #{_parameter} and not exists (
-            select orderid from torders where isvalid = '0' and orderid = #{_parameter})
-        ) a,tproduct b
-        where a.productid = b.productid
+        select a.accountid,sum(a.detailamount) as money from (
+        select t1.detailamount,t2.accountid from torderitem t1,tproductbelong t2
+        where t1.productid = t2.productid and t1.orderid = #{_parameter} and not exists (
+          select orderid from torders where isvalid = '0' and orderid = #{_parameter}
+        )
+        ) a
         group by a.accountid
         order by money desc
     </select>

@@ -2,7 +2,7 @@
 <!DOCTYPE mapper
         PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.tibbers.zhonghui.dao.IOrderTransport">
+<mapper namespace="com.tibbers.zhonghui.dao.IOrderTransportDao">
     <resultMap id="OrderTransport" type="com.tibbers.zhonghui.model.OrderTransport">
         <result property="serialid" jdbcType="VARCHAR" column="serialid"/>
         <result property="accountid" jdbcType="VARCHAR" column="accountid"/>
@@ -17,9 +17,21 @@
         <result property="reverse2" jdbcType="VARCHAR" column="reverse2"/>
     </resultMap>
 
+    <resultMap id="detailTransInOrder" type="java.util.Map">
+        <result property="accountid" jdbcType="VARCHAR" column="accountid"/>
+        <result property="familyid" jdbcType="VARCHAR" column="familyid"/>
+        <result property="transportfee" jdbcType="VARCHAR" column="transportfee"/>
+    </resultMap>
 
     <insert id="insertSingleOrderTrasportRelation" parameterType="com.tibbers.zhonghui.model.OrderTransport">
         insert into tordertransport values(#{serialid},#{accountid},#{orderid},#{familyid},#{costamount},#{limitcustomfee},#{orderdatetime},#{transportfee},#{isvalid},#{reverse1},#{reverse2})
+    </insert>
+
+    <insert id="insertatchOrderTransportRelation" parameterType="java.util.List">
+        insert into tordertransport VALUES
+        <foreach collection="list" index="index" item="item" separator=",">
+            (#{item.serialid},#{item.accountid},#{item.orderid},#{item.familyid},#{item.costamount},#{item.limitcustomfee},#{item.orderdatetime},#{item.transportfee},#{item.isvalid},#{item.reverse1},#{item.reverse2})
+        </foreach>
     </insert>
 
     <update id="updateRelationState" parameterType="com.tibbers.zhonghui.model.OrderTransport">
@@ -44,5 +56,12 @@
         <if test="pager != null">
             limit #{startLine},#{offset}
         </if>
+    </select>
+
+    <select id="queryDetailTransportFeeInOrder"  resultMap="detailTransInOrder">
+        select '' as accountid,a.orderid as familyid,sum(a.transportfee) as transportfee from tordertransport a where a.orderid = #{_parameter} and a.isvalid = '0'
+        union all
+        select b.accountid,a.familyid,IFNULL(a.transportfee,0) as transportfee from tordertransport a,tproductbelong b
+        where a.familyid = b.familyid and a.orderid = #{_parameter} and a.isvalid = '0'
     </select>
 </mapper>
