@@ -64,7 +64,7 @@
     <select id="queryDetailTransportFeeInOrder"  resultMap="detailTransInOrder">
         select '' as accountid,a.orderid as familyid,sum(a.transportfee) as transportfee from tordertransport a where a.orderid = #{_parameter} and a.isvalid = '0'
         union all
-        select b.accountid,a.familyid,IFNULL(a.transportfee,0) as transportfee from tordertransport a,tproductbelong b
+        select b.accountid,a.familyid,if(IFNULL(a.transportfee,0),null ,0) as transportfee from tordertransport a,tproductbelong b
         where a.familyid = b.familyid and a.orderid = #{_parameter} and a.isvalid = '0'
     </select>
 </mapper>
