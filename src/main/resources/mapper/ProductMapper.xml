@@ -168,7 +168,7 @@
     <!--会员查询自己的上传产品的列表-->
     <select id="vipQueryUploadProducts" parameterType="java.util.Map" resultMap="productQuery">
         select a.*,b.auditstate from (
-        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.transpotfee,t1.limitcustomfee,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum
+        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.transportfee,t1.limitcustomfee,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum
         from tproduct t1,tproductbelong t2,taccount t3
         where t1.productid = t2.productid and t2.accountid = t3.accountid
         <if test="product != null">
