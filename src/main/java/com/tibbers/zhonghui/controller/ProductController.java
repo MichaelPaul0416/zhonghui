@@ -264,7 +264,7 @@ public class ProductController {
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE, response);
             }catch (Exception e){
                 logger.error(e.getMessage(),e);
-                response = new Response(false, e.getMessage());
+                response = new Response(false, e.getCause().getMessage());
                 apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE, AppConstants.REQUEST_STATUS_MESSAGE, response);
             }
         }else {
