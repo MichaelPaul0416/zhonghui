@@ -211,7 +211,7 @@ public class ProductController {
                 String familyid = productService.checkOnlyUploadOneProduct(accountid);
                 boolean alreadyUpload = false;
                 if(StringUtil.isEmpty(familyid)){
-                    logger.info(String.format("用户[%s]未上传过产品，生成新的产品组id"));
+                    logger.info(String.format("用户[%s]未上传过产品，生成新的产品组id",accountid));
                     familyid = StringUtil.generateUUID();
                 }else {
                     alreadyUpload = true;

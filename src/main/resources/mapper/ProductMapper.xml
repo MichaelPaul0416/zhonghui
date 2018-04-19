@@ -86,17 +86,17 @@
     </resultMap>
 
     <resultMap id="onlyOneResult" type="java.util.Map">
-        <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="number" jdbcType="VARCHAR" property="number"/>
         <result column="familyid" jdbcType="VARCHAR" property="familyid"/>
     </resultMap>
 
     <select id="checkOnlyUploadOneProduct" resultMap="onlyOneResult" >
-        select productid,familyid from tproduct where productid in (select productid from tproductbelong where accountid = #{_parameter} and salestate != '4') group by familyid
+        select count(productid) as number,familyid from tproduct where productid in (select productid from tproductbelong where accountid = #{_parameter} and salestate != '4') group by familyid
     </select>
 
     <insert id="insertSingleProduct" parameterType="com.tibbers.zhonghui.model.Product">
         insert into tproduct ( familyid,productid,unitprice,productname,note,itemid,imagepath,color,valuescore,productgrade,fieldmeaning,transportfee,limitcustomfee,reverse1,reverse2)
-        values(#{familyid},#{productid},#{unitprice},#{productname},#{note},#{itemid},#{imagepath},#{color},#{valuescore},#{productgrade},#{fieldmeaning},#{transportfee},#{limitcustomfee},{reverse1},#{reverse2})
+        values(#{familyid},#{productid},#{unitprice},#{productname},#{note},#{itemid},#{imagepath},#{color},#{valuescore},#{productgrade},#{fieldmeaning},#{transportfee},#{limitcustomfee},#{reverse1},#{reverse2})
     </insert>
 
     <insert id="insertBatchProduct" parameterType="java.util.List">
