@@ -70,7 +70,7 @@
     <update id="updateAccountIncomeBatch" parameterType="java.util.List">
         insert into taccount (accountid,accoBalance) values
         <foreach collection="list" index="index" separator="," item="item">
-            (#{account.accountid},#{account.accobalance})
+            (#{item.accountid},#{item.accobalance})
         </foreach>
         on DUPLICATE KEY UPDATE accobalance=values(accobalance)
 

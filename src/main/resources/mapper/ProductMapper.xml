@@ -21,8 +21,27 @@
         <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
     </resultMap>
 
+    <resultMap id="ProductResultShow" type="com.tibbers.zhonghui.model.Product">
+        <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="unitprice" jdbcType="VARCHAR" property="unitprice"/>
+        <result column="productname" jdbcType="VARCHAR" property="productname"/>
+        <result column="note" jdbcType="VARCHAR" property="note"/>
+        <result column="itemid" jdbcType="VARCHAR" property="itemid"/>
+        <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
+        <result column="color" jdbcType="VARCHAR" property="color"/>
+        <result column="valuescore" jdbcType="INTEGER" property="valuescore"/>
+        <result column="productgrade" jdbcType="VARCHAR" property="productgrade"/>
+        <result column="fieldmeaning" jdbcType="VARCHAR" property="fieldmeaning"/>
+        <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
+        <result column="limitcustomfee" jdbcType="VARCHAR" property="limitcustomfee"/>
+        <result column="familyid" jdbcType="VARCHAR" property="familyid"/>
+        <result column="reverse1" jdbcType="VARCHAR" property="reverse1"/>
+        <result column="reverse2" jdbcType="VARCHAR" property="reverse2"/>
+    </resultMap>
+
     <resultMap id="customProductQuery" type="java.util.Map">
         <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="familyid" jdbcType="VARCHAR" property="familyid"/>
         <result column="unitprice" jdbcType="VARCHAR" property="unitprice"/>
         <result column="productname" jdbcType="VARCHAR" property="productname"/>
         <result column="note" jdbcType="VARCHAR" property="note"/>
@@ -42,6 +61,7 @@
 
     <resultMap id="queryProductCustomer" type="java.util.Map">
         <result column="productid" jdbcType="VARCHAR" property="productid"/>
+        <result column="familyid" jdbcType="VARCHAR" property="familyid"/>
         <result column="unitprice" jdbcType="VARCHAR" property="unitprice"/>
         <result column="productname" jdbcType="VARCHAR" property="productname"/>
         <result column="note" jdbcType="VARCHAR" property="note"/>
@@ -111,7 +131,7 @@
     </update>
 
     <select id="queryByProductId" parameterType="java.lang.String" resultMap="queryProductCustomer">
-        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.transportfee,t1.productgrade,t1.fieldmeaning,t1.transportfee,t1.limitcustomfee,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum
+        select t1.productid,t1.familyid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.transportfee,t1.productgrade,t1.fieldmeaning,t1.transportfee,t1.limitcustomfee,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum
         from tproduct t1,tproductbelong t2
         where t1.productid = t2.productid and t1.productid = #{_parameter}
     </select>
@@ -121,7 +141,7 @@
     </select>
 
     <select id="queryByProductStates" parameterType="java.util.Map" resultMap="customProductQuery">
-        select  t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.transportfee,t1.limitcustomfee,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum from tproduct t1,tproductbelong t2
+        select  t1.productid,t1.familyid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.transportfee,t1.limitcustomfee,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum from tproduct t1,tproductbelong t2
         where t1.productid = t2.productid and t1.productid in (select productid from tproductbelong
         <where>
             <if test="states.length != 0">
@@ -138,8 +158,8 @@
         </if>
     </select>
 
-    <select id="queryProducts" parameterType="java.util.Map" resultMap="ProductResult">
-        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.transportfee,t1.limitcustomfee,t1.reverse1,t1.reverse2,t2.remaindernum
+    <select id="queryProducts" parameterType="java.util.Map" resultMap="ProductResultShow">
+        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.transportfee,t1.limitcustomfee,t1.familyid,t1.reverse1,t1.reverse2,t2.remaindernum
         from tproduct t1,tproductbelong t2
         WHERE t1.productid = t2.productid and t1.productid in (select productid from tproductbelong
         <where>
@@ -192,7 +212,7 @@
     </select>
 
     <select id="salerQueryProductsByState" parameterType="java.util.Map" resultMap="customProductQuery">
-        select t1.productid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.limitcustomfee,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum
+        select t1.productid,t1.familyid,t1.unitprice,t1.productname,t1.note,t1.itemid,t1.imagepath,t1.color,t1.valuescore,t1.productgrade,t1.fieldmeaning,t1.limitcustomfee,t1.reverse1,t1.reverse2,t2.salestate,t2.remaindernum
         from tproduct t1,tproductbelong t2,taccount t3
         where t1.productid = t2.productid and t2.accountid = t3.accountid
         <if test="product != null">

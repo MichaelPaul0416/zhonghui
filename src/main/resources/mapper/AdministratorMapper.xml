@@ -87,7 +87,7 @@
     <select id="accountCustomRecordInFewMonths" parameterType="java.util.Map" resultMap="consumeRecords">
         select n.*,m.finalAmount from (
         select c.accountid ,(c.consume - c.refund) as finalAmount from(
-        select a.accountid,a.consume , if(IFNULL(b.refund,0),null,0 )as refund from (
+        select a.accountid,a.consume , if(IFNULL(b.refund,0),ifnull(b.refund,0),0 )as refund from (
         select t1.accountid,/*t1.orderid,*/ sum(CAST(t1.amount AS decimal(9,2)) + CAST(t1.transportfee AS decimal(9,2)))  as consume
         from torders t1 where  t1.isvalid = '1'
         and t1.createdatetime &gt; #{start} and t1.createdatetime &lt; #{end}

@@ -46,6 +46,10 @@ public class Orders {
                 '}';
     }
 
+    public Orders(){
+        this.reverse2 = "";
+    }
+
     public String getExpresscompany() {
         return expresscompany;
     }

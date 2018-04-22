@@ -26,6 +26,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -91,9 +92,8 @@ public class OrderServiceImpl implements IOrderService {
             //根据payforbalance判断是余额支付还是微信支付，余额支付的话，查询是否有该账户，有的话继续
             Orders orders = JSONObject.parseObject(orderInfo,Orders.class);
             String openid;
-            Account account = null;
+            Account account = accountService.queryByAccountid(orders.getAccountid());
             if("1".equals(orders.getPaybybalance())) {//0--其他支付，1--余额支付
-                account = accountService.queryByAccountid(orders.getAccountid());
                 if(account != null && !StringUtil.isEmpty(account.getAccountname())){
                     openid = account.getAccountid();
                 }else {
@@ -134,12 +134,12 @@ public class OrderServiceImpl implements IOrderService {
                         prePaySerial(orders, orders.getOrderid(), payResult ,orders.getPaybybalance());
 
                         double recommand = generateRecommandRelation(orders,orders.getPaybybalance());
-                        double payAmount = Double.parseDouble(orders.getAmount()) - Double.parseDouble(orders.getTransportfee());//抽成需要减去总的邮费
+                        double payAmount = new BigDecimal(orders.getAmount()).doubleValue() - new BigDecimal(orders.getTransportfee()).doubleValue();//抽成需要减去总的邮费
 //                        double fee = addOrderPrecentage(orders.getOrderid(), (int) (Double.parseDouble(orders.getAmount()) * 100));
                         double fee = addOrderPrecentage(orders.getOrderid(), (int) StringUtil.multiply(payAmount,100));
                         WxPayOrderNotifyResult result = new WxPayOrderNotifyResult();
                         result.setOutTradeNo(orders.getOrderid());
-                        double money = Double.parseDouble(orders.getAmount());
+                        double money = new BigDecimal(orders.getAmount()).doubleValue();
 //                        result.setTotalFee((int)(money * 100));
                         result.setTotalFee((int) StringUtil.multiply(money,100));
 
@@ -270,7 +270,7 @@ public class OrderServiceImpl implements IOrderService {
             orderTransport.setReverse2("");
         }
         orderTransportDao.insertatchOrderTransportRelation(list);
-        logger.info(String.format("账户[%s]的订单明细运费批量插入成功",accountid));
+        logger.info(String.format("账户[%s]的订单明细运费批量插入成功[%s]",accountid,list));
 
     }
 
@@ -348,7 +348,7 @@ public class OrderServiceImpl implements IOrderService {
             list.add(recommandIncome);
             recommandIncomeDao.insertRecommandIncomeOrBatch(list);
             logger.info(String.format("新增推荐人[%s]/被推荐人[%s]收益关系[%s]成功",recommandIncome.getAccountid(),recommandIncome.getComefrom(),recommandIncome));
-            return Double.parseDouble(recommandIncome.getIncome());
+            return new BigDecimal(recommandIncome.getIncome()).doubleValue();
         }else {
             logger.info(String.format("未找到[%s]是被谁推荐的",orders.getAccountid()));
             return 0.0;
@@ -440,7 +440,7 @@ public class OrderServiceImpl implements IOrderService {
                 map.put("capital",queryCapitalSerial);
                 List<CapitalSerial> capitalSerials = capitalSerialDao.queryCapitalSerialByPager(map);
 
-                if("1".equals(querys.get(0).get("isvalid")) && "1".equals(capitalSerials.get(0).getState())) {
+                if("1".equals(querys.get(0).get("isvalid")) && "2".equals(capitalSerials.get(0).getState())) {
 
                     CapitalSerial capitalSerial = new CapitalSerial();
                     capitalSerial.setOrderid(orderid);
@@ -467,7 +467,7 @@ public class OrderServiceImpl implements IOrderService {
                         //新增商户平台的订单提成
                         double payAmount = result.getTotalFee() - StringUtil.multiply(querys.get(0).get("transportfee"),"100");//总支付金额-邮费，此时单位是分
                         double fee = addOrderPrecentage(orderid, (int) payAmount);
-                        caculateFinalIncome(fee, Double.parseDouble(recommandFee), result,null);
+                        caculateFinalIncome(fee, new BigDecimal(recommandFee).doubleValue(), result,null);
 
                         isvalid = "1";
 
@@ -484,7 +484,7 @@ public class OrderServiceImpl implements IOrderService {
                     OrderTransport orderTransport = new OrderTransport();
                     orderTransport.setOrderid(orderid);
                     orderTransport.setIsvalid(isvalid);
-                    logger.info(String.format("更新订单[%s]的运费订单明细[%]",orderid,orderTransport));
+                    logger.info(String.format("更新订单[%s]的运费订单明细[%s]",orderid,orderTransport));
                     orderTransportDao.updateRelationStateByOrderid(orderTransport);
 
                     //更新流水信息
@@ -517,14 +517,14 @@ public class OrderServiceImpl implements IOrderService {
         double totalTransPortFee;
         Map<String,String> merchantFees;
         if(feeMap == null) {
-            logger.info(String.format("开始查询订单[%s]内各个商户的邮费"));
+            logger.info(String.format("开始查询订单[%s]内各个商户的邮费",orderid));
             List<Map<String, String>> merchantTransports = orderTransportDao.queryDetailTransportFeeInOrder(orderid);
             merchantFees = new HashMap<>();
             if (merchantTransports.size() <= 1) {
                 throw new APIException(String.format("运费订单明细中未查询到订单[%s]的相关运费明细，请联系管理员", orderid));
             } else {
                 logger.info(String.format("查询到订单[%s]的运费明细[%s]", orderid, merchantTransports));
-                logger.info(String.format("过滤订单[%]的运费明细中的第一行信息汇总信息", orderid));
+                logger.info(String.format("过滤订单[%s]的运费明细中的第一行信息汇总信息", orderid));
                 Map<String, String> temp;
                 for (int i = 1; i < merchantTransports.size(); i++) {
                     temp = merchantTransports.get(i);
@@ -532,21 +532,21 @@ public class OrderServiceImpl implements IOrderService {
                 }
 
             }
-            totalTransPortFee = Double.parseDouble(merchantTransports.get(0).get("transportfee"));//总运费
+            totalTransPortFee = new BigDecimal(String.valueOf(merchantTransports.get(0).get("transportfee"))).doubleValue();//总运费
         }else {
             merchantFees = feeMap;
-            totalTransPortFee = Double.parseDouble(feeMap.get("total"));
+            totalTransPortFee = new BigDecimal(feeMap.get("total")).doubleValue();
             merchantFees.remove("total");
         }
         logger.info(String.format("订单[%s]内的运费明细[%s]", orderid, merchantFees));
-        logger.info(String.format("开始为订单[%s]计算各个商户的最终收益"));
+        logger.info(String.format("开始为订单[%s]计算各个商户的最终收益",orderid));
 //        double accountPay = result.getTotalFee() / 100.0;
         double accountPay = StringUtil.divide(result.getTotalFee(),100);
         double feeForSales = accountPay - platformFee - recommandFee - totalTransPortFee;//这里还需要减去所有订单内邮费
         Orders query = new Orders();
         query.setOrderid(orderid);
         Map<String,Object> param = new HashMap<>();
-        param.put("order",query);
+        param.put("orders",query);
         List<Map<String,String>> list = ordersDao.queryOrdersByPager(param);
         if (list.size() > 1){
             throw new APIException(String.format("订单[%s]重复",orderid));
@@ -564,11 +564,11 @@ public class OrderServiceImpl implements IOrderService {
             throw new APIException("订单内的产品未找到相关上传人员，请联系管理员");
         }
 
-        double totalMoney = Double.parseDouble(total);
+        double totalMoney = new BigDecimal(total).doubleValue();
         List<String> updateAccounts = new ArrayList<>();
         Map<String,Map<String,Object>> tmp = new HashMap<>();
         for(Map<String,Object> singleMap : analyseResults){
-            double part = Double.parseDouble(String.valueOf(singleMap.get("money")));
+            double part = new BigDecimal(String.valueOf(singleMap.get("money"))).doubleValue();
 //            double percent = part / totalMoney;
             double percent = StringUtil.divide(part,totalMoney);
             singleMap.put("percent",percent);
@@ -583,9 +583,9 @@ public class OrderServiceImpl implements IOrderService {
         for (Account account : accounts){
             Map<String,Object> tempMap = tmp.get(account.getAccountid());
             double receive = (double) tempMap.get("receiveMoney");
-            double balance = Double.parseDouble(account.getAccobalance());
+            double balance = new BigDecimal(account.getAccobalance()).doubleValue();
             balance += receive;
-            balance += Double.parseDouble(merchantFees.get(account.getAccountid()));
+            balance += new BigDecimal(merchantFees.get(account.getAccountid())).doubleValue();
             account.setAccobalance(String.valueOf(balance));
         }
         logger.info(String.format("需要批量更新的卖家余额以及信息[%s]",accounts));
@@ -602,12 +602,14 @@ public class OrderServiceImpl implements IOrderService {
         precentage.setOrderid(orderid);
         double money = StringUtil.divide(amount,100);
 
-        money = StringUtil.multiply(money,StringUtil.divide(Double.parseDouble(wxPayConfiguration.getPrecentage()),100));
+        money = StringUtil.multiply(money,StringUtil.divide(new BigDecimal(wxPayConfiguration.getPrecentage()).doubleValue(),100));
 //        money = money * Integer.parseInt(wxPayConfiguration.getPrecentage()) / 100;
         precentage.setPrecentage(String.valueOf(money));
         precentage.setDonedatetime(StringUtil.currentDateTime());
 
-        precentageDao.insertSinglePrecentage(precentage);
+        List<Precentage> list = new ArrayList<>();
+        list.add(precentage);
+        precentageDao.insertBatchPrecentage(list);
         logger.info(String.format("平台从订单[%s]提取[%s]收益,插入成功",orderid,money));
         return money;
     }
@@ -732,7 +734,19 @@ public class OrderServiceImpl implements IOrderService {
         Map<String,Object> param = new HashMap<>();
         param.put("income",recommandIncome);
         List<RecommandIncome> queryResult = recommandIncomeDao.queryRecommandIncomeByPager(param);
-        if(queryResult.size() == 1 && queryResult.get(0) != null) {
+        if( queryResult == null || queryResult.size() == 0) {
+//            该笔订单的下单人，是自己进来系统的，不是被人推荐，所以不存在他下单的时候有收益流水。
+//            但是没有流水的话还需要查询recommand表判断一下，该用户是否是真的不是被推荐进来的，如果还是没有，则返回"0"
+            Account account = accountService.queryByOrderid(recommandserialid);
+            if(account == null){
+                throw new APIException(String.format("订单[%s]不存在，请联系管理员",recommandserialid));
+            }
+            if("1".equals(account.getCusttype())){
+                throw new APIException(String.format("账户[%s]被VIP推荐，但是尚未找到该账户的订单流水[%],请联系管理员",account.getAccountid(),recommandserialid));
+            }else {
+                return "0";
+            }
+        }else if(queryResult.size() == 1 && queryResult.get(0) != null) {
             RecommandIncome income = queryResult.get(0);
             String accountid = income.getAccountid();//下单时绑定的推荐者id
             String amount = income.getIncome();//下单时计算好的收益
@@ -756,19 +770,7 @@ public class OrderServiceImpl implements IOrderService {
             }
 
             return amount;
-        } else if( queryResult.get(0) == null) {
-//            该笔订单的下单人，是自己进来系统的，不是被人推荐，所以不存在他下单的时候有收益流水。
-//            但是没有流水的话还需要查询recommand表判断一下，该用户是否是真的不是被推荐进来的，如果还是没有，则返回"0"
-            Account account = accountService.queryByOrderid(recommandserialid);
-            if(account == null){
-                throw new APIException(String.format("订单[%s]不存在，请联系管理员",recommandserialid));
-            }
-            if("1".equals(account)){
-                throw new APIException(String.format("账户[%s]被VIP推荐，但是尚未找到该账户的订单流水[%],请联系管理员",account.getAccountid(),recommandserialid));
-            }else {
-                return "0";
-            }
-        }else {
+        } else {
             throw new APIException(String.format("关于订单的[%s]的推荐流水大于1条，请联系管理员",recommandserialid));
         }
     }

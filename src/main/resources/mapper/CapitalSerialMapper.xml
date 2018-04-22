@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <!--增，查-->
 <mapper namespace="com.tibbers.zhonghui.dao.ICapitalSerialDao">
-    <resultMap id="CapitalSerial" type="java.util.Map">
+    <resultMap id="CapitalSerial" type="com.tibbers.zhonghui.model.CapitalSerial">
         <result column="emcapitalserial" jdbcType="VARCHAR" property="emcapitalserial"/>
         <result column="thirdpartserial" jdbcType="VARCHAR" property="thirdpartserial"/>
         <result column="orderid" jdbcType="VARCHAR" property="orderid"/>

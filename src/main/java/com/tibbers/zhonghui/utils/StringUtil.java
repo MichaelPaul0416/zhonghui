@@ -110,8 +110,8 @@ public class StringUtil {
     public static double formatStr2Dobule(String amount){
         double num;
         DecimalFormat myformat = new DecimalFormat("#0.00");
-        num = Double.parseDouble(amount);//装换为double类型
-        num = Double.parseDouble(myformat.format(num));//保留2为小数
+        num = new BigDecimal(amount).doubleValue();//装换为double类型
+        num = new BigDecimal(myformat.format(num)).doubleValue();//保留2为小数
         return num;
     }
 

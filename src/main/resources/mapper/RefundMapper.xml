@@ -88,7 +88,7 @@
         select a.*,b.addressid from (
         select
         t1.refundserialid,t1.productid,t1.accountid,t1.applydatetime,t1.agreestate,t1.orderid,t1.itemid,t1.detail,t1.number,t1.amount,t2.unitprice,t2.productname,t2.valuescore,t2.productgrade,t2.fieldmeaning,t2.imagepath,
-        if(ifnull((select a.transportfee from tordertransport a where a.orderid = t1.orderid and a.familyid = t2.familyid),0),null,0) as transportfee
+        if(ifnull((select a.transportfee from tordertransport a where a.orderid = t1.orderid and a.familyid = t2.familyid),0),ifnull((select a.transportfee from tordertransport a where a.orderid = t1.orderid and a.familyid = t2.familyid),0),0) as transportfee
         from trefund t1,tproduct t2 where t1.productid = t2.productid and t1.accountid = #{refund.accountid}
         and t1.applydatetime &gt; #{begin} and t1.applydatetime &lt; #{end}
         ) a,torders b where a.orderid = b.orderid

@@ -23,6 +23,7 @@ import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -169,7 +170,7 @@ public class OrderRelationController {
     public void notifyOrderResult(HttpServletRequest request, HttpServletResponse response){
         BufferedReader reader = null;
         try {
-            reader = new BufferedReader(new InputStreamReader(request.getInputStream()));
+            reader = new BufferedReader(new InputStreamReader(request.getInputStream(),Charset.forName("utf-8")));
             String line ;
             StringBuilder builder = new StringBuilder();
             while((line = reader.readLine()) != null){

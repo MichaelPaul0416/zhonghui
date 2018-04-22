@@ -12,7 +12,7 @@
     </resultMap>
 
 
-    <insert id="insertSinglePrecentage" parameterType="java.util.List">
+    <insert id="insertBatchPrecentage" parameterType="java.util.List">
         insert into tprecentage values
         <foreach collection="list" index="index" separator="," item="item">
             (#{item.serialid},#{item.orderid},#{item.precentage},#{item.donedatetime},#{item.reverse1})
