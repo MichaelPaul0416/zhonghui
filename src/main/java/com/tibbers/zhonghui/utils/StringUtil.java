@@ -141,7 +141,7 @@ public class StringUtil {
 
     public static double divide(double amount,double number){
         BigDecimal one = new BigDecimal(amount);
-        return one.divide(new BigDecimal(number)).doubleValue();
+        return one.divide(new BigDecimal(number),2,BigDecimal.ROUND_HALF_UP).doubleValue();
     }
 
     public static void main(String args[]){
