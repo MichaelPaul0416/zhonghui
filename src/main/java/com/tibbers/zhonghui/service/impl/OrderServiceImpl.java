@@ -655,33 +655,34 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public List<Map<String, Object>> merchantQueryOrders(String accountid, String orderstate, Pager pager) {
+    public Map<String, List<Map<String, Object>>> merchantQueryOrders(String accountid, String orderstate, Pager pager) {
         logger.info(String.format("开始查询商户[%s]的订单详细信息",accountid));
 
-        List<Map<String,Object>> list = new ArrayList<>();
+        Map<String,List<Map<String,Object>>> resultMap = new HashMap<>();
         if("3".equals(orderstate)){
             logger.info(String.format("查询商户[%s]的退款信息",accountid));
             Map<String,Object> param = new HashMap<>();
             param.put("accountid",accountid);
             param.put("pager",pager);
-            list.addAll(refundDao.merchantQueryRefundOrders(param));
-            logger.info(String.format("查询到商户[%s]的待确认的退款流水[%s]",accountid,list));
+            resultMap.put("refundinfo",refundDao.merchantQueryRefundOrders(param));
+//            list.addAll(refundDao.merchantQueryRefundOrders(param));
+            logger.info(String.format("查询到商户[%s]的待确认的退款流水[%s]",accountid,resultMap));
         }else {
             //要么查询全部，要么根据状态查询
             Map<String,Object> map = new HashMap<>();
             map.put("accountid",accountid);
             map.put("orderstate",orderstate);
             map.put("pager",pager);
-            list = ordersDao.salerOrderCenter(map);
+            resultMap.put("orderinfo",ordersDao.salerOrderCenter(map));
             if(StringUtil.isEmpty(orderstate)){
                 Map<String,Object> param = new HashMap<>();
                 param.put("accountid",accountid);
                 param.put("pager",pager);
-                list.addAll(refundDao.merchantQueryRefundOrders(param));
+                resultMap.put("refundinfo",(refundDao.merchantQueryRefundOrders(param)));
             }
         }
-        logger.info(String.format("查询到商户[%s]的订单中心信息[%s]",accountid,list));
-        return list;
+        logger.info(String.format("查询到商户[%s]的订单中心信息[%s]",accountid,resultMap));
+        return resultMap;
     }
 
     @Override

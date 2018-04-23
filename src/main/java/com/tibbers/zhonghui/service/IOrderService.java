@@ -22,7 +22,7 @@ public interface IOrderService {
 
     List<Map<String,Object>> accountOrderCenter(String accountid, String orderstate, Pager pager);
 
-    List<Map<String,Object>> merchantQueryOrders(String accountid,String orderstate,Pager pager);
+    Map<String, List<Map<String, Object>>> merchantQueryOrders(String accountid, String orderstate, Pager pager);
 
     Orders updateOrderInfo(Orders orders);
 

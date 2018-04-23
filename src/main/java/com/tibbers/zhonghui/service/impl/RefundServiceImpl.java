@@ -259,7 +259,7 @@ public class RefundServiceImpl implements IRefundService {
         if(amount.compareTo(refund.getAmount()) < 0){
             throw new APIException(String.format("订单[%s]金额小于退款流水金额[%s]",amount,refund.getAmount()));
         }
-        refundRequest.setTotalFee((int)(StringUtil.formatStr2Dobule(refund.getAmount()) * 100));
+        refundRequest.setTotalFee((int)(StringUtil.formatStr2Dobule(amount) * 100));
         refundRequest.setRefundFee((int)(StringUtil.formatStr2Dobule(refund.getAmount()) * 100));
         refundRequest.setRefundDesc(refund.getDetail());
 
