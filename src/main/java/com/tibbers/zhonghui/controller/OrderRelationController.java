@@ -126,7 +126,7 @@ public class OrderRelationController {
                     pager = new Pager(Integer.parseInt(startLine),Integer.parseInt(offset));
                 }
 
-                List<Map<String,Object>> result = orderService.accountOrderCenter(accountid,orderState,pager);
+                Map<String,List<Map<String,Object>>> result = orderService.accountOrderCenter(accountid,orderState,pager);
                 response = new Response(true,result);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
             }catch (Exception e){

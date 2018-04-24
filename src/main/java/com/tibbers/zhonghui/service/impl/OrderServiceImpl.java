@@ -441,7 +441,7 @@ public class OrderServiceImpl implements IOrderService {
                 List<CapitalSerial> capitalSerials = capitalSerialDao.queryCapitalSerialByPager(map);
 
                 if("1".equals(querys.get(0).get("isvalid")) && "2".equals(capitalSerials.get(0).getState())) {
-
+                    logger.info(String.format("根据微信扣款结果通知更新订单[%s]的信息",orderid));
                     CapitalSerial capitalSerial = new CapitalSerial();
                     capitalSerial.setOrderid(orderid);
                     capitalSerial.setCapitaldatetime(StringUtil.currentDateTime());
@@ -497,6 +497,7 @@ public class OrderServiceImpl implements IOrderService {
                     response = AppConstants.NOTIFY_RESPONSE_SUCCESS;
                 }else {
                     response = String.format("支付扣款[%s]重复通知",result.getTransactionId());
+                    logger.info(response);
                 }
             }else{
                 response = String.format(AppConstants.NOTIFY_RESPONSE_FAILED_TEMPLATE,"报文为空");
@@ -615,11 +616,11 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     @Override
-    public List<Map<String, Object>> accountOrderCenter(String accountid, String orderstate, Pager pager) {
+    public Map<String, List<Map<String, Object>>> accountOrderCenter(String accountid, String orderstate, Pager pager) {
         logger.info(String.format("开始查询用户[%s]的订单详细信息",accountid));
 
+        Map<String,List<Map<String,Object>>> resultMap = new HashMap<>();
 
-        List<Map<String, Object>> list = new ArrayList<>();
         //orderstate--> 0未发货，1已发货待收货，2已收货，3退款
         if("3".equals(orderstate)){
             //客户端查询退款订单的话，另外调用接口查询
@@ -631,13 +632,17 @@ public class OrderServiceImpl implements IOrderService {
             params.put("pager",pager);
             params.put("end",StringUtil.currentDateTime());
             params.put("begin", DateUtil.caculateDate(-30));
-            list.addAll(refundDao.refundSerialsInCenter(params));
+
+            resultMap.put("refundinfo",refundDao.refundSerialsInCenter(params));
+            resultMap.put("orderinfo",null);
         }else {
+            List<Map<String, Object>> list;
             Map<String,Object> map = new HashMap<>();
             map.put("accountid",accountid);
             map.put("orderstate",orderstate);
             map.put("pager",pager);
             list = ordersDao.accountOrderCenter(map);//如果orderstate有值，则查询有值的，如果不传，则查询除了3以外的所有订单
+            resultMap.put("orderinfo",list);
             if (StringUtil.isEmpty(orderstate)){//不传的情况，针对3需要特殊接口查询
                 Map<String,Object> params = new HashMap<>();
                 Refund refund = new Refund();
@@ -647,11 +652,11 @@ public class OrderServiceImpl implements IOrderService {
                 params.put("pager",pager);
                 params.put("end",StringUtil.currentDateTime());
                 params.put("begin",DateUtil.caculateDate(-30));
-                list.addAll(refundDao.refundSerialsInCenter(params));
+                resultMap.put("refundinfo",refundDao.refundSerialsInCenter(params));
             }
         }
-        logger.info(String.format("查询到用户[%s]需要的订单详细信息[%s]",accountid,list));
-        return list;
+        logger.info(String.format("查询到用户[%s]需要的订单详细信息[%s]",accountid,resultMap));
+        return resultMap;
     }
 
     @Override
