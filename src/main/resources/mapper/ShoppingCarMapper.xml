@@ -83,7 +83,7 @@
         <where>
             1 = 1
             <if test="accountid != null and !&quot;&quot;.equals(accountid)">and accountid = #{accountid}</if>
-            <if test="producid != null and !&quot;&quot;.equals(producid)">and producid = #{producid}</if>
+            <if test="productid != null and !&quot;&quot;.equals(productid)">and productid = #{productid}</if>
             <if test="deleteflag != null and !&quot;&quot;.equals(deleteflag)">and deleteflag = #{deleteflag}</if>
         </where>
     </select>
