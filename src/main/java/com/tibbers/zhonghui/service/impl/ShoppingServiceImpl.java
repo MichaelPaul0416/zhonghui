@@ -35,9 +35,26 @@ public class ShoppingServiceImpl implements IShoppingService {
         try {
             ShoppingCar shoppingCar = JSONObject.parseObject(shoppingCarInfo,ShoppingCar.class);
             logger.info(String.format("购物车中新增一条明细记录[%s]",shoppingCar));
-            shoppingCar.setSerialid(StringUtil.generateUUID());
-            shoppingCar.setDeleteflag("1");
-            shoppingCarDao.addItem2ShopCar(shoppingCar);
+            ShoppingCar param = new ShoppingCar();
+            param.setProductid(shoppingCar.getProductid());
+            param.setAccountid(shoppingCar.getAccountid());
+            param.setDeleteflag("1");
+
+            ShoppingCar existQuery = shoppingCarDao.queryExists(param);
+            if(existQuery == null) {
+                shoppingCar.setSerialid(StringUtil.generateUUID());
+                shoppingCar.setDeleteflag("1");
+                shoppingCarDao.addItem2ShopCar(shoppingCar);
+            }else {
+                ShoppingCar updateBean = new ShoppingCar();
+                updateBean.setSerialid(existQuery.getSerialid());
+                updateBean.setNumber(existQuery.getNumber() + shoppingCar.getNumber());
+                updateBean.setModifydatetime(StringUtil.currentDateTime());
+                updateBean.setReverse2("");
+                shoppingCarDao.updateGoodsInShopCar(updateBean);
+                logger.info(String.format("已存在用户[%s]对于产品[%s]的收藏，更新收藏数量为[%s]",
+                        shoppingCar.getAccountid(),shoppingCar.getProductid(),updateBean.getNumber()));
+            }
             logger.info("明细新增成功");
             return shoppingCar.getSerialid();
         }catch (Exception e){

@@ -26,4 +26,6 @@ public interface IShoppingCarDao {
     List<Map<String,String>> queryListByPager(Map<String,Object> map);
 
     List<ShoppingCar> queryListBySerialid(List<String> list);
+
+    ShoppingCar queryExists(ShoppingCar shoppingCar);
 }
