@@ -149,12 +149,15 @@ public class OrderRelationController {
         Response response;
 
         if(StringUtil.argsNotEmpty(new String[]{orderinfo,itemlist,itemtransportlist,code,clientip})){
+            PayResult payResult;
             try{
-                PayResult payResult = orderService.createOrder(orderinfo,itemlist, itemtransportlist, code, clientip);
+                payResult = orderService.createOrder(orderinfo,itemlist, itemtransportlist, code, clientip);
                 response = new Response(true,payResult);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
             }catch (APIException e){
-                response = new Response(false,e.getMessage());
+                payResult = new PayResult();
+                payResult.setErr_code_msg(e.getCause().getMessage());
+                response = new Response(false,payResult);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
             }
         }else{
