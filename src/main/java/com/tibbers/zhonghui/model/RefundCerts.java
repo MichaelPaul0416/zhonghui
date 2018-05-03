@@ -16,6 +16,16 @@ public class RefundCerts {
     private String reverse2;
 
 
+    private RefundCerts(){
+        serialid = "";
+        refundserialid = "";
+        certphotoid = "";
+        certphotopath = "";
+        uploaddatetime = "";
+        deleteflag = "";
+        reverse1 = "";
+        reverse2 = "";
+    }
     @Override
     public String toString() {
         return "RefundCerts{" +

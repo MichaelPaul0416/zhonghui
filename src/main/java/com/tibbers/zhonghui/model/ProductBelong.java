@@ -18,7 +18,14 @@ public class ProductBelong {
 
     private String familyid;
 
-
+    public ProductBelong(){
+        serialid = "";
+        productid = "";
+        accountid = "";
+        salestate = "";
+        remaindernum = 0;
+        familyid = "";
+    }
     @Override
     public String toString() {
         return "ProductBelong{" +

@@ -18,6 +18,18 @@ public class WithDraw {
     private String reverse1;
     private String reverse2;
 
+    public WithDraw(){
+        serialid = "";
+        accountid = "";
+        applydatetime = "";
+        amount = "";
+        applystate = "";
+        adminid = "";
+        agreedatetime = "";
+        refusereason = "";
+        reverse1 = "";
+        reverse2 = "";
+    }
     @Override
     public String toString() {
         return "WithDraw{" +

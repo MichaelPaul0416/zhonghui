@@ -17,6 +17,19 @@ public class Person {
     private String reverse2;
     private String reverse3;
 
+    public Person(){
+        personid = "";
+        personname = "";
+        sex = "";
+        age = 1;
+        phone = "";
+        address = "";
+        bindQQ = "";
+        reverse1 = "";
+        reverse2 = "";
+        reverse3 = "";
+    }
+
     @Override
     public String toString() {
         return "Person{" +

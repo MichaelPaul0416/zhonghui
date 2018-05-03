@@ -20,6 +20,16 @@ public class OrderTransport {
     private String reverse2;
 
     public OrderTransport(){
+        serialid = "";
+        accountid = "";
+        orderid = "";
+        familyid = "";
+        costamount = "";
+        limitcustomfee = "";
+        orderdatetime = "";
+        transportfee = "";
+        isvalid = "0";
+        reverse1 = "";
         reverse2 = "";
     }
     @Override

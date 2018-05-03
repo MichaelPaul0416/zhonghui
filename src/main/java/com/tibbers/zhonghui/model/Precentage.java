@@ -14,6 +14,10 @@ public class Precentage {
     private String reverse1;
 
     public Precentage(){
+        serialid = "";
+        orderid = "";
+        precentage = "";
+        donedatetime = "";
         reverse1 = "";
     }
     @Override

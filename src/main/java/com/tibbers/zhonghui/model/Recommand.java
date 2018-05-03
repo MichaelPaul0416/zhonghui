@@ -14,6 +14,15 @@ public class Recommand {
     private String reverse1;
     private String reverse2;
 
+    public Recommand(){
+        serialid = "";
+        accountid = "";
+        recommanddate = "";
+        recommanddate = "";
+        recommander = "";
+        reverse1 = "";
+        reverse2 = "";
+    }
     @Override
     public String toString() {
         return "Recommand{" +

@@ -18,6 +18,18 @@ public class OrderItems {
     private String reverse2;
 
 
+    public OrderItems(){
+        serialid = "";
+        orderid = "";
+        productid = "";
+        pronumber = 1;
+        shopcarid = "";
+        discount = 0;
+        note = "";
+        detailamount = "";
+        reverse1 = "";
+        reverse2 = "";
+    }
     @Override
     public String toString() {
         return "OrderItems{" +

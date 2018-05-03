@@ -16,6 +16,17 @@ public class RecommandIncome {
     private String reverse1;
     private String reverse2;
 
+    public RecommandIncome(){
+        incomeserialno = "";
+        accountid = "";
+        comefrom = "";
+        income = "";
+        incomedatetime = "";
+        description = "";
+        alreadydone = "";
+        reverse1 = "";
+        reverse2 = "";
+    }
     @Override
     public String toString() {
         return "RecommandIncome{" +

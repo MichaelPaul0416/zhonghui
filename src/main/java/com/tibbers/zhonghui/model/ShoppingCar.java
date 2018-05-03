@@ -17,6 +17,14 @@ public class ShoppingCar {
     private String reverse2;
 
     public ShoppingCar(){
+        serialid = "";
+        accountid = "";
+        productid = "";
+        number = 1;
+        adddatetime = "";
+        modifydatetime = "";
+        deleteflag = "";
+        reverse1 = "";
         reverse2 = " ";
     }
 

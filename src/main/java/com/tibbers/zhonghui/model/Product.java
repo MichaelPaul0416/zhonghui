@@ -22,6 +22,23 @@ public class Product {
     private String reverse1;
     private String reverse2;
 
+    public Product(){
+        productid = "";
+        productname = "";
+        familyid = "";
+        unitprice = "";
+        note = "";
+        itemid = "";
+        imagepath = "";
+        color = "";
+        valuescore = 0;
+        productgrade = "";
+        fieldmeaning = "";
+        transportfee = "";
+        limitcustomfee = "";
+        reverse1 = "";
+        reverse2 = "";
+    }
     @Override
     public String toString() {
         return "Product{" +

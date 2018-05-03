@@ -20,6 +20,15 @@ public class Administrator implements Serializable{
     private String reverse2;
 
     public Administrator(){
+        serialid = "";
+        adminid = "";
+        adminname = "";
+        adminpassword = "";
+        createdatetime = "";
+        lastmodifydatetime = "";
+        identitytype = "";
+        isvalid = "";
+        reverse1 = "";
         reverse2 = "";
     }
 

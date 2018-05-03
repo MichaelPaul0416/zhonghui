@@ -16,6 +16,17 @@ public class CapitalSerial {
     private String reverse1;
     private String reverse2;
 
+    public CapitalSerial(){
+        emcapitalserial = "";
+        thirdpartserial = "";
+        orderid = "";
+        capitaldatetime = "";
+        state = "";
+        thirdpartmsg = "";
+        capitaldirect = "";
+        reverse1 = "";
+        reverse2 = "";
+    }
     @Override
     public String toString() {
         return "CapitalSerial{" +

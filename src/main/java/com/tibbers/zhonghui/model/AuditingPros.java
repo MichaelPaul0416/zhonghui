@@ -15,6 +15,16 @@ public class AuditingPros {
     private String enddatetime;
     private String rejectreason;
 
+    public AuditingPros(){
+        serialid = "";
+        productid = "";
+        auditor = "";
+        auditstate = "";
+        applydatetime = "";
+        begindatetime = "";
+        enddatetime = "";
+        rejectreason = "";
+    }
     @Override
     public String toString() {
         return "AuditingPros{" +

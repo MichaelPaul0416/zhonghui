@@ -19,6 +19,16 @@ public class Account {
     private String reverse;
 
     public Account(){
+        accountid = "";
+        personid = "";
+        accountname = "";
+        imagepath = "";
+        bindphone = "";
+        score = "0";
+        isvip = "";
+        custtype = "";
+        accobalance = "";
+        codeimagepath = "";
         reverse = "";
     }
 

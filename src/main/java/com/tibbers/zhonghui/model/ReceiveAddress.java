@@ -21,6 +21,22 @@ public class ReceiveAddress {
     private String defaultaddress;
     private String reverse;
 
+    public ReceiveAddress(){
+        serialid = "";
+        accountid = "";
+        receivename = "";
+        contactphone = "";
+        postcode = "";
+        province = "";
+        city = "";
+        area = "";
+        street = "";
+        addressmore = "";
+        totaladdress = "";
+        defaultaddress = "";
+        defaultaddress = "";
+        reverse = "";
+    }
     @Override
     public String toString() {
         return "ReceiveAddress{" +

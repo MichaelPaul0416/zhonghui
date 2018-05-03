@@ -16,6 +16,15 @@ public class SysParam implements Serializable{
     private String deleteflag;
     private String reverse;
 
+    public SysParam(){
+        categoryid = "";
+        itemid = "";
+        itemname = "";
+        caption = "";
+        description = "";
+        deleteflag = "";
+        reverse = "";
+    }
     @Override
     public String toString() {
         return "SysParam{" +

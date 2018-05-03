@@ -22,6 +22,23 @@ public class Refund {
     private String reverse1;
     private String reverse2;
 
+    public Refund(){
+        refundserialid = "";
+        accountid = "";
+        orderid = "";
+        productid = "";
+        number = 1;
+        amount = "";
+        itemid = "";
+        detail = "";
+        applydatetime = "";
+        agreestate = "";
+        dealdatetime = "";
+        agreedatetime = "";
+        rejectreason = "";
+        reverse1 = "";
+        reverse2 = "";
+    }
     @Override
     public String toString() {
         return "Refund{" +

@@ -24,6 +24,25 @@ public class Orders {
     private String reverse1;
     private String reverse2;
 
+    public Orders(){
+        addressid = "";
+        accountid = "";
+        orderid = "";
+        createdatetime = "";
+        orderstate = "0";
+        isvalid = "";
+        expressno = "";
+        expresscompany = "";
+        donedatetime = "";
+        freetransport = "";
+        transportfee = "";
+        note = "";
+        amount = "";
+        paybybalance = "";
+        reverse1 = "";
+        reverse2 = "";
+    }
+
     @Override
     public String toString() {
         return "Orders{" +
@@ -44,10 +63,6 @@ public class Orders {
                 ", reverse1='" + reverse1 + '\'' +
                 ", reverse2='" + reverse2 + '\'' +
                 '}';
-    }
-
-    public Orders(){
-        this.reverse2 = "";
     }
 
     public String getExpresscompany() {
