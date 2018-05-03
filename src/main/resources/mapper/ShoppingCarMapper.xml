@@ -54,7 +54,7 @@
         update tshopcar set
         <if test="number > 0">number = #{number},</if>
         <if test="modifydatetime != null and !&quot;&quot;.equals(modifydatetime)">modifydatetime = #{modifydatetime},</if>
-        <if test="reverse1 != null">reverse1 = #{reverse1},</if>
+        <if test="reverse1 != null and !&quot;&quot;.equals(reverse1)">reverse1 = #{reverse1},</if>
         <if test="reverse2 != null">reverse2 = #{reverse2}</if>
         where serialid = #{serialid}
     </update>

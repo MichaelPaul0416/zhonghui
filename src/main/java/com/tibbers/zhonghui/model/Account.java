@@ -27,7 +27,7 @@ public class Account {
         score = "0";
         isvip = "";
         custtype = "";
-        accobalance = "";
+        accobalance = "0";
         codeimagepath = "";
         reverse = "";
     }

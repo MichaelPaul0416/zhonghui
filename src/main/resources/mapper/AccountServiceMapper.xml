@@ -61,8 +61,8 @@
         <if test="phone != null and !&quot;&quot;.equals(phone.trim())"> phone= #{phone} ,</if>
         <if test="address != null and !&quot;&quot;.equals(address.trim())"> address= #{address} ,</if>
         <if test="bindQQ != null and !&quot;&quot;.equals(bindQQ.trim())"> bindQQ= #{bindQQ} ,</if>
-        <if test="reverse1 != null"> reverse1 = #{reverse1}, </if>
-        <if test="reverse2 != null"> reverse2 = #{reverse2}, </if>
+        <if test="reverse1 != null and !&quot;&quot;.equals(reverse1)"> reverse1 = #{reverse1}, </if>
+        <if test="reverse2 != null and !&quot;&quot;.equals(reverse2)"> reverse2 = #{reverse2}, </if>
         <if test="reverse3 != null"> reverse3 = #{reverse3} </if>
         where personid = #{personid}
     </update>

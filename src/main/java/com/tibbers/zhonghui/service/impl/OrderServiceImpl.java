@@ -440,6 +440,9 @@ public class OrderServiceImpl implements IOrderService {
                 map.put("capital",queryCapitalSerial);
                 List<CapitalSerial> capitalSerials = capitalSerialDao.queryCapitalSerialByPager(map);
 
+                if(capitalSerials.size() == 0){
+                    throw new APIException(String.format("不存在订单[%s]对应的资金流水",orderid));
+                }
                 if("1".equals(querys.get(0).get("isvalid")) && "2".equals(capitalSerials.get(0).getState())) {
                     logger.info(String.format("根据微信扣款结果通知更新订单[%s]的信息",orderid));
                     CapitalSerial capitalSerial = new CapitalSerial();

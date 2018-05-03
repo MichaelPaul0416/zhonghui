@@ -16,7 +16,7 @@ public class RefundCerts {
     private String reverse2;
 
 
-    private RefundCerts(){
+    public RefundCerts(){
         serialid = "";
         refundserialid = "";
         certphotoid = "";

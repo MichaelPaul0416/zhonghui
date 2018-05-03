@@ -114,7 +114,7 @@
             <if test="rejectreason != null and refund.rejectreason != null and !&quot;&quot;.equals(refund.rejectreason)">and t1.rejectreason like '%' #{refund.rejectreason} '%'</if>
             <if test="refund.itemid != null and !&quot;&quot;.equals(refund.itemid)">and t1.itemid = #{refund.itemid}</if>
             <if test="refund.agreestate != null and !&quot;&quot;.equals(refund.agreestate)">and t1.agreestate = #{refund.agreestate}</if>
-            <if test="refund.reverse1 != null "> and t1.reverse1 = #{refund.reverse1}</if>
+            <if test="refund.reverse1 != null and !&quot;&quot;.equals(reverse1)"> and t1.reverse1 = #{refund.reverse1}</if>
             <if test="refund.reverse2 != null "> and t1.reverse2 = #{refund.reverse2}</if>
         </if>
         ORDER by t1.agreedatetime desc
@@ -128,7 +128,7 @@
         <if test="dealdatetime != null and !&quot;&quot;.equals(dealdatetime)">dealdatetime = #{dealdatetime},</if>
         <if test="agreedatetime != null and !&quot;&quot;.equals(agreedatetime)">agreedatetime = #{agreedatetime},</if>
         <if test="rejectreason != null and !&quot;&quot;.equals(rejectreason)">rejectreason = #{rejectreason},</if>
-        <if test="reverse1 != null ">reverse1 = #{reverse1},</if>
+        <if test="reverse1 != null and !&quot;&quot;.equals(reverse1)">reverse1 = #{reverse1},</if>
         <if test="reverse2 != null ">reverse2 = #{reverse2}</if>
         where refundserialid = #{refundserialid}
     </update>

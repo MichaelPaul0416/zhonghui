@@ -47,6 +47,13 @@ public class AppDemoTest {
     }
 
     @Test
+    public void showJson(){
+        String account = "{\"accountname\":\"hello\"}";
+        Account bean = JSONObject.parseObject(account,Account.class);
+        System.out.println(bean);
+    }
+
+    @Test
     public void queryAllType(){
         List<String> list = sqlSession.selectList("queryAllType");
         System.out.println(list);

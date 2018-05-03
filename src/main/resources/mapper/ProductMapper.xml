@@ -179,7 +179,7 @@
              <if test="product.itemid != null and !&quot;&quot;.equals(product.itemid) ">and t1.itemid = #{product.itemid} </if>
              <if test="product.color != null and !&quot;&quot;.equals(product.color) "> and t1.color = #{product.color} </if>
              <if test="product.productgrade != null and !&quot;&quot;.equals(product.productgrade) "> and t1.productgrade like '%' #{product.productgrade} '%'</if>
-             <if test="product.reverse1 != null "> and t1.reverse1 = #{product.reverse1} </if>
+             <if test="product.reverse1 != null and !&quot;&quot;.equals(product.reverse1)"> and t1.reverse1 = #{product.reverse1} </if>
              <if test="product.reverse2 != null "> and t1.reverse2 = #{product.reverse2} </if>
         </if>
         <if test="pager != null">limit #{pager.startLine},#{pager.offset}</if>
@@ -198,7 +198,7 @@
                 <if test="product.itemid != null and !&quot;&quot;.equals(product.itemid) ">and t1.itemid = #{product.itemid} </if>
                 <if test="product.color != null and !&quot;&quot;.equals(product.color) "> and t1.color = #{product.color} </if>
                 <if test="product.productgrade != null and !&quot;&quot;.equals(product.productgrade) "> and t1.productgrade like '%' #{product.productgrade} '%'</if>
-                <if test="product.reverse1 != null "> and t1.reverse1 = #{product.reverse1} </if>
+                <if test="product.reverse1 != null and !&quot;&quot;.equals(product.reverse1)"> and t1.reverse1 = #{product.reverse1} </if>
                 <if test="product.reverse2 != null "> and t1.reverse2 = #{product.reverse2} </if>
             </if>
             <if test="account != null">
@@ -222,7 +222,7 @@
             <if test="product.itemid != null and !&quot;&quot;.equals(product.itemid) ">and t1.itemid = #{product.itemid} </if>
             <if test="product.color != null and !&quot;&quot;.equals(product.color) "> and t1.color = #{product.color} </if>
             <if test="product.productgrade != null and !&quot;&quot;.equals(product.productgrade) "> and t1.productgrade like '%' #{product.productgrade} '%'</if>
-            <if test="product.reverse1 != null "> and t1.reverse1 = #{product.reverse1} </if>
+            <if test="product.reverse1 != null and !&quot;&quot;.equals(product.reverse1)"> and t1.reverse1 = #{product.reverse1} </if>
             <if test="product.reverse2 != null "> and t1.reverse2 = #{product.reverse2} </if>
         </if>
         <if test="account != null">

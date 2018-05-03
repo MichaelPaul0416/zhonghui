@@ -31,7 +31,7 @@
             <if test="capital.orderid != null and !&quot;&quot;.equals(capital.orderid)"> and orderid = #{capital.orderid}</if>
             <if test="capital.state != null and !&quot;&quot;.equals(capital.state)"> and state = #{capital.state}</if>
             <if test="capital.capitaldirect != null and !&quot;&quot;.equals(capital.capitaldirect)"> and capitaldirect = #{capital.capitaldirect}</if>
-            <if test="capital.reverse1 != null "> and reverse1 = #{capital.reverse1}</if>
+            <if test="capital.reverse1 != null and !&quot;&quot;.equals(capital.reverse1)"> and reverse1 = #{capital.reverse1}</if>
             <if test="capital.reverse2 != null "> and reverse2 = #{capital.reverse2}</if>
         </if>
         <if test="pager != null">limit #{pager.startLine},#{pager.offset}</if>

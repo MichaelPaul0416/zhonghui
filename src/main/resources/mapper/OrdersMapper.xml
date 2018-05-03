@@ -104,7 +104,7 @@
         <if test="expresscompany != null and !&quot;&quot;.equals(expresscompany)"> expresscompany = #{expresscompany}, </if>
         <if test="donedatetime != null and !&quot;&quot;.equals(donedatetime)"> donedatetime = #{donedatetime}, </if>
         <if test="transportfee != null and !&quot;&quot;.equals(transportfee)"> transportfee = #{transportfee}, </if>
-        <if test="reverse1 != null "> reverse1 = #{reverse1}, </if>
+        <if test="reverse1 != null and !&quot;&quot;.equals(reverse1)"> reverse1 = #{reverse1}, </if>
         <if test="reverse2 != null "> reverse2 = #{reverse2} </if>
         where orderid = #{orderid}
     </update>
@@ -124,7 +124,7 @@
             <if test="orders.freetransport != null and !&quot;&quot;.equals(orders.freetransport)">and t1.freetransport = #{orders.freetransport} </if>
             <if test="orders.note != null and !&quot;&quot;.equals(orders.note)">and t1.note like '%' #{orders.note} '%' </if>
             <if test="orders.paybybalance != null and !&quot;&quot;.equals(orders.paybybalance)">and t1.paybybalance = #{orders.paybybalance}</if>
-            <if test="orders.reverse1 != null ">and t1.reverse1 like '%' #{orders.reverse1} '%' </if>
+            <if test="orders.reverse1 != null and !&quot;&quot;.equals(orders.reverse1)">and t1.reverse1 like '%' #{orders.reverse1} '%' </if>
             <if test="orders.reverse2 != null ">and t1.reverse2 like '%' #{orders.reverse2} '%' </if>
         </if>
         order by t1.createdatetime desc,t1.donedatetime desc

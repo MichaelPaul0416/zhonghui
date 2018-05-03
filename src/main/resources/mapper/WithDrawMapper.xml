@@ -45,7 +45,7 @@
           <if test="withdraw.adminid != null and !&quot;&quot;.equals(withdraw.adminid)"> and adminid = #{withdraw.adminid} </if>
           <if test="withdraw.agreedatetime != null and !&quot;&quot;.equals(withdraw.agreedatetime)"> and agreedatetime like '%' #{withdraw.agreedatetime} '%' </if>
           <if test="withdraw.refusereason != null and !&quot;&quot;.equals(withdraw.refusereason)"> and refusereason like '%' #{withdraw.refusereason} '%' </if>
-          <if test="withdraw.reverse1 != null"> and reverse1 like '%' #{withdraw.reverse1} '%'</if>
+          <if test="withdraw.reverse1 != null and !&quot;&quot;.equals(withdraw.reverse1)"> and reverse1 like '%' #{withdraw.reverse1} '%'</if>
           <if test="withdraw.reverse2 != null "> and reverse2 like '%' #{withdraw.reverse2} '%'</if>
         </if>
         <if test="pager != null">

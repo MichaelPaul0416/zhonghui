@@ -133,8 +133,8 @@
         UPDATE  tadministrator set
          <if test="adminpassword != null and !&quot;&quot;.equals(adminpassword)">adminpassword = #{adminpassword} , </if>
          <if test="lastmodifydatetime != null and !&quot;&quot;.equals(lastmodifydatetime)">lastmodifydatetime = #{lastmodifydatetime} , </if>
-         <if test="reverse1 != null ">reverse1 = #{reverse1} , </if>
-         <if test="reverse1 != null ">reverse2 = #{reverse2} </if>
+         <if test="reverse1 != null and !&quot;&quot;.equals(reverse1)">reverse1 = #{reverse1} , </if>
+         <if test="reverse2 != null ">reverse2 = #{reverse2} </if>
         where adminid = #{adminid}
     </update>
     
