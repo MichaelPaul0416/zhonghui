@@ -36,7 +36,7 @@ public class WithDrawServiceImpl implements IWithDrawService{
     private IAccountServiceDao accountServiceDao;
     @Override
     public List<WithDraw> applyWithDrawOrBatch(List<WithDraw> withDraws) {
-        logger.info(String.format("开始批量插入提现申请"));
+        logger.info(String.format("开始批量插入提现申请[%s]",withDraws));
         try {
             for(WithDraw withDraw : withDraws){
                 withDraw.setSerialid(StringUtil.generateUUID());
