@@ -409,4 +409,37 @@ public class AccountServiceController {
 
         return JSONObject.toJSONString(apiResponse);
     }
+
+    @RequestMapping("/queryWxOpenid")
+    @ResponseBody
+    public String queryWxOpneid(String code){
+        APIResponse apiResponse;
+        Response response;
+        if(!StringUtil.isEmpty(code)){
+
+            logger.info(String.format("根据code[%s]从微信获取openid",code));
+            try {
+                JSONObject object = WxLoginUtil.doLoginAuth(code);
+                logger.info(String.format("微信返回信息[%s]", object));
+                String openid = (String) object.get("openid");
+                if (StringUtil.isEmpty(openid)) {
+                    throw new APIException("微信返回的openid为空，请检查code的时效性或者联系管理员");
+                }
+                Map<String, String> data = new HashMap<>();
+                data.put("openid", openid);
+                data.put("code", "code");
+                response = new Response(true, data);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE, AppConstants.SERVICE_SUCCEED_MESSAGE, response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getCause().getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            }
+        }else {
+            response = new Response(false,"换取openid的code不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
+    }
 }
