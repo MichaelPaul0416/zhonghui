@@ -70,6 +70,7 @@
         <result column="freetransport" jdbcType="VARCHAR" property="freetransport"/>
         <result column="transportfee" jdbcType="VARCHAR" property="transportfee"/>
         <result column="createdatetime" jdbcType="VARCHAR" property="createdatetime"/>
+        <result column="note" jdbcType="VARCHAR" property="note"/>
         <result column="productid" jdbcType="VARCHAR" property="productid"/>
         <result column="imagepath" jdbcType="VARCHAR" property="imagepath"/>
         <result column="addressid" jdbcType="VARCHAR" property="addressid"/>
@@ -202,7 +203,7 @@
         select
         t1.accountid,t1.orderid,t1.orderstate,t1.expressno,t1.expresscompany,t1.freetransport,
         (select transportfee from tordertransport m where m.orderid = t1.orderid and m.familyid = t4.familyid and m.isvalid = '1') as transportfee,
-        t1.createdatetime,t2.productid,t4.imagepath,t1.addressid,t4.productname,t4.unitprice,t4.productgrade,t4.fieldmeaning,t2.pronumber,t1.amount,t1.paybybalance,t2.detailamount
+        t1.createdatetime,t1.note,t2.productid,t4.imagepath,t1.addressid,t4.productname,t4.unitprice,t4.productgrade,t4.fieldmeaning,t2.pronumber,t1.amount,t1.paybybalance,t2.detailamount
         from torders t1,torderitem t2,tproductbelong t3 ,tproduct t4
         where t1.orderid = t2.orderid and t2.productid = t3.productid and t2.productid = t4.productid
         <if test="orderstate != null and !&quot;&quot;.equals(orderstate)">and t1.orderstate = #{orderstate} </if>
