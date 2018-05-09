@@ -57,42 +57,53 @@ public class AccountServiceController {
     @ResponseBody
     public void accountCodeID(HttpServletRequest request,HttpServletResponse httpServletResponse){
 
-        File codeImage ;
+        File codeImage = null;
         String accountid = request.getParameter("accountid");
         String access_token = request.getParameter("access_token");
         FileInputStream inputStream = null;
         OutputStream outputStream;
-
+        String info = null;
         try {
             if(!StringUtils.isEmpty(accountid)){
                 Account account = accountService.queryByAccountid(accountid);
                 if(account != null){
-                    String codePath = account.getCodeImagepath();
-                    if(!StringUtil.isEmpty(codePath)){
-                        codeImage = new File(codePath);
+                    if("1".equals(account.getIsvip())) {
+                        String codePath = account.getCodeImagepath();
+                        if (!StringUtil.isEmpty(codePath)) {
+                            codeImage = new File(codePath);
+                        } else {
+                            String path = WxLoginUtil.landAccountCodeImage(accountid, account.getPersonid(), access_token, serviceConfigBean.getWxenvcodeImagePathPrefix());
+                            Account update = new Account();
+                            update.setAccountid(accountid);
+                            update.setCodeImagepath(path);
+                            accountService.updateAccountInfo(new Gson().toJson(update));
+                            logger.info(String.format("账户[%s]的场景二维码存储成功[%s]", accountid, path));
+                            codeImage = new File(path);
+                        }
+                        if (!codeImage.exists()) {
+                            codeImage = null;
+                            info = "场景二维码尚未找到，请联系管理员";
+                        }
                     }else {
-                        String path = WxLoginUtil.landAccountCodeImage(accountid,account.getPersonid(),access_token,serviceConfigBean.getWxenvcodeImagePathPrefix());
-                        Account update = new Account();
-                        update.setAccountid(accountid);
-                        update.setCodeImagepath(path);
-                        accountService.updateAccountInfo(new Gson().toJson(update));
-                        logger.info(String.format("账户[%s]的场景二维码存储成功[%s]",accountid,path));
-                        codeImage = new File(path);
-                    }
-                    if(!codeImage.exists()){
-                        codeImage = new File(serviceConfigBean.getDefaultImagePath());
+                        info = "您当前不是VIP用户，如果想要使用推荐功能，请联系管理员为您升级为VIP用户";
                     }
                 }else {
-                    codeImage = new File(serviceConfigBean.getDefaultImagePath());
+                    codeImage = null;
+                    info = String.format("当前用户[%s]不存在，请联系管理员",accountid);
                 }
             }else{
-                codeImage = new File(serviceConfigBean.getDefaultImagePath());
+                codeImage = null;
+                info = "需要查询的账户编号accountid不能为空";
             }
-
-            inputStream = new FileInputStream(codeImage);
-            byte[] data = new byte[(int)codeImage.length()];
-            inputStream.read(data);
-            httpServletResponse.setContentType("image/jpeg");
+            byte[] data;
+            if(codeImage != null) {
+                inputStream = new FileInputStream(codeImage);
+                data = new byte[(int) codeImage.length()];
+                inputStream.read(data);
+                httpServletResponse.setContentType("image/jpeg");
+            }else {
+                data = info.getBytes();
+            }
             outputStream = httpServletResponse.getOutputStream();
             outputStream.write(data);
             outputStream.flush();
