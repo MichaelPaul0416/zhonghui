@@ -92,7 +92,7 @@
         <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
         <result column="money" jdbcType="VARCHAR" property="money"/>
     </resultMap>
-    <!--新增订单表记录-->
+    <!--新增订单表记录123-->
     <insert id="insertSingelOrder" parameterType="com.tibbers.zhonghui.model.Orders">
         insert into torders values(#{addressid},#{accountid},#{orderid},#{createdatetime},#{orderstate},#{isvalid},#{expressno},#{expresscompany},#{donedatetime},#{freetransport},#{transportfee},#{note},#{amount},#{paybybalance},#{reverse1},#{reverse2})
     </insert>
