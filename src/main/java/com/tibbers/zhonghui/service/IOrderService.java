@@ -16,7 +16,7 @@ import java.util.Map;
 @Repository
 public interface IOrderService {
 
-    PayResult createOrder(String orderInfo, String itemlist, String itemtransportlist, String code, String clientip);
+    PayResult createOrder(String orderInfo, String itemlist, String itemtransportlist, String code);
 
     String dealWithAsynNotifyOrder(String xmlData);
 
@@ -27,4 +27,6 @@ public interface IOrderService {
     Orders updateOrderInfo(Orders orders);
 
     String queryOrderState(String orderid);
+
+    Map<String,String> cancelPayOrder(String accountid, String orderid);
 }

@@ -56,21 +56,28 @@ public class AuditingProsServiceImpl implements IAuditingProsService {
     public void auditProductApply(String auditor, String auditstate, String serialid, String rejectreason) {
         AuditingPros auditingPros = new AuditingPros();
         try{
-            auditingPros.setSerialid(serialid);
-            auditingPros.setAuditstate(auditstate);
-            auditingPros.setAuditor(auditor);
-            auditingPros.setBegindatetime(StringUtil.currentDateTime());
-            auditingPros.setEnddatetime(StringUtil.currentDateTime());
-            auditingPros.setRejectreason(rejectreason);
-            logger.info(String.format("管理员[%s]即将审核[%s]申请",auditor,serialid));
-            auditingProsDao.auditProductApply(auditingPros);
-            logger.info(String.format("审核申请[%s]状态修改成功,修改为[%s]",serialid,auditstate));
-            if("1".equals(auditstate)){
-                logger.info(String.format("开始更新产品[%s]的销售状态为[%s]",auditingPros.getProductid(),auditingPros));
-                ProductBelong productBelong = new ProductBelong();
-                productBelong.setProductid(auditingPros.getProductid());
-                productBelong.setSalestate("1");
-                productBelongDao.updateProductState(productBelong);
+            Map<String,Object> param = new HashMap<>();
+            param.put("auditstate","0");
+            List<Map<String,String>> result = auditingProsDao.querySerialByAuditState(param);
+            if(result != null && result.size() == 1) {
+                String productid = result.get(0).get("productid");
+                auditingPros.setSerialid(serialid);
+                auditingPros.setAuditstate(auditstate);
+                auditingPros.setAuditor(auditor);
+                auditingPros.setBegindatetime(StringUtil.currentDateTime());
+                auditingPros.setEnddatetime(StringUtil.currentDateTime());
+                auditingPros.setRejectreason(rejectreason);
+                logger.info(String.format("管理员[%s]即将审核[%s]申请", auditor, serialid));
+                auditingProsDao.auditProductApply(auditingPros);
+                logger.info(String.format("审核申请[%s]状态修改成功,修改为[%s]", serialid, auditstate));
+                if ("1".equals(auditstate)) {
+                    auditingPros.setProductid(productid);
+                    logger.info(String.format("开始更新产品[%s]的销售状态为[%s]", auditingPros.getProductid(), auditingPros));
+                    ProductBelong productBelong = new ProductBelong();
+                    productBelong.setProductid(auditingPros.getProductid());
+                    productBelong.setSalestate("1");
+                    productBelongDao.updateProductState(productBelong);
+                }
             }
         }catch (Exception e){
             throw new APIException(e.getCause());

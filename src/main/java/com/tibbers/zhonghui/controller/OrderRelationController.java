@@ -142,16 +142,40 @@ public class OrderRelationController {
         return JSONObject.toJSONString(apiResponse);
     }
 
+    @RequestMapping("/cancelPayOrder")
+    @ResponseBody
+    public String cancelPayOrder(String accountid,String orderid){
+        APIResponse apiResponse;
+        Response response;
+
+        if(StringUtil.argsNotEmpty(new String[]{accountid,orderid})){
+            try{
+                Map<String,String> map = orderService.cancelPayOrder(accountid,orderid);
+                response = new Response(true,map);
+                apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getCause().getMessage());
+                apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
+            }
+        }else {
+            response = new Response(false,"用户编号accountid/订单编号orderid不能为空");
+            apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
+        }
+
+        return JSONObject.toJSONString(apiResponse);
+    }
+
     @RequestMapping("/createSingleOrder")
     @ResponseBody
-    public String createSingleOrder(String orderinfo,String itemlist,String itemtransportlist,String code,String clientip){
+    public String createSingleOrder(String orderinfo,String itemlist,String itemtransportlist,String code){
         APIResponse apiResponse ;
         Response response;
 
-        if(StringUtil.argsNotEmpty(new String[]{orderinfo,itemlist,itemtransportlist,code,clientip})){
+        if(StringUtil.argsNotEmpty(new String[]{orderinfo,itemlist,itemtransportlist,code})){
             PayResult payResult;
             try{
-                payResult = orderService.createOrder(orderinfo,itemlist, itemtransportlist, code, clientip);
+                payResult = orderService.createOrder(orderinfo,itemlist, itemtransportlist, code);
                 response = new Response(true,payResult);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
             }catch (APIException e){
@@ -161,7 +185,7 @@ public class OrderRelationController {
                 apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
             }
         }else{
-            response = new Response(false,"订单信息[orderinfo],订单明细[itemlist],运费明细[itemtransportlist],小程序code[code],客户端ip[clientip]不能为空");
+            response = new Response(false,"订单信息[orderinfo],订单明细[itemlist],运费明细[itemtransportlist],小程序code[code]不能为空");
             apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
         }
 

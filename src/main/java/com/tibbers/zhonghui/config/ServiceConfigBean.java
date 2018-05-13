@@ -29,6 +29,17 @@ public class ServiceConfigBean {
     @Value("#{prop.wxenvcodeImagePathPrefix}")
     private String wxenvcodeImagePathPrefix;
 
+    @Value("#{prop.serverip}")
+    private String serverip;
+
+    public String getServerip() {
+        return serverip;
+    }
+
+    public void setServerip(String serverip) {
+        this.serverip = serverip;
+    }
+
     public String getWxenvcodeImagePathPrefix() {
         return wxenvcodeImagePathPrefix;
     }

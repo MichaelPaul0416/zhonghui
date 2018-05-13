@@ -53,8 +53,8 @@
             <if test="orderdatetime != null and !&quot;&quot;.equals(orderdatetime)"> orderdatetime = #{orderdatetime} and </if>
             <if test="transportfee != null and !&quot;&quot;.equals(transportfee)"> transportfee = #{transportfee} and </if>
             <if test="isvalid != null and !&quot;&quot;.equals(isvalid)"> isvalid = #{isvalid} and </if>
-            <if test="isvalid != null "> isvalid = #{isvalid} and </if>
-            isvalid = #{isvalid}
+            <if test="reverse1 != null "> reverse1 = #{reverse1} and </if>
+            1 = 1
         </where>
         <if test="pager != null">
             limit #{startLine},#{offset}

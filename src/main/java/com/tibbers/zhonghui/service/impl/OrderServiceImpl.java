@@ -8,6 +8,7 @@ import com.github.binarywang.wxpay.exception.WxPayException;
 import com.github.binarywang.wxpay.service.WxPayService;
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.AppConstants;
+import com.tibbers.zhonghui.config.ServiceConfigBean;
 import com.tibbers.zhonghui.config.WxPayConfiguration;
 import com.tibbers.zhonghui.dao.*;
 import com.tibbers.zhonghui.model.*;
@@ -85,8 +86,11 @@ public class OrderServiceImpl implements IOrderService {
     @Autowired
     private IOrderTransportDao orderTransportDao;
 
+    @Autowired
+    private ServiceConfigBean configBean;
+
     @Override
-    public PayResult createOrder(String orderInfo, String itemlist, String itemtransportlist, String code, String clientip) {
+    public PayResult createOrder(String orderInfo, String itemlist, String itemtransportlist, String code) {
         logger.info(String.format("根据[%s]获取鉴权信息",code));
         try {
             //根据payforbalance判断是余额支付还是微信支付，余额支付的话，查询是否有该账户，有的话继续
@@ -185,7 +189,7 @@ public class OrderServiceImpl implements IOrderService {
                     map.put("orderitems", orderItemsList);
 //                map.put("openid","oUpF8uMuAJO_M2pxb1Q9zNjWeS6o");
                     map.put("openid", openid);
-                    map.put("clientip", clientip);
+                    map.put("clientip", configBean.getServerip());
                     WxPayUnifiedOrderRequest request = assembelyOrderRequest(map);
                     //统一下单
                     WxPayUnifiedOrderResult result = payService.unifiedOrder(request);
@@ -735,6 +739,57 @@ public class OrderServiceImpl implements IOrderService {
         map.put("xml",builder.toString());
         String response = WxLoginUtil.sendPost("https://api.mch.weixin.qq.com/pay/orderquery",map);
         return response;
+    }
+
+    @Override
+    public Map<String, String> cancelPayOrder(String accountid, String orderid) {
+        logger.info(String.format("用户[%s]取消订单[%s]的支付",accountid,orderid));
+        Orders cancelOrder = new Orders();
+        cancelOrder.setOrderid(orderid);
+        cancelOrder.setIsvalid("0");
+        logger.info(String.format("更新用户[%s]的订单[%s]状态为无效",accountid,orderid));
+        ordersDao.updatePartOrderMsg(cancelOrder);
+        logger.info(String.format("更新订单运费表中[%s]的订单[%s]的运费明细为无效",accountid,orderid));
+        OrderTransport orderTransport = new OrderTransport();
+        orderTransport.setOrderid(orderid);
+        orderTransport.setIsvalid("3");//支付取消
+        orderTransportDao.updateRelationStateByOrderid(orderTransport);
+        logger.info(String.format("更新[%s]的订单[%s]的资金流水为失效",accountid,orderid));
+        CapitalSerial capitalSerial = new CapitalSerial();
+        capitalSerial.setOrderid(orderid);
+        capitalSerial.setState("3");
+        capitalSerial.setThirdpartmsg("用户取消支付");
+        capitalSerial.setCapitaldatetime(StringUtil.currentDateTime());
+        capitalSerialDao.updateCapitalSerialInfo(capitalSerial);
+        logger.info(String.format("更新用户[%s]的订单[%s]带来的收益关系为无效"));
+        RecommandIncome recommandIncome = new RecommandIncome();
+        recommandIncome.setIncomedatetime(StringUtil.currentDateTime());
+        recommandIncome.setAlreadydone("2");//支付取消，收益无效
+        recommandIncome.setDescription("支付取消，收益无效");
+        recommandIncome.setIncomeserialno(orderid);
+        recommandIncomeDao.updateIncomeSerial(recommandIncome);
+        logger.info(String.format("还原用户[%s]在订单[%s]内下的库存",accountid,orderid));
+        Map<String,Object> map = new HashMap<>();
+        OrderItems param = new OrderItems();
+        param.setOrderid(orderid);
+        map.put("orderitem",param);
+        List<OrderItems> orderItems = orderItemsDao.queryItemsByPager(map);
+        for(OrderItems items : orderItems){
+            ProductBelong queryParam = new ProductBelong();
+            queryParam.setProductid(items.getProductid());
+            ProductBelong productBelong = productBelongDao.queryBelongByProductid(queryParam);
+            if(productBelong != null){
+                queryParam.setRemaindernum(productBelong.getRemaindernum() + items.getPronumber());
+                productBelongDao.updateProductBelongRemaindernum(queryParam);
+            }else {
+                throw new APIException(String.format("商品[%s]不存在",items.getProductid()));
+            }
+        }
+
+        Map<String,String> result = new HashMap<>();
+        result.put("falg","ok");
+        result.put("msg",String.format("订单[%s]取消支付成功",orderid));
+        return result;
     }
 
     private String updateAccountBanlaceAsRecommander(String recommandserialid){
