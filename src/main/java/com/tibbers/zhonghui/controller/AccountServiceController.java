@@ -59,7 +59,7 @@ public class AccountServiceController {
 
         File codeImage = null;
         String accountid = request.getParameter("accountid");
-        String access_token = request.getParameter("access_token");
+//        String access_token = request.getParameter("access_token");
         FileInputStream inputStream = null;
         OutputStream outputStream;
         String info = null;
@@ -72,7 +72,7 @@ public class AccountServiceController {
                         if (!StringUtil.isEmpty(codePath)) {
                             codeImage = new File(codePath);
                         } else {
-                            String path = WxLoginUtil.landAccountCodeImage(accountid, access_token, serviceConfigBean.getWxenvcodeImagePathPrefix());
+                            String path = WxLoginUtil.landAccountCodeImage(accountid, serviceConfigBean.getWxenvcodeImagePathPrefix());
                             Account update = new Account();
                             update.setAccountid(accountid);
                             update.setCodeImagepath(path);
@@ -100,7 +100,7 @@ public class AccountServiceController {
                 inputStream = new FileInputStream(codeImage);
                 data = new byte[(int) codeImage.length()];
                 inputStream.read(data);
-                httpServletResponse.setContentType("image/jpeg");
+                httpServletResponse.setContentType("image/png");
             }else {
                 data = info.getBytes();
             }

@@ -110,7 +110,7 @@ public class WxLoginUtil {
         return jsonObject;
     }
 
-    public static String landAccountCodeImage(String accountid, String accessToken, String basePath) throws IOException {
+    public static String landAccountCodeImage(String accountid, String basePath) throws IOException {
 
         Map<String, Object> params = new HashMap<>();
 //        int hashcode = Math.abs((accountid + personid).hashCode());
@@ -139,7 +139,7 @@ public class WxLoginUtil {
         if (!targetFile.exists()) {
             targetFile.mkdirs();
         }
-        String finalPath = path + "/" + accountid + ".jpg";
+        String finalPath = path + "/" + accountid + ".png";
         FileOutputStream out = new FileOutputStream(finalPath);
 
         byte[] buffer = new byte[8192];
@@ -191,6 +191,6 @@ public class WxLoginUtil {
     }
 
     public static void main(String args[]) throws Exception {
-//        landAccountCodeImage(367621639);
+//        landAccountCodeImage("3a17c62c50517861","9_A29m4QtvwUF6q1f09Plul4CDSgnz-P-tUBCYYB3-wGOmrEkXbLZzDQ73lWEIeOZeD0cMk1Bu7U-LkFAmoNwNeBIgkDKI4pbAh03n7YTZvOebO_hoWAChM00xLYfxNBJrHDcBVRH2SGEGVxtGRYGbAJAWDL","D://");
     }
 }
