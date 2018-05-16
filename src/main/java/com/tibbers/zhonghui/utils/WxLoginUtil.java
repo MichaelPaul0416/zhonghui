@@ -31,7 +31,8 @@ public class WxLoginUtil {
     private static Logger logger = Logger.getLogger(WxLoginUtil.class);
 
     private static final String URL = "https://api.weixin.qq.com/sns/jscode2session";
-    private static final String URL_CODE = "https://api.weixin.qq.com/wxa/getwxacode?access_token=";
+//    private static final String URL_CODE = "https://api.weixin.qq.com/wxa/getwxacode?access_token=";
+    private static final String URL_CODE = "https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=";
 
     private static String dealByType(Map<String,?> map,boolean requestMethod){
         if(requestMethod){
@@ -109,12 +110,13 @@ public class WxLoginUtil {
         return jsonObject;
     }
 
-    public static String landAccountCodeImage(String accountid, String personid, String accessToken, String basePath) throws IOException {
+    public static String landAccountCodeImage(String accountid, String accessToken, String basePath) throws IOException {
 
         Map<String, Object> params = new HashMap<>();
-        int hashcode = Math.abs((accountid + personid).hashCode());
+//        int hashcode = Math.abs((accountid + personid).hashCode());
+        int hashcode = Math.abs((accountid).hashCode());
         params.put("scene", hashcode);
-        params.put("path", "/pages/index/index");
+        params.put("page", "pages/index/index");
         params.put("width", 400);
 
         CloseableHttpClient httpClient = HttpClientBuilder.create().build();

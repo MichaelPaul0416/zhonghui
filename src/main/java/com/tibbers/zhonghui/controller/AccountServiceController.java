@@ -72,7 +72,7 @@ public class AccountServiceController {
                         if (!StringUtil.isEmpty(codePath)) {
                             codeImage = new File(codePath);
                         } else {
-                            String path = WxLoginUtil.landAccountCodeImage(accountid, account.getPersonid(), access_token, serviceConfigBean.getWxenvcodeImagePathPrefix());
+                            String path = WxLoginUtil.landAccountCodeImage(accountid, access_token, serviceConfigBean.getWxenvcodeImagePathPrefix());
                             Account update = new Account();
                             update.setAccountid(accountid);
                             update.setCodeImagepath(path);
