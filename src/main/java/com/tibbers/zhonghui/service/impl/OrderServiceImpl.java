@@ -761,7 +761,7 @@ public class OrderServiceImpl implements IOrderService {
         capitalSerial.setThirdpartmsg("用户取消支付");
         capitalSerial.setCapitaldatetime(StringUtil.currentDateTime());
         capitalSerialDao.updateCapitalSerialInfo(capitalSerial);
-        logger.info(String.format("更新用户[%s]的订单[%s]带来的收益关系为无效"));
+        logger.info(String.format("更新用户[%s]的订单[%s]带来的收益关系为无效",accountid,orderid));
         RecommandIncome recommandIncome = new RecommandIncome();
         recommandIncome.setIncomedatetime(StringUtil.currentDateTime());
         recommandIncome.setAlreadydone("2");//支付取消，收益无效
