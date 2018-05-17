@@ -5,7 +5,7 @@
 <mapper namespace="com.tibbers.zhonghui.dao.IRecommandDao">
 
     <resultMap id="RecommandResult" type="com.tibbers.zhonghui.model.Recommand">
-        <result column="addressid" jdbcType="VARCHAR" property="addressid"/>
+        <result column="serialid" jdbcType="VARCHAR" property="serialid"/>
         <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
         <result column="recommander" jdbcType="VARCHAR" property="recommander"/>
         <result column="recommanddate" jdbcType="VARCHAR" property="recommanddate"/>
@@ -31,7 +31,7 @@
         <result column="isvip" jdbcType="VARCHAR" property="isvip"/>
     </resultMap>
     <insert id="insertRecommand" parameterType="com.tibbers.zhonghui.model.Recommand">
-        insert into trecommand values (#{addressid},#{accountid},#{recommander},#{recommanddate},#{recommandtime},#{reverse1},#{reverse2})
+        insert into trecommand values (#{serialid},#{accountid},#{recommander},#{recommanddate},#{recommandtime},#{reverse1},#{reverse2})
     </insert>
 
     <select id="queryRecommandByPager" parameterType="java.util.Map" resultMap="RecommandResult">
@@ -43,7 +43,7 @@
 
     <select id="queryMyRecommandAccounts" parameterType="java.util.Map" resultMap="myRecommander">
         select accountid,accountname,imagepath,imagepath,score,isvip,custtype,accobalance
-        from taccount where accountid in (select recommander from trecommand where recommander = #{recommand.recommander})
+        from taccount where accountid in (select accountid from trecommand where recommander = #{recommand.recommander})
         <if test="pager != null">
             limit #{pager.startLine},#{pager.offset}
         </if>

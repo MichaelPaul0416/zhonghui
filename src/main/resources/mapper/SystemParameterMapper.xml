@@ -30,7 +30,7 @@
     </select>
 
     <select id="queryConfigByCategoryId" resultMap="SysParamResult" parameterType="java.lang.String">
-        select categoryid,itemid,itemname,caption,description,reverse from tsysparameter where categoryid = #{_parameter} and itemid != '#' anda deleteflag != '1'
+        select categoryid,itemid,itemname,caption,description,reverse from tsysparameter where categoryid = #{_parameter} and itemid != '#' and deleteflag != '1'
     </select>
 
 
