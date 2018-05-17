@@ -35,6 +35,7 @@
     </insert>
 
     <select id="queryBelongByProductid" parameterType="com.tibbers.zhonghui.model.ProductBelong" resultMap="SingleRelation">
-        select * from tproductbelong where productid = #{productid} and salestate = #{salestate}
+        select * from tproductbelong where productid = #{productid}
+        <if test="salestate != null and !&quot;&quot;.equals(salestate)" >and salestate = #{salestate}</if>
     </select>
 </mapper>

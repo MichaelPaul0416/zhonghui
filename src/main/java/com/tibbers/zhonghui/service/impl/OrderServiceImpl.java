@@ -773,16 +773,17 @@ public class OrderServiceImpl implements IOrderService {
         OrderItems param = new OrderItems();
         param.setOrderid(orderid);
         map.put("orderitem",param);
-        List<OrderItems> orderItems = orderItemsDao.queryItemsByPager(map);
-        for(OrderItems items : orderItems){
+        List<Map<String,Object>> orderItems = orderItemsDao.queryItemsByPager(map);
+        for(Map<String,Object> items : orderItems){
             ProductBelong queryParam = new ProductBelong();
-            queryParam.setProductid(items.getProductid());
+            queryParam.setProductid((String) items.get("productid"));
+//            queryParam.setSalestate();
             ProductBelong productBelong = productBelongDao.queryBelongByProductid(queryParam);
             if(productBelong != null){
-                queryParam.setRemaindernum(productBelong.getRemaindernum() + items.getPronumber());
+                queryParam.setRemaindernum(productBelong.getRemaindernum() + Integer.parseInt(String.valueOf(items.get("pronumber"))));
                 productBelongDao.updateProductBelongRemaindernum(queryParam);
             }else {
-                throw new APIException(String.format("商品[%s]不存在",items.getProductid()));
+                throw new APIException(String.format("商品[%s]不存在",items.get("productid")));
             }
         }
 

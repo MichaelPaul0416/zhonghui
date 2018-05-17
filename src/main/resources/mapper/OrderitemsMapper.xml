@@ -9,7 +9,7 @@
         <result column="orderid" jdbcType="VARCHAR" property="orderid"/>
         <result column="productid" jdbcType="VARCHAR" property="productid"/>
         <result column="productname" jdbcType="VARCHAR" property="productname"/>
-        <result column="pronumber" jdbcType="VARCHAR" property="pronumber"/>
+        <result column="pronumber" jdbcType="INTEGER" property="pronumber"/>
         <result column="discount" jdbcType="VARCHAR" property="discount"/>
         <result column="shopcarid" jdbcType="VARCHAR" property="shopcarid"/>
         <result column="note" jdbcType="VARCHAR" property="note"/>
@@ -26,7 +26,7 @@
         </foreach>
     </insert>
 
-    <select id="queryItemsByPager" parameterType="java.util.Map">
+    <select id="queryItemsByPager" parameterType="java.util.Map" resultMap="OrderItemsResult">
         select t1.serialid,t1.orderid,t1.productid,t2.productname,t1.pronumber,t1.discount,t1.shopcarid,t1.note,t1.detailamount,t1.reverse1,t1.reverse2
         from torderitem t1,tproduct t2
         where t1.productid = t2.productid
@@ -35,9 +35,9 @@
             <if test="orderitem.productid != null and !&quot;&quot;.equals(orderitem.productid)">and t1.productid = #{orderitem.productid}</if>
             <if test="product != null and product.productname != null and !&quot;&quot;.equals(product.productname)">and t2.productname like '%'#{product.productname}'%'</if>
             <if test="orderitem.note != null and !&quot;&quot;.equals(orderitem.note)">and t1.note like '%' #{orderitem.note} '%' </if>
-            <if test="orderitem.reverse1 != null !&quot;&quot;.equals(orderitem.reverse1)">and t1.reverse1 = #{orderitem.reverse1} </if>
-            <if test="orderitem.reverse2 != null ">and t1.reverse2 like '%' #{orderitem.reverse2} '%' </if>
+            <if test="orderitem.reverse1 != null and !&quot;&quot;.equals(orderitem.reverse1)">and t1.reverse1 = #{orderitem.reverse1} </if>
+            <if test="orderitem.reverse2 != null ">and t1.reverse2 = #{orderitem.reverse2}</if>
         </if>
-        <if test="pager != null">limit #{pager.startLine},#{offset}</if>
+        <if test="pager != null">limit #{pager.startLine},#{pager.offset}</if>
     </select>
 </mapper>

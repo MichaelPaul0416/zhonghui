@@ -16,5 +16,5 @@ public interface IOrderItemsDao {
 
     void insertItemsBatch(List<OrderItems> list);
 
-    List<OrderItems> queryItemsByPager(Map<String,Object> params);
+    List<Map<String, Object>> queryItemsByPager(Map<String,Object> params);
 }
