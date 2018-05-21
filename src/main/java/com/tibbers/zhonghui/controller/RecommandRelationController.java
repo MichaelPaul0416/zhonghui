@@ -49,16 +49,23 @@ public class RecommandRelationController {
             try{
                 Map<String,Object> map = new HashMap<>();
                 List<Map<String,String>> income = recommandService.queryTotalRecommandIncome(accountid);
+                Map<String,String> data;
                 if (income.size() == 1) {
                     map.put("income", income.get(0));
                 }else {
-                    map.put("income","");
+                    data = new HashMap<>();
+                    data.put("accountid",accountid);
+                    data.put("totalincome","0");
+                    map.put("income",data);
                 }
                 List<Map<String,String>> withdraw = withDrawService.queryTotalWithdraw(accountid);
                 if(withdraw.size() == 1) {
                     map.put("withdraw", withdraw.get(0));
                 }else{
-                    map.put("withdraw","");
+                    data = new HashMap<>();
+                    data.put("accountid",accountid);
+                    data.put("totalwithdraw","0");
+                    map.put("withdraw",data);
                 }
                 response = new Response(true,map);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);

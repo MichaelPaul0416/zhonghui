@@ -23,6 +23,8 @@
         <result column="isvip" jdbcType="VARCHAR" property="isvip"/>
         <result column="custtype" jdbcType="VARCHAR" property="custtype"/>
         <result column="accobalance" jdbcType="VARCHAR" property="accobalance"/>
+        <result column="number" jdbcType="VARCHAR" property="number"/>
+        <result column="summary" jdbcType="VARCHAR" property="summary"/>
     </resultMap>
 
     <resultMap id="recommandRelation" type="java.util.Map">
@@ -41,9 +43,20 @@
         </if>
     </select>
 
-    <select id="queryMyRecommandAccounts" parameterType="java.util.Map" resultMap="myRecommander">
+    <!--<select id="queryMyRecommandAccounts" parameterType="java.util.Map" resultMap="myRecommander">
         select accountid,accountname,imagepath,imagepath,score,isvip,custtype,accobalance
         from taccount where accountid in (select accountid from trecommand where recommander = #{recommand.recommander})
+        <if test="pager != null">
+            limit #{pager.startLine},#{pager.offset}
+        </if>
+    </select>-->
+
+    <select id="queryMyRecommandAccounts" parameterType="java.util.Map" resultMap="myRecommander">
+        select accountid,accountname,imagepath,score,isvip,custtype,accobalance,t2.*
+        from taccount t1,(
+        select comefrom,count(*) as number,sum(CAST(income AS decimal(12,2))) as summary from trecommandincome where accountid = #{recommand.recommander} and alreadydone = '1' group by comefrom) t2
+        where t1.accountid = t2.comefrom and t1.accountid in (select accountid from trecommand where recommander = #{recommand.recommander})
+        order by t2.summary desc
         <if test="pager != null">
             limit #{pager.startLine},#{pager.offset}
         </if>
