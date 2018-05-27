@@ -150,8 +150,8 @@ public class WxLoginUtil {
 
         Map<String, Object> params = new HashMap<>();
 //        int hashcode = Math.abs((accountid + personid).hashCode());
-        int hashcode = Math.abs((accountid).hashCode());
-        params.put("scene", hashcode);
+//        int hashcode = Math.abs((accountid).hashCode());
+        params.put("scene", accountid);
         params.put("page", "pages/index/index");
         params.put("width", 400);
 
@@ -229,5 +229,6 @@ public class WxLoginUtil {
     public static void main(String args[]) throws Exception {
 //        landAccountCodeImage("3a17c62c50517861","9_A29m4QtvwUF6q1f09Plul4CDSgnz-P-tUBCYYB3-wGOmrEkXbLZzDQ73lWEIeOZeD0cMk1Bu7U-LkFAmoNwNeBIgkDKI4pbAh03n7YTZvOebO_hoWAChM00xLYfxNBJrHDcBVRH2SGEGVxtGRYGbAJAWDL","D://");
 //        System.out.println(accessToken());
+        System.out.println("3a17c62c50517861".hashCode());
     }
 }
