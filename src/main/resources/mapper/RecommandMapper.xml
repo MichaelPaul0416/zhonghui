@@ -52,12 +52,12 @@
     </select>-->
 
     <select id="queryMyRecommandAccounts" parameterType="java.util.Map" resultMap="myRecommander">
-        select 'total' as accountid,'' as accountname,'' as imagepath,'' as score,'' as isvip,'' as custtype,'' as accobalance,'' as comefrom,count(*) as number,'' as summary
+        select 'total' as accountid,'' as accountname,'' as imagepath,'' as score,'' as isvip,'' as custtype,'' as accobalance,'' as comefrom,CAST(count(*) AS char) as number,'' as summary
           from trecommand a where recommander = #{recommand.recommander}
         union all
         select * FROM (select accountid,accountname,imagepath,score,isvip,custtype,accobalance,IFNULL(t2.comefrom,'null') as comefrom,IFNULL(t2.number,'0') as number,IFNULL(t2.summary,'0') as summary
           from taccount t1 left join (
-          select comefrom,count(*) as number,sum(CAST(income AS decimal(12,2))) as summary from trecommandincome where accountid = #{recommand.recommander} and alreadydone = '1' group by comefrom) t2
+          select comefrom,CAST(count(*) AS CHAR) as number,CAST(sum(CAST(income AS decimal(12,2))) AS CHAR) as summary from trecommandincome where accountid = #{recommand.recommander} and alreadydone = '1' group by comefrom) t2
           on t1.accountid = t2.comefrom where t1.accountid in (select accountid from trecommand where recommander = #{recommand.recommander})
           order by t2.summary desc
           <if test="pager != null">
