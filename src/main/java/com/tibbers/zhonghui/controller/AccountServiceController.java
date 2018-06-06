@@ -399,7 +399,7 @@ public class AccountServiceController {
         APIResponse apiResponse ;
         Response response;
 
-        if(StringUtil.argsNotEmpty(new String[]{isvip,termid})){
+        if(StringUtil.argsNotEmpty(new String[]{isvip})){
             try{
                 Pager pager = null;
                 if(!StringUtil.isEmpty(startLine) && !StringUtil.isEmpty(offset)){
@@ -414,7 +414,7 @@ public class AccountServiceController {
                 apiResponse = new APIResponse(AppConstants.RESPONSE_FAILED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
             }
         }else {
-            response = new Response(false,"查询的账户是否vip，账户类型termid不能为空");
+            response = new Response(false,"查询的账户是否vip");
             apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.REQUEST_STATUS_MESSAGE,response);
         }
 
