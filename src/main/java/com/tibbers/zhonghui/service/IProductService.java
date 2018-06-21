@@ -39,7 +39,7 @@ public interface IProductService {
 
     void updateImages4Products(MultipartFile[] files, String[] productids);
 
-    void updateProductInfo(Product product);
+    void updateProductInfo(Product product, int remain);
 
     Map<String, List<String>> insertProductsBatch(String productList, String accountid);
 

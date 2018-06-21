@@ -332,10 +332,18 @@ public class ProductServiceImpl implements IProductService {
     }
 
     @Override
-    public void updateProductInfo(Product product) {
+    public void updateProductInfo(Product product, int remain) {
         logger.info(String.format("更新产品[%s]的信息",product.getProductid()));
         iProductDao.updateProductInfo(product);
         logger.info(String.format("更新产品[%s]信息[%s]成功",product.getProductid(),product));
+        if(remain > 0){
+            logger.info(String.format("更新产品[%s]的库存信息",product.getProductid()));
+            ProductBelong productBelong = new ProductBelong();
+            productBelong.setProductid(product.getProductid());
+            productBelong.setRemaindernum(remain);
+            iProductBelongDao.updateProductBelongRemaindernum(productBelong);
+            logger.info(String.format("更新产品[%s]的库存成功",product.getProductid()));
+        }
     }
 
     @Override

@@ -5,12 +5,8 @@ import com.alibaba.fastjson.JSONObject;
 import com.tibbers.zhonghui.config.APIException;
 import com.tibbers.zhonghui.config.AppConstants;
 import com.tibbers.zhonghui.config.ServiceConfigBean;
-import com.tibbers.zhonghui.dao.IAuditingProsDao;
-import com.tibbers.zhonghui.dao.IProductBelongDao;
 import com.tibbers.zhonghui.model.Account;
-import com.tibbers.zhonghui.model.AuditingPros;
 import com.tibbers.zhonghui.model.Product;
-import com.tibbers.zhonghui.model.ProductBelong;
 import com.tibbers.zhonghui.model.common.APIResponse;
 import com.tibbers.zhonghui.model.common.Pager;
 import com.tibbers.zhonghui.model.common.Response;
@@ -31,7 +27,6 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -56,14 +51,14 @@ public class ProductController {
 
     @RequestMapping("/updateProductInfo")
     @ResponseBody
-    public String updateProductInfo(String productInfo){
+    public String updateProductInfo(String productInfo, int remain){
         APIResponse apiResponse;
         Response response;
 
         if(!StringUtil.isEmpty(productInfo)){
             try{
                 Product product = JSONObject.parseObject(productInfo,Product.class);
-                productService.updateProductInfo(product);
+                productService.updateProductInfo(product, remain);
                 Map<String,Object> result = new HashMap<>();
                 result.put("flag",true);
                 result.put("msg","update successfully");
