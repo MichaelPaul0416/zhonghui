@@ -21,5 +21,5 @@ public interface IRecommandDao {
 
     Map<String, String> recommandByVIP(String accountid);
 
-    Recommand queryRecommandByAccountid(String accountid);
+    Map<String,String> queryRecommandByAccountid(String accountid);
 }

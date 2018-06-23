@@ -47,6 +47,7 @@
         <if test="bindphone != null and !&quot;&quot;.equals(bindphone.trim())"> bindphone = #{bindphone} ,</if>
         <if test="score > -1"> score= #{score} ,</if>
         <if test="isvip != null and !&quot;&quot;.equals(isvip.trim())"> isvip = #{isvip} ,</if>
+        <if test="custtype != null and !&quot;&quot;.equals(custtype.trim())"> custtype = #{custtype} ,</if>
         <if test="accobalance != null and !&quot;&quot;.equals(accobalance.trim())"> accobalance = #{accobalance},</if>
         <if test="codeimagepath != null and !&quot;&quot;.equals(codeimagepath.trim())"> codeimagepath = #{codeimagepath},</if>
         <if test="reverse != null"> reverse = #{reverse} </if>

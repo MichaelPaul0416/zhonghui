@@ -51,7 +51,7 @@ public class ProductController {
 
     @RequestMapping("/updateProductInfo")
     @ResponseBody
-    public String updateProductInfo(String productInfo, int remain){
+    public String updateProductInfo(String productInfo, Integer remain){
         APIResponse apiResponse;
         Response response;
 

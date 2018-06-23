@@ -329,9 +329,9 @@ public class OrderServiceImpl implements IOrderService {
 
     private double generateRecommandRelation( Orders orders,String paybybalance) {
         logger.info(String.format("开始查询推荐[%s]的账户",orders.getAccountid()));
-        Recommand query = recommandDao.queryRecommandByAccountid(orders.getAccountid());
-        if(query != null && !StringUtil.isEmpty(query.getRecommander())){
-            String recommander = query.getRecommander();
+        Map<String,String> query = recommandDao.queryRecommandByAccountid(orders.getAccountid());
+        if(query.size() == 1 && "1".equals("custtype") && "0".equals(query.get("isvip"))){//不是vip并且是被推荐用户才需要计算推荐收益费用
+            String recommander = query.get("recommander");
             RecommandIncome recommandIncome = new RecommandIncome();
             recommandIncome.setIncomeserialno(orders.getOrderid());//关联订单
             recommandIncome.setAccountid(recommander);

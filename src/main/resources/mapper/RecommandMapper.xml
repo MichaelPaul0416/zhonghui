@@ -32,6 +32,14 @@
         <result column="recommander" jdbcType="VARCHAR" property="recommander"/>
         <result column="isvip" jdbcType="VARCHAR" property="isvip"/>
     </resultMap>
+
+    <resultMap id="relation" type="java.util.Map">
+        <result column="accountid" jdbcType="VARCHAR" property="accountid"/>
+        <result column="isvip" jdbcType="VARCHAR" property="isvip"/>
+        <result column="custtype" jdbcType="VARCHAR" property="custtype"/>
+        <result column="recommander" jdbcType="VARCHAR" property="recommander"/>
+    </resultMap>
+
     <insert id="insertRecommand" parameterType="com.tibbers.zhonghui.model.Recommand">
         insert into trecommand values (#{serialid},#{accountid},#{recommander},#{recommanddate},#{recommandtime},#{reverse1},#{reverse2})
     </insert>
@@ -51,9 +59,10 @@
         </if>
     </select>-->
 
+    <!--只显示非VIP的下线，如果下线成为VIP，那么就不显示了-->
     <select id="queryMyRecommandAccounts" parameterType="java.util.Map" resultMap="myRecommander">
         select 'total' as accountid,'' as accountname,'' as imagepath,'' as score,'' as isvip,'' as custtype,'' as accobalance,'' as comefrom,CAST(count(*) AS char) as number,'' as summary
-          from trecommand a where recommander = #{recommand.recommander}
+          from trecommand a ,taccount c where a.accountid = c.accountid and a.recommander = #{recommand.recommander} and c.custtype = '1'
         union all
         select * FROM (select accountid,accountname,imagepath,score,isvip,custtype,accobalance,IFNULL(t2.comefrom,'null') as comefrom,IFNULL(t2.number,'0') as number,IFNULL(t2.summary,'0') as summary
           from taccount t1 left join (
@@ -62,7 +71,7 @@
           order by t2.summary desc
           <if test="pager != null">
               limit #{pager.startLine},#{pager.offset}
-          </if>) b
+          </if>) b where b.custtype = '1'
 
     </select>
 
@@ -72,7 +81,7 @@
          where t1.recommander = t2.accountid and t1.accountid = #{_parameter}
     </select>
 
-    <select id="queryRecommandByAccountid" parameterType="java.lang.String" resultMap="RecommandResult">
-        select * from trecommand where accountid = #{_parameter}
+    <select id="queryRecommandByAccountid" parameterType="java.lang.String" resultMap="relation">
+        select a.accountid,a.isvip,a.custtype,b.recommander from trecommand a,taccount b where a.accountid = b.accountid and a.accountid = #{_parameter}
     </select>
 </mapper>
