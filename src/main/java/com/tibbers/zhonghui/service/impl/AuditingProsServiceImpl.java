@@ -58,6 +58,7 @@ public class AuditingProsServiceImpl implements IAuditingProsService {
         try{
             Map<String,Object> param = new HashMap<>();
             param.put("auditstate","0");
+            param.put("serialid",serialid);
             List<Map<String,String>> result = auditingProsDao.querySerialByAuditState(param);
             if(result != null && result.size() == 1) {
                 String productid = result.get(0).get("productid");

@@ -37,6 +37,9 @@
         from tauditingpros t1,tproduct t2,tproductbelong t3
         where t1.productid = t2.productid and t2.productid = t3.productid
         and t3.salestate = '0' and t1.auditstate = #{auditstate}
+        <if test="serialid != null and !&quot;&quot;.equals(serialid)">
+            and t1.serialid = #{serialid}
+        </if>
         order by t1.applydatetime
         <if test="pager != null">
             limit #{pager.startLine},#{pager.offset}
