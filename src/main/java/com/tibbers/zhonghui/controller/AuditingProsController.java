@@ -81,7 +81,7 @@ public class AuditingProsController {
 
     @RequestMapping("/querySerialByAuditState")
     @ResponseBody
-    public String querySerialByAuditState(String auditstate,  String startLine, String offset){
+    public String querySerialByAuditState(String auditstate, String salestate,String startLine, String offset){
         APIResponse apiResponse;
         Response response ;
         if(!StringUtil.isEmpty(auditstate)){
@@ -90,7 +90,7 @@ public class AuditingProsController {
                 if(!StringUtils.isEmpty(startLine) && !StringUtils.isEmpty(offset)){
                     pager = new Pager(Integer.parseInt(startLine),Integer.parseInt(offset));
                 }
-                List<Map<String,String>> list = auditingProsService.querySerialByAuditState(auditstate,pager);
+                List<Map<String,String>> list = auditingProsService.querySerialByAuditState(auditstate, salestate, pager);
                 response = new Response(true,list);
                 apiResponse = new APIResponse(AppConstants.RESPONSE_SUCCEED_CODE,AppConstants.SERVICE_SUCCEED_MESSAGE,response);
             }catch (APIException e){

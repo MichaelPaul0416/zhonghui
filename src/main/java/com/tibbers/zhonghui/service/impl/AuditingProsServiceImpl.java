@@ -58,6 +58,7 @@ public class AuditingProsServiceImpl implements IAuditingProsService {
         try{
             Map<String,Object> param = new HashMap<>();
             param.put("auditstate","0");
+            param.put("salestate","0");//默认查询销售状态为0的商品
             param.put("serialid",serialid);
             List<Map<String,String>> result = auditingProsDao.querySerialByAuditState(param);
             if(result != null && result.size() == 1) {
@@ -86,11 +87,13 @@ public class AuditingProsServiceImpl implements IAuditingProsService {
     }
 
     @Override
-    public List<Map<String,String>> querySerialByAuditState(String auditstate, Pager pager) {
+    public List<Map<String,String>> querySerialByAuditState(String auditstate, String salestate, Pager pager) {
         Map<String,Object> map = new HashMap<>();
         try{
             map.put("auditstate",auditstate);
+            map.put("salestate",salestate);
             map.put("pager",pager);
+            logger.info("接口入参["+map+"]");
             List<Map<String,String>> list = auditingProsDao.querySerialByAuditState(map);
             logger.info(String.format("查询结果[%s]",list));
             return list;

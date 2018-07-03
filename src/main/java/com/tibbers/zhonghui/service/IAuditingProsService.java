@@ -15,5 +15,5 @@ public interface IAuditingProsService {
 
     void auditProductApply(String auditor, String auditstate, String serialid, String rejectreason);
 
-    List<Map<String,String>> querySerialByAuditState(String auditstate, Pager pager);
+    List<Map<String,String>> querySerialByAuditState(String auditstate, String salestate, Pager pager);
 }

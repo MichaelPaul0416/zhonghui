@@ -36,7 +36,7 @@
         select t1.serialid,t1.productid,t2.productname,t2.imagepath,t1.auditor,t1.auditstate,t1.applydatetime,t1.begindatetime,t1.enddatetime,t1.rejectreason
         from tauditingpros t1,tproduct t2,tproductbelong t3
         where t1.productid = t2.productid and t2.productid = t3.productid
-        and t3.salestate = '0' and t1.auditstate = #{auditstate}
+        and t3.salestate = #{salestate} and t1.auditstate = #{auditstate}
         <if test="serialid != null and !&quot;&quot;.equals(serialid)">
             and t1.serialid = #{serialid}
         </if>
