@@ -103,6 +103,13 @@ public class AccountServiceImpl implements IAccountService {
         try{
             Account acco = JSONObject.parseObject(account,Account.class);
             logger.info(String.format("开始修改账户[%s]信息",acco.getAccountid()));
+            if(StringUtil.isEmpty(acco.getAccountid()) && StringUtil.isEmpty(acco.getPersonid())){
+                throw new APIException("accountid，personid不能全为空，必须传值并且只能传两者之一");
+            }
+
+            if(!StringUtil.isEmpty(acco.getAccountid()) && !StringUtil.isEmpty(acco.getPersonid())){
+                throw new APIException("accountid，personid不能都传值，两者只能有一个传值");
+            }
             accountServiceDao.updateAccountInfo(acco);
             logger.info(String.format("账户[%s]信息修改成功",acco.getAccountid()));
         }catch (Exception e){
