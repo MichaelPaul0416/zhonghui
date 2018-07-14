@@ -31,4 +31,6 @@ public interface IAccountService {
     List<Map<String,Object>> orderByScore(Map<String,Object> param);
 
     Account queryAccountByOpenid(String openid);
+
+    boolean checkInfoComplete(String code);
 }

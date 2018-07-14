@@ -15,6 +15,7 @@ import com.tibbers.zhonghui.service.IRecommandService;
 import com.tibbers.zhonghui.utils.StringUtil;
 import com.tibbers.zhonghui.utils.WxLoginUtil;
 import org.apache.log4j.Logger;
+import org.springframework.aop.framework.AbstractAdvisingBeanPostProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.util.StringUtils;
@@ -51,6 +52,31 @@ public class AccountServiceController {
 
     @Autowired
     private ServiceConfigBean serviceConfigBean;
+
+
+    @RequestMapping("/checkInfoComplete")
+    @ResponseBody
+    public String checkInfoComplete(String code){
+        APIResponse apiResponse;
+        Response response;
+
+        if(StringUtil.isEmpty(code)){
+            response = new Response(false,"code不能为空");
+            apiResponse = new APIResponse(AppConstants.REQUEST_STATUS_MESSAGE,AppConstants.RESPONSE_FAILED_CODE,response);
+        }else {
+            try{
+                boolean complete = accountService.checkInfoComplete(code);
+                response = new Response(false,complete);
+                apiResponse = new APIResponse(AppConstants.REQUEST_STATUS_MESSAGE,AppConstants.RESPONSE_SUCCEED_CODE,response);
+            }catch (Exception e){
+                logger.error(e.getMessage(),e);
+                response = new Response(false,e.getCause().getMessage());
+                apiResponse = new APIResponse(AppConstants.REQUEST_STATUS_MESSAGE,AppConstants.RESPONSE_FAILED_CODE,response);
+            }
+        }
+
+        return JSONObject.toJSONString(apiResponse);
+    }
 
 
     @RequestMapping("/accountCodeID")

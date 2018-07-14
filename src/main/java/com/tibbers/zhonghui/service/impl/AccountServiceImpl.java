@@ -265,5 +265,21 @@ public class AccountServiceImpl implements IAccountService {
         return account;
     }
 
+    @Override
+    public boolean checkInfoComplete(String code) {
+
+        JSONObject jsonObject = WxLoginUtil.doLoginAuth(code);
+        logger.info(String.format("微信鉴权接口返回信息[%s]",jsonObject.toJSONString()));
+        String openid = (String) jsonObject.get("openid");
+
+        logger.info(String.format("根据openid[%s]查询account信息",openid));
+        Account account = accountServiceDao.queryAccountByOpenid(openid);
+
+        boolean accountName = !StringUtil.isEmpty(account.getAccountname());
+        boolean image = !StringUtil.isEmpty(account.getImagepath());
+        //都不为空才返回信息完整
+        return accountName && image;
+    }
+
 
 }

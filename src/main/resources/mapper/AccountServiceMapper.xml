@@ -51,7 +51,12 @@
         <if test="accobalance != null and !&quot;&quot;.equals(accobalance.trim())"> accobalance = #{accobalance},</if>
         <if test="codeimagepath != null and !&quot;&quot;.equals(codeimagepath.trim())"> codeimagepath = #{codeimagepath},</if>
         <if test="reverse != null"> reverse = #{reverse} </if>
-        where accountid = #{accountid}
+        <if test="accountid != null and !&quot;&quot;.equals(accountid)">
+            where accountid = #{accountid}
+        </if>
+        <if test="personid != null and !&quot;&quot;.equals(personid)">
+            where personid = #{personid}
+        </if>
     </update>
 
     <update id="updatePersonalInfo" parameterType="com.tibbers.zhonghui.model.Person">
