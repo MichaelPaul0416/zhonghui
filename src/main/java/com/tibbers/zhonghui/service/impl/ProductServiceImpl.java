@@ -61,7 +61,7 @@ public class ProductServiceImpl implements IProductService {
         productBelong.setRemaindernum(number);
         productBelong.setFamilyid(product.getFamilyid());
         iProductBelongDao.insertSingleRelation(productBelong);
-        logger.info(String.format("记录[%s]插入数据库成功",product));
+        logger.info(String.format("记录[%s]插入数据库成功",productBelong));
         AuditingPros auditingPros = new AuditingPros();
         logger.info(String.format("添加产品[%s]的审核申请",product.getProductid()));
         auditingPros.setProductid(product.getProductid());

@@ -196,7 +196,7 @@ public class AccountServiceController {
                     result.put("registry",true);
                     result.put("msg","已注册");
                     result.put("accountid",account.getAccountid());
-                    if(!imageUrl.equals(account.getImagepath())){
+                    if(!StringUtil.isEmpty(imageUrl) && !imageUrl.equals(account.getImagepath())){
                         Account update = new Account();
                         update.setAccountid(account.getAccountid());
                         update.setImagepath(imageUrl);
