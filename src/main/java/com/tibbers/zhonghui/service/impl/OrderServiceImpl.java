@@ -27,6 +27,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 
+import javax.resource.spi.CommException;
 import java.math.BigDecimal;
 import java.util.*;
 
@@ -91,28 +92,28 @@ public class OrderServiceImpl implements IOrderService {
 
     @Override
     public PayResult createOrder(String orderInfo, String itemlist, String itemtransportlist, String code) {
-        logger.info(String.format("根据[%s]获取鉴权信息",code));
+        logger.info(String.format("根据[%s]获取鉴权信息", code));
         try {
             //根据payforbalance判断是余额支付还是微信支付，余额支付的话，查询是否有该账户，有的话继续
-            Orders orders = JSONObject.parseObject(orderInfo,Orders.class);
+            Orders orders = JSONObject.parseObject(orderInfo, Orders.class);
             String openid;
             Account account = accountService.queryByAccountid(orders.getAccountid());
-            if("1".equals(orders.getPaybybalance())) {//0--其他支付，1--余额支付
-                if(account != null && !StringUtil.isEmpty(account.getAccountname())){
+            if ("1".equals(orders.getPaybybalance())) {//0--其他支付，1--余额支付
+                if (account != null && !StringUtil.isEmpty(account.getAccountname())) {
                     openid = account.getAccountid();
-                }else {
-                    throw new APIException(String.format("账户[%s]不存在",orders.getAccountid()));
+                } else {
+                    throw new APIException(String.format("账户[%s]不存在", orders.getAccountid()));
                 }
-            }else{
+            } else {
                 JSONObject jsonObject = WxLoginUtil.doLoginAuth(code);
-                logger.info(String.format("微信鉴权接口返回信息[%s]",jsonObject.toJSONString()));
+                logger.info(String.format("微信鉴权接口返回信息[%s]", jsonObject.toJSONString()));
 //                openid = jsonObject.getString("opendid");
                 openid = (String) jsonObject.get("openid");
 //                openid = "oe9PL4qR5KW4gKxN0csK2n3LgdCE";
 
             }
 
-            if(!StringUtils.isEmpty(openid)){
+            if (!StringUtils.isEmpty(openid)) {
 //            if(true){
                 logger.info(String.format("即将为客户生成一笔订单"));
                 orders.setReverse1(orders.getAmount());//原先订单总金额存储在这里面
@@ -123,10 +124,10 @@ public class OrderServiceImpl implements IOrderService {
                 orders.setOrderstate("0");
                 //该订单是是否有效[0:无效，1:有效]
                 orders.setIsvalid("1");
-                List<OrderItems> orderItemsList = JSONObject.parseArray(itemlist,OrderItems.class);
+                List<OrderItems> orderItemsList = JSONObject.parseArray(itemlist, OrderItems.class);
 
-                if("1".equals(orders.getPaybybalance())){
-                    PayResult payResult ;
+                if ("1".equals(orders.getPaybybalance())) {
+                    PayResult payResult;
                     try {
                         orders.setIsvalid("1");
                         //更新订单表
@@ -135,23 +136,23 @@ public class OrderServiceImpl implements IOrderService {
                         updateShopcar(orderItemsList);
 
                         payResult = buildPayResult(orders);
-                        prePaySerial(orders, orders.getOrderid(), payResult ,orders.getPaybybalance());
+                        prePaySerial(orders, orders.getOrderid(), payResult, orders.getPaybybalance());
 
-                        double recommand = generateRecommandRelation(orders,orders.getPaybybalance());
+                        double recommand = generateRecommandRelation(orders, orders.getPaybybalance());
                         double payAmount = new BigDecimal(orders.getAmount()).doubleValue() - new BigDecimal(orders.getTransportfee()).doubleValue();//抽成需要减去总的邮费
 //                        double fee = addOrderPrecentage(orders.getOrderid(), (int) (Double.parseDouble(orders.getAmount()) * 100));
-                        double fee = addOrderPrecentage(orders.getOrderid(), (int) StringUtil.multiply(payAmount,100));
+                        double fee = addOrderPrecentage(orders.getOrderid(), (int) StringUtil.multiply(payAmount, 100));
                         WxPayOrderNotifyResult result = new WxPayOrderNotifyResult();
                         result.setOutTradeNo(orders.getOrderid());
                         double money = new BigDecimal(orders.getAmount()).doubleValue();
 //                        result.setTotalFee((int)(money * 100));
-                        result.setTotalFee((int) StringUtil.multiply(money,100));
+                        result.setTotalFee((int) StringUtil.multiply(money, 100));
 
                         //余额支付的话，需要先计算各个familyid需要支付的邮费
-                        List<OrderTransport> orderTransports = JSONObject.parseArray(itemtransportlist,OrderTransport.class);
-                        Map<String,String> feeMap = new HashMap<>();
-                        for (OrderTransport transport : orderTransports){
-                            feeMap.put(transport.getAccountid(),transport.getTransportfee());//各家商店应支付的运费
+                        List<OrderTransport> orderTransports = JSONObject.parseArray(itemtransportlist, OrderTransport.class);
+                        Map<String, String> feeMap = new HashMap<>();
+                        for (OrderTransport transport : orderTransports) {
+                            feeMap.put(transport.getAccountid(), transport.getTransportfee());//各家商店应支付的运费
                             transport.setSerialid(StringUtil.serialId());
                             transport.setOrderid(orders.getOrderid());
                             transport.setOrderdatetime(StringUtil.currentDateTime());
@@ -159,21 +160,21 @@ public class OrderServiceImpl implements IOrderService {
                             transport.setReverse1("");
                             transport.setReverse2("");
                         }
-                        feeMap.put("total",orders.getTransportfee());//总运费
+                        feeMap.put("total", orders.getTransportfee());//总运费
 
-                        caculateFinalIncome(fee,recommand,result,feeMap);
+                        caculateFinalIncome(fee, recommand, result, feeMap);
 
                         logger.info(String.format("更新订单[%s]的运费明细，由于是余额支付，直接将运费明细状态置为钱已到账"));
                         orderTransportDao.insertatchOrderTransportRelation(orderTransports);
 
-                        updateProductRemainder(orderItemsList,orders.getOrderid());
+                        updateProductRemainder(orderItemsList, orders.getOrderid());
 
                         //更新用户的账户积分
-                        updateAccoutScoreByBalance(account,orders.getAmount());
+                        updateAccoutScoreByBalance(account, orders.getAmount());
                         payResult.setOrderid(orders.getOrderid());
                         return payResult;
-                    }catch (Exception e){
-                        logger.error(e.getMessage(),e);
+                    } catch (Exception e) {
+                        logger.error(e.getMessage(), e);
 //                        payResult = new PayResult();
 //                        payResult.setAppid(wxPayConfiguration.getAppId());
 //                        payResult.setMchid(wxPayConfiguration.getMchId());
@@ -183,7 +184,7 @@ public class OrderServiceImpl implements IOrderService {
 //                        payResult.setTrade_type("balance");
                         throw new APIException(e.getCause().getMessage());
                     }
-                }else {
+                } else {
                     Map<String, Object> map = new HashMap<>();
                     map.put("orders", orders);
                     map.put("orderitems", orderItemsList);
@@ -195,8 +196,8 @@ public class OrderServiceImpl implements IOrderService {
                     WxPayUnifiedOrderResult result = payService.unifiedOrder(request);
                     PayResult payResult = buildPayResult(result, orders);
 
-                    if(AppConstants.RETURN_CODE.equals(payResult.getReturn_code()) ){
-                        if(!AppConstants.RESULT_CODE.equals(payResult.getResult_code())){
+                    if (AppConstants.RETURN_CODE.equals(payResult.getReturn_code())) {
+                        if (!AppConstants.RESULT_CODE.equals(payResult.getResult_code())) {
                             orders.setIsvalid("0");
                         }
                         //更新订单表
@@ -205,27 +206,27 @@ public class OrderServiceImpl implements IOrderService {
                         generateOrderItems(orders, orderItemsList);
 
                         //插入运费明细信息
-                        List<OrderTransport> list = JSONObject.parseArray(itemtransportlist,OrderTransport.class);
-                        generateTransportFee(list,account.getAccountid(),orders.getOrderid());
+                        List<OrderTransport> list = JSONObject.parseArray(itemtransportlist, OrderTransport.class);
+                        generateTransportFee(list, account.getAccountid(), orders.getOrderid());
 
                         //如果预支付成功的话
-                        if(AppConstants.RESULT_CODE.equals(payResult.getResult_code())){
+                        if (AppConstants.RESULT_CODE.equals(payResult.getResult_code())) {
 
                             updateShopcar(orderItemsList);
 
-                            prePaySerial(orders, request.getOutTradeNo(), payResult,"0");
+                            prePaySerial(orders, request.getOutTradeNo(), payResult, "0");
 
-                            generateRecommandRelation(orders,"0");
+                            generateRecommandRelation(orders, "0");
 
                             //根据订单明细，减少对应的产品库存
-                            updateProductRemainder(orderItemsList,orders.getOrderid());
+                            updateProductRemainder(orderItemsList, orders.getOrderid());
 
                             //账户余额和积分等微信进行扣款成功通知之后在做修改
-                        }else {
-                            throw new APIException(String.format("获取预支付pre_pay_id失败,错误代码[%s],错误信息[%s]",payResult.getErr_code(),payResult.getErr_code_msg()));
+                        } else {
+                            throw new APIException(String.format("获取预支付pre_pay_id失败,错误代码[%s],错误信息[%s]", payResult.getErr_code(), payResult.getErr_code_msg()));
                         }
 
-                    }else{
+                    } else {
                         payResult.setAppid(wxPayConfiguration.getAppId());
                         payResult.setMchid(wxPayConfiguration.getMchId());
                         payResult.setNonce_str(request.getNonceStr());
@@ -239,33 +240,33 @@ public class OrderServiceImpl implements IOrderService {
                     return payResult;
                 }
 
-            }else{
-                throw new APIException(String.format("微信鉴权接口根据code[%s]返回的openid为空",code));
+            } else {
+                throw new APIException(String.format("微信鉴权接口根据code[%s]返回的openid为空", code));
             }
-        } catch (Exception e){
-            logger.error(e.getMessage(),e);
-            if(e instanceof WxPayException){
+        } catch (Exception e) {
+            logger.error(e.getMessage(), e);
+            if (e instanceof WxPayException) {
                 WxPayException exception = (WxPayException) e;
-                logger.error(e.getMessage(),e);
-                String errorcode = exception.getReturnCode(),errormsg = exception.getReturnMsg();
-                if(org.apache.commons.lang3.StringUtils.isNoneEmpty(exception.getErrCode())){
+                logger.error(e.getMessage(), e);
+                String errorcode = exception.getReturnCode(), errormsg = exception.getReturnMsg();
+                if (org.apache.commons.lang3.StringUtils.isNoneEmpty(exception.getErrCode())) {
                     errorcode = exception.getErrCode();
                     errormsg = exception.getErrCodeDes();
                 }
-                String info = String.format("微信返回错误代码[%s],错误描述[%s]",errorcode,errormsg);
+                String info = String.format("微信返回错误代码[%s],错误描述[%s]", errorcode, errormsg);
                 throw new APIException(info);
-            }else if(e instanceof WxErrorException){
+            } else if (e instanceof WxErrorException) {
                 throw new APIException("调用微信鉴权接口异常：" + e.getMessage());
-            }else {
+            } else {
                 throw new APIException(e.getCause().getMessage());
             }
         }
 
     }
 
-    private void generateTransportFee(List<OrderTransport> list,String accountid,String orderid){
-        logger.info(String.format("开始为账户[%s]插入订单明细运费金额",accountid));
-        for(OrderTransport orderTransport : list){
+    private void generateTransportFee(List<OrderTransport> list, String accountid, String orderid) {
+        logger.info(String.format("开始为账户[%s]插入订单明细运费金额", accountid));
+        for (OrderTransport orderTransport : list) {
             orderTransport.setSerialid(StringUtil.serialId());
             orderTransport.setOrderid(orderid);
             orderTransport.setOrderdatetime(StringUtil.currentDateTime());
@@ -274,24 +275,24 @@ public class OrderServiceImpl implements IOrderService {
             orderTransport.setReverse2("");
         }
         orderTransportDao.insertatchOrderTransportRelation(list);
-        logger.info(String.format("账户[%s]的订单明细运费批量插入成功[%s]",accountid,list));
+        logger.info(String.format("账户[%s]的订单明细运费批量插入成功[%s]", accountid, list));
 
     }
 
-    private void updateAccoutScoreByBalance(Account queryAccount,String amount){
+    private void updateAccoutScoreByBalance(Account queryAccount, String amount) {
         Account account = new Account();
         account.setAccountid(queryAccount.getAccountid());
         String oldScore = queryAccount.getScore();
-        String newScore = StringUtil.addNumber(oldScore,amount);
+        String newScore = StringUtil.addNumber(oldScore, amount);
         account.setScore(newScore);
 
         accountService.updateAccountInfo(account);
-        logger.info(String.format("用户[%s]的积分信息通过余额支付更新成功，当前积分[%s]",account.getAccountid(),account.getScore()));
+        logger.info(String.format("用户[%s]的积分信息通过余额支付更新成功，当前积分[%s]", account.getAccountid(), account.getScore()));
     }
 
-    private void updateProductRemainder(List<OrderItems> orderItems,String orderid){
-        logger.info(String.format("开始根据订单[%s]减少对应的产品库存",orderid));
-        for(OrderItems orderItem : orderItems){
+    private void updateProductRemainder(List<OrderItems> orderItems, String orderid) {
+        logger.info(String.format("开始根据订单[%s]减少对应的产品库存", orderid));
+        for (OrderItems orderItem : orderItems) {
             ProductBelong productBelong = new ProductBelong();
             productBelong.setProductid(orderItem.getProductid());
             productBelong.setSalestate("1");
@@ -299,38 +300,38 @@ public class OrderServiceImpl implements IOrderService {
             int buy = orderItem.getPronumber();
             int remainder = query.getRemaindernum();
 
-            if(buy > remainder){
-                throw new APIException(String.format("产品[%s]库存不足，订单内购买数量[%s]，库存余量[%s]",orderItem.getProductid(),buy,remainder));
+            if (buy > remainder) {
+                throw new APIException(String.format("产品[%s]库存不足，订单内购买数量[%s]，库存余量[%s]", orderItem.getProductid(), buy, remainder));
             }
 
             remainder = remainder - buy;
             productBelong.setRemaindernum(remainder);
             productBelongDao.updateProductBelongRemaindernum(productBelong);
-            logger.info(String.format("产品[%s]更新库存余量为[%s]",productBelong.getProductid(),productBelong.getRemaindernum()));
+            logger.info(String.format("产品[%s]更新库存余量为[%s]", productBelong.getProductid(), productBelong.getRemaindernum()));
         }
     }
 
     private void generateOrderItems(Orders orders, List<OrderItems> orderItemsList) {
-        logger.info(String.format("客户[%s]的订单生成成功[%s]",orders.getAccountid(),orders));
-        for(OrderItems orderItems : orderItemsList){
-            if(StringUtil.isEmpty(orderItems.getProductid())){
+        logger.info(String.format("客户[%s]的订单生成成功[%s]", orders.getAccountid(), orders));
+        for (OrderItems orderItems : orderItemsList) {
+            if (StringUtil.isEmpty(orderItems.getProductid())) {
                 throw new APIException("订单明细中的产品编号productid为必传字段");
             }
             orderItems.setSerialid(StringUtil.serialId());
             orderItems.setOrderid(orders.getOrderid());
             orderItems.setReverse1(orders.getAddressid());
         }
-        logger.info(String.format("即将开始生成订单[%s]的订单明细[%s]",orders.getOrderid(),orderItemsList));
+        logger.info(String.format("即将开始生成订单[%s]的订单明细[%s]", orders.getOrderid(), orderItemsList));
 
         //更新订单明细
         orderItemsDao.insertItemsBatch(orderItemsList);
-        logger.info(String.format("订单[%s]的明细已经生成",orders.getOrderid()));
+        logger.info(String.format("订单[%s]的明细已经生成", orders.getOrderid()));
     }
 
-    private double generateRecommandRelation( Orders orders,String paybybalance) {
-        logger.info(String.format("开始查询推荐[%s]的账户",orders.getAccountid()));
-        Map<String,String> query = recommandDao.queryRecommandByAccountid(orders.getAccountid());
-        if(query.size() == 1 && "1".equals("custtype") && "0".equals(query.get("isvip"))){//不是vip并且是被推荐用户才需要计算推荐收益费用
+    private double generateRecommandRelation(Orders orders, String paybybalance) {
+        logger.info(String.format("开始查询推荐[%s]的账户", orders.getAccountid()));
+        Map<String, String> query = recommandDao.queryRecommandByAccountid(orders.getAccountid());
+        if (query.size() == 1 && "1".equals("custtype") && "0".equals(query.get("isvip"))) {//不是vip并且是被推荐用户才需要计算推荐收益费用
             String recommander = query.get("recommander");
             RecommandIncome recommandIncome = new RecommandIncome();
             recommandIncome.setIncomeserialno(orders.getOrderid());//关联订单
@@ -338,11 +339,11 @@ public class OrderServiceImpl implements IOrderService {
             recommandIncome.setComefrom(orders.getAccountid());
             double total = StringUtil.formatStr2Dobule(orders.getAmount());//此时的金额包含了邮费，需要先减去邮费
             total -= StringUtil.formatStr2Dobule(orders.getTransportfee());
-            recommandIncome.setIncome(StringUtil.caculteIncome(total,Integer.parseInt(wxPayConfiguration.getRecommandfee())));
+            recommandIncome.setIncome(StringUtil.caculteIncome(total, Integer.parseInt(wxPayConfiguration.getRecommandfee())));
             recommandIncome.setIncomedatetime(StringUtil.currentDateTime());
-            if("1".equals(paybybalance)){
+            if ("1".equals(paybybalance)) {
                 recommandIncome.setAlreadydone("1");
-            }else {
+            } else {
                 recommandIncome.setAlreadydone("0");
             }
             recommandIncome.setDescription("");
@@ -351,17 +352,17 @@ public class OrderServiceImpl implements IOrderService {
             List<RecommandIncome> list = new ArrayList<>();
             list.add(recommandIncome);
             recommandIncomeDao.insertRecommandIncomeOrBatch(list);
-            logger.info(String.format("新增推荐人[%s]/被推荐人[%s]收益关系[%s]成功",recommandIncome.getAccountid(),recommandIncome.getComefrom(),recommandIncome));
+            logger.info(String.format("新增推荐人[%s]/被推荐人[%s]收益关系[%s]成功", recommandIncome.getAccountid(), recommandIncome.getComefrom(), recommandIncome));
             return new BigDecimal(recommandIncome.getIncome()).doubleValue();
-        }else {
-            logger.info(String.format("未找到[%s]是被谁推荐的",orders.getAccountid()));
+        } else {
+            logger.info(String.format("未找到[%s]是被谁推荐的", orders.getAccountid()));
             return 0.0;
         }
     }
 
-    private void prePaySerial(Orders orders, String orderid, PayResult payResult,String paybybalance) {
+    private void prePaySerial(Orders orders, String orderid, PayResult payResult, String paybybalance) {
         //预支付流水生成
-        logger.info(String.format("根据微信预支付号[%s]生成一条支付流水",payResult.getPrepay_id()));
+        logger.info(String.format("根据微信预支付号[%s]生成一条支付流水", payResult.getPrepay_id()));
         List<CapitalSerial> capitalSerials = new ArrayList<>();
         CapitalSerial capitalSerial = new CapitalSerial();
         capitalSerial.setEmcapitalserial(orderid);
@@ -373,10 +374,10 @@ public class OrderServiceImpl implements IOrderService {
         capitalSerial.setReverse2("");
         capitalSerials.add(capitalSerial);
 //        1扣款成功，0扣款失败，2微信用户已经支付，但是微信后台没有通知到api
-        if("1".equals(paybybalance)){
+        if ("1".equals(paybybalance)) {
             capitalSerial.setState("1");
             capitalSerial.setThirdpartmsg("使用账户余额支付成功");
-        }else {
+        } else {
             capitalSerial.setThirdpartmsg("获取预支付ID成功");
             capitalSerial.setState("2");
         }
@@ -385,18 +386,18 @@ public class OrderServiceImpl implements IOrderService {
 
     private void updateShopcar(List<OrderItems> orderItemsList) {
         //根据订单明细，获取哪些是从购物车结账的
-        Map<String,OrderItems> shoppingCarMap = new HashMap<>();
+        Map<String, OrderItems> shoppingCarMap = new HashMap<>();
         List<String> shopcarids = new ArrayList<>();
-        for(OrderItems orderItems : orderItemsList){
+        for (OrderItems orderItems : orderItemsList) {
 //                            orderItems.setSerialid(StringUtil.generateUUID());
 //                            orderItems.setOrderid(orders.getOrderid());
-            if(!StringUtils.isEmpty(orderItems.getShopcarid())){
+            if (!StringUtils.isEmpty(orderItems.getShopcarid())) {
                 shopcarids.add(orderItems.getShopcarid());
-                shoppingCarMap.put(orderItems.getShopcarid(),orderItems);
+                shoppingCarMap.put(orderItems.getShopcarid(), orderItems);
             }
         }
-        if(shopcarids.size() > 0) {
-            logger.info(String.format("更新购物车中的明细记录[%s]",orderItemsList));
+        if (shopcarids.size() > 0) {
+            logger.info(String.format("更新购物车中的明细记录[%s]", orderItemsList));
             List<ShoppingCar> shoppingCarList = shoppingCarDao.queryListBySerialid(shopcarids);
             List<ShoppingCar> batchRemoveList = new ArrayList<>();
             for (ShoppingCar shoppingCar : shoppingCarList) {
@@ -428,34 +429,37 @@ public class OrderServiceImpl implements IOrderService {
          */
         String response;
         try {
+            if (xmlData.contains("<!ENTITY")) {
+                throw new APIException("此次请求报文[" + xmlData + "]存在引用了外部实体，可能存在XXE漏洞，已抛弃此次请求");
+            }
             WxPayOrderNotifyResult result = this.payService.parseOrderNotifyResult(xmlData);
-            logger.info(String.format("微信支付异步通知结果[%s]",result));
-            if(AppConstants.RETURN_CODE.equals(result.getReturnCode())){
+            logger.info(String.format("微信支付异步通知结果[%s]", result));
+            if (AppConstants.RETURN_CODE.equals(result.getReturnCode())) {
                 String orderid = result.getOutTradeNo();//商户订单号
-                Map<String,Object> map = new HashMap<>();
+                Map<String, Object> map = new HashMap<>();
                 Orders order = new Orders();
                 order.setOrderid(orderid);
-                map.put("orders",order);
-                List<Map<String,String>> querys = ordersDao.queryOrdersByPager(map);
+                map.put("orders", order);
+                List<Map<String, String>> querys = ordersDao.queryOrdersByPager(map);
 
                 map.remove("orders");
                 CapitalSerial queryCapitalSerial = new CapitalSerial();
                 queryCapitalSerial.setOrderid(orderid);
-                map.put("capital",queryCapitalSerial);
+                map.put("capital", queryCapitalSerial);
                 List<CapitalSerial> capitalSerials = capitalSerialDao.queryCapitalSerialByPager(map);
 
-                if(capitalSerials.size() == 0){
-                    throw new APIException(String.format("不存在订单[%s]对应的资金流水",orderid));
+                if (capitalSerials.size() == 0) {
+                    throw new APIException(String.format("不存在订单[%s]对应的资金流水", orderid));
                 }
-                if("1".equals(querys.get(0).get("isvalid")) && "2".equals(capitalSerials.get(0).getState())) {
-                    logger.info(String.format("根据微信扣款结果通知更新订单[%s]的信息",orderid));
+                if ("1".equals(querys.get(0).get("isvalid")) && "2".equals(capitalSerials.get(0).getState())) {
+                    logger.info(String.format("根据微信扣款结果通知更新订单[%s]的信息", orderid));
                     CapitalSerial capitalSerial = new CapitalSerial();
                     capitalSerial.setOrderid(orderid);
                     capitalSerial.setCapitaldatetime(StringUtil.currentDateTime());
 
                     Orders orders = new Orders();
                     orders.setOrderid(orderid);
-                    String isvalid ;
+                    String isvalid;
                     if (AppConstants.RESULT_CODE.equals(result.getResultCode())) {
                         //更新支付流水状态
                         capitalSerial.setState("1");
@@ -472,9 +476,9 @@ public class OrderServiceImpl implements IOrderService {
                         String recommandFee = updateAccountBanlaceAsRecommander(orderid);
 
                         //新增商户平台的订单提成
-                        double payAmount = result.getTotalFee() - StringUtil.multiply(querys.get(0).get("transportfee"),"100");//总支付金额-邮费，此时单位是分
+                        double payAmount = result.getTotalFee() - StringUtil.multiply(querys.get(0).get("transportfee"), "100");//总支付金额-邮费，此时单位是分
                         double fee = addOrderPrecentage(orderid, (int) payAmount);
-                        caculateFinalIncome(fee, new BigDecimal(recommandFee).doubleValue(), result,null);
+                        caculateFinalIncome(fee, new BigDecimal(recommandFee).doubleValue(), result, null);
 
                         isvalid = "1";
 
@@ -491,7 +495,7 @@ public class OrderServiceImpl implements IOrderService {
                     OrderTransport orderTransport = new OrderTransport();
                     orderTransport.setOrderid(orderid);
                     orderTransport.setIsvalid(isvalid);
-                    logger.info(String.format("更新订单[%s]的运费订单明细[%s]",orderid,orderTransport));
+                    logger.info(String.format("更新订单[%s]的运费订单明细[%s]", orderid, orderTransport));
                     orderTransportDao.updateRelationStateByOrderid(orderTransport);
 
                     //更新流水信息
@@ -502,12 +506,12 @@ public class OrderServiceImpl implements IOrderService {
                     logger.info(String.format("订单[%s]的流水信息更新成功[%s]", orderid, capitalSerial));
 
                     response = AppConstants.NOTIFY_RESPONSE_SUCCESS;
-                }else {
-                    response = String.format("支付扣款[%s]重复通知",result.getTransactionId());
+                } else {
+                    response = String.format("支付扣款[%s]重复通知", result.getTransactionId());
                     logger.info(response);
                 }
-            }else{
-                response = String.format(AppConstants.NOTIFY_RESPONSE_FAILED_TEMPLATE,"报文为空");
+            } else {
+                response = String.format(AppConstants.NOTIFY_RESPONSE_FAILED_TEMPLATE, "报文为空");
             }
             return response;
         } catch (WxPayException e) {
@@ -515,7 +519,7 @@ public class OrderServiceImpl implements IOrderService {
         }
     }
 
-    private void caculateFinalIncome(double platformFee,double recommandFee,WxPayOrderNotifyResult result,Map<String,String> feeMap){
+    private void caculateFinalIncome(double platformFee, double recommandFee, WxPayOrderNotifyResult result, Map<String, String> feeMap) {
         /**
          * 先查询订单运费表，获取各个familyid对应的邮费，然后支付金额减去订单总邮费得到钱A
          * 平台抽成从钱A中抽取
@@ -523,9 +527,9 @@ public class OrderServiceImpl implements IOrderService {
          */
         String orderid = result.getOutTradeNo();
         double totalTransPortFee;
-        Map<String,String> merchantFees;
-        if(feeMap == null) {
-            logger.info(String.format("开始查询订单[%s]内各个商户的邮费",orderid));
+        Map<String, String> merchantFees;
+        if (feeMap == null) {
+            logger.info(String.format("开始查询订单[%s]内各个商户的邮费", orderid));
             List<Map<String, String>> merchantTransports = orderTransportDao.queryDetailTransportFeeInOrder(orderid);
             merchantFees = new HashMap<>();
             if (merchantTransports.size() <= 1) {
@@ -541,76 +545,76 @@ public class OrderServiceImpl implements IOrderService {
 
             }
             totalTransPortFee = new BigDecimal(String.valueOf(merchantTransports.get(0).get("transportfee"))).doubleValue();//总运费
-        }else {
+        } else {
             merchantFees = feeMap;
             totalTransPortFee = new BigDecimal(feeMap.get("total")).doubleValue();
             merchantFees.remove("total");
         }
         logger.info(String.format("订单[%s]内的运费明细[%s]", orderid, merchantFees));
-        logger.info(String.format("开始为订单[%s]计算各个商户的最终收益",orderid));
+        logger.info(String.format("开始为订单[%s]计算各个商户的最终收益", orderid));
 //        double accountPay = result.getTotalFee() / 100.0;
-        double accountPay = StringUtil.divide(result.getTotalFee(),100);
+        double accountPay = StringUtil.divide(result.getTotalFee(), 100);
         double feeForSales = accountPay - platformFee - recommandFee - totalTransPortFee;//这里还需要减去所有订单内邮费
         Orders query = new Orders();
         query.setOrderid(orderid);
-        Map<String,Object> param = new HashMap<>();
-        param.put("orders",query);
-        List<Map<String,String>> list = ordersDao.queryOrdersByPager(param);
-        if (list.size() > 1){
-            throw new APIException(String.format("订单[%s]重复",orderid));
+        Map<String, Object> param = new HashMap<>();
+        param.put("orders", query);
+        List<Map<String, String>> list = ordersDao.queryOrdersByPager(param);
+        if (list.size() > 1) {
+            throw new APIException(String.format("订单[%s]重复", orderid));
         }
 
-        if(list.size() == 0){
-            throw new APIException(String.format("订单[%s]不存在，请联系管理员",orderid));
+        if (list.size() == 0) {
+            throw new APIException(String.format("订单[%s]不存在，请联系管理员", orderid));
         }
 
-        Map<String,String> map = list.get(0);
+        Map<String, String> map = list.get(0);
         String total = map.get("reverse1");//前端传过来总金额
         //订单内根据销售产品的商户，分类计算各个商户在该订单内销售总金额
-        List<Map<String,Object>> analyseResults = ordersDao.analyseSalerAmountInOrder(orderid);
-        if(analyseResults.size() == 0){
+        List<Map<String, Object>> analyseResults = ordersDao.analyseSalerAmountInOrder(orderid);
+        if (analyseResults.size() == 0) {
             throw new APIException("订单内的产品未找到相关上传人员，请联系管理员");
         }
 
         double totalMoney = new BigDecimal(total).doubleValue();
         List<String> updateAccounts = new ArrayList<>();
-        Map<String,Map<String,Object>> tmp = new HashMap<>();
-        for(Map<String,Object> singleMap : analyseResults){
+        Map<String, Map<String, Object>> tmp = new HashMap<>();
+        for (Map<String, Object> singleMap : analyseResults) {
             double part = new BigDecimal(String.valueOf(singleMap.get("money"))).doubleValue();
 //            double percent = part / totalMoney;
-            double percent = StringUtil.divide(part,totalMoney);
-            singleMap.put("percent",percent);
+            double percent = StringUtil.divide(part, totalMoney);
+            singleMap.put("percent", percent);
 //            singleMap.put("receiveMoney",feeForSales * percent);
-            singleMap.put("receiveMoney",StringUtil.multiply(feeForSales,percent));
+            singleMap.put("receiveMoney", StringUtil.multiply(feeForSales, percent));
             updateAccounts.add((String) singleMap.get("accountid"));
-            tmp.put((String) singleMap.get("accountid"),singleMap);
+            tmp.put((String) singleMap.get("accountid"), singleMap);
         }
 
 
         List<Account> accounts = accountService.queryByAccountids(updateAccounts);
-        for (Account account : accounts){
-            Map<String,Object> tempMap = tmp.get(account.getAccountid());
+        for (Account account : accounts) {
+            Map<String, Object> tempMap = tmp.get(account.getAccountid());
             double receive = (double) tempMap.get("receiveMoney");
             double balance = new BigDecimal(account.getAccobalance()).doubleValue();
             balance += receive;
             balance += new BigDecimal(merchantFees.get(account.getAccountid())).doubleValue();
             account.setAccobalance(String.valueOf(balance));
         }
-        logger.info(String.format("需要批量更新的卖家余额以及信息[%s]",accounts));
+        logger.info(String.format("需要批量更新的卖家余额以及信息[%s]", accounts));
         accountService.updateAccountIncomeBatch(accounts);
         logger.info(String.format("卖家余额批量更新成功"));
 
 
     }
 
-    private double addOrderPrecentage(String orderid,int amount){
-        logger.info(String.format("订单[%s]扣款成功，开始计算平台抽取费用",orderid));
+    private double addOrderPrecentage(String orderid, int amount) {
+        logger.info(String.format("订单[%s]扣款成功，开始计算平台抽取费用", orderid));
         Precentage precentage = new Precentage();
         precentage.setSerialid(StringUtil.generateUUID());
         precentage.setOrderid(orderid);
-        double money = StringUtil.divide(amount,100);
+        double money = StringUtil.divide(amount, 100);
 
-        money = StringUtil.multiply(money,StringUtil.divide(new BigDecimal(wxPayConfiguration.getPrecentage()).doubleValue(),100));
+        money = StringUtil.multiply(money, StringUtil.divide(new BigDecimal(wxPayConfiguration.getPrecentage()).doubleValue(), 100));
 //        money = money * Integer.parseInt(wxPayConfiguration.getPrecentage()) / 100;
         precentage.setPrecentage(String.valueOf(money));
         precentage.setDonedatetime(StringUtil.currentDateTime());
@@ -618,88 +622,88 @@ public class OrderServiceImpl implements IOrderService {
         List<Precentage> list = new ArrayList<>();
         list.add(precentage);
         precentageDao.insertBatchPrecentage(list);
-        logger.info(String.format("平台从订单[%s]提取[%s]收益,插入成功",orderid,money));
+        logger.info(String.format("平台从订单[%s]提取[%s]收益,插入成功", orderid, money));
         return money;
     }
 
     @Override
     public Map<String, List<Map<String, Object>>> accountOrderCenter(String accountid, String orderstate, Pager pager) {
-        logger.info(String.format("开始查询用户[%s]的订单详细信息",accountid));
+        logger.info(String.format("开始查询用户[%s]的订单详细信息", accountid));
 
-        Map<String,List<Map<String,Object>>> resultMap = new HashMap<>();
+        Map<String, List<Map<String, Object>>> resultMap = new HashMap<>();
 
         //orderstate--> 0未发货，1已发货待收货，2已收货，3退款
-        if("3".equals(orderstate)){
+        if ("3".equals(orderstate)) {
             //客户端查询退款订单的话，另外调用接口查询
-            Map<String,Object> params = new HashMap<>();
+            Map<String, Object> params = new HashMap<>();
             Refund refund = new Refund();
             refund.setAccountid(accountid);
 //            refund.setAgreestate("4");
-            params.put("refund",refund);
-            params.put("pager",pager);
-            params.put("end",StringUtil.currentDateTime());
+            params.put("refund", refund);
+            params.put("pager", pager);
+            params.put("end", StringUtil.currentDateTime());
             params.put("begin", DateUtil.caculateDate(-30));
 
-            resultMap.put("refundinfo",refundDao.refundSerialsInCenter(params));
-            resultMap.put("orderinfo",null);
-        }else {
+            resultMap.put("refundinfo", refundDao.refundSerialsInCenter(params));
+            resultMap.put("orderinfo", null);
+        } else {
             List<Map<String, Object>> list;
-            Map<String,Object> map = new HashMap<>();
-            map.put("accountid",accountid);
-            map.put("orderstate",orderstate);
-            map.put("pager",pager);
+            Map<String, Object> map = new HashMap<>();
+            map.put("accountid", accountid);
+            map.put("orderstate", orderstate);
+            map.put("pager", pager);
             list = ordersDao.accountOrderCenter(map);//如果orderstate有值，则查询有值的，如果不传，则查询除了3以外的所有订单
-            resultMap.put("orderinfo",list);
-            if (StringUtil.isEmpty(orderstate)){//不传的情况，针对3需要特殊接口查询
-                Map<String,Object> params = new HashMap<>();
+            resultMap.put("orderinfo", list);
+            if (StringUtil.isEmpty(orderstate)) {//不传的情况，针对3需要特殊接口查询
+                Map<String, Object> params = new HashMap<>();
                 Refund refund = new Refund();
                 refund.setAccountid(accountid);
 //                refund.setAgreestate("4");
-                params.put("refund",refund);
-                params.put("pager",pager);
-                params.put("end",StringUtil.currentDateTime());
-                params.put("begin",DateUtil.caculateDate(-30));
-                resultMap.put("refundinfo",refundDao.refundSerialsInCenter(params));
+                params.put("refund", refund);
+                params.put("pager", pager);
+                params.put("end", StringUtil.currentDateTime());
+                params.put("begin", DateUtil.caculateDate(-30));
+                resultMap.put("refundinfo", refundDao.refundSerialsInCenter(params));
             }
         }
-        logger.info(String.format("查询到用户[%s]需要的订单详细信息[%s]",accountid,resultMap));
+        logger.info(String.format("查询到用户[%s]需要的订单详细信息[%s]", accountid, resultMap));
         return resultMap;
     }
 
     @Override
     public Map<String, List<Map<String, Object>>> merchantQueryOrders(String accountid, String orderstate, Pager pager) {
-        logger.info(String.format("开始查询商户[%s]的订单详细信息",accountid));
+        logger.info(String.format("开始查询商户[%s]的订单详细信息", accountid));
 
-        Map<String,List<Map<String,Object>>> resultMap = new HashMap<>();
-        if("3".equals(orderstate)){
-            logger.info(String.format("查询商户[%s]的退款信息",accountid));
-            Map<String,Object> param = new HashMap<>();
-            param.put("accountid",accountid);
-            param.put("pager",pager);
-            resultMap.put("refundinfo",refundDao.merchantQueryRefundOrders(param));
+        Map<String, List<Map<String, Object>>> resultMap = new HashMap<>();
+        if ("3".equals(orderstate)) {
+            logger.info(String.format("查询商户[%s]的退款信息", accountid));
+            Map<String, Object> param = new HashMap<>();
+            param.put("accountid", accountid);
+            param.put("pager", pager);
+            resultMap.put("refundinfo", refundDao.merchantQueryRefundOrders(param));
 //            list.addAll(refundDao.merchantQueryRefundOrders(param));
-            logger.info(String.format("查询到商户[%s]的待确认的退款流水[%s]",accountid,resultMap));
-        }else {
+            logger.info(String.format("查询到商户[%s]的待确认的退款流水[%s]", accountid, resultMap));
+        } else {
             //要么查询全部，要么根据状态查询
-            Map<String,Object> map = new HashMap<>();
-            map.put("accountid",accountid);
-            map.put("orderstate",orderstate);
-            map.put("pager",pager);
-            resultMap.put("orderinfo",ordersDao.salerOrderCenter(map));
-            if(StringUtil.isEmpty(orderstate)){
-                Map<String,Object> param = new HashMap<>();
-                param.put("accountid",accountid);
-                param.put("pager",pager);
-                resultMap.put("refundinfo",(refundDao.merchantQueryRefundOrders(param)));
+            Map<String, Object> map = new HashMap<>();
+            map.put("accountid", accountid);
+            map.put("orderstate", orderstate);
+            map.put("pager", pager);
+            resultMap.put("orderinfo", ordersDao.salerOrderCenter(map));
+            if (StringUtil.isEmpty(orderstate)) {
+                Map<String, Object> param = new HashMap<>();
+                param.put("accountid", accountid);
+                param.put("pager", pager);
+                resultMap.put("refundinfo", (refundDao.merchantQueryRefundOrders(param)));
             }
         }
-        logger.info(String.format("查询到商户[%s]的订单中心信息[%s]",accountid,resultMap));
+        logger.info(String.format("查询到商户[%s]的订单中心信息[%s]", accountid, resultMap));
         return resultMap;
     }
 
     @Override
     public Orders updateOrderInfo(Orders orders) {
-        if(StringUtil.isEmpty(orders.getOrderid())){
+        if (StringUtil.isEmpty(orders.getOrderid())) {
             throw new APIException("更新的订单编号orderid不能为空");
         }
         orders.setReverse2("");
@@ -714,16 +718,16 @@ public class OrderServiceImpl implements IOrderService {
         String out_trade_no = orderid;
         String nonce_str = StringUtil.randomStr(32);
 
-        Map<String,String> urlparams = new TreeMap<>();
-        urlparams.put("appid",appid);
-        urlparams.put("mch_id",mch_id);
-        urlparams.put("out_trade_no",out_trade_no);
-        urlparams.put("nonce_str",nonce_str);
-        urlparams.put("sign_type","MD5");
+        Map<String, String> urlparams = new TreeMap<>();
+        urlparams.put("appid", appid);
+        urlparams.put("mch_id", mch_id);
+        urlparams.put("out_trade_no", out_trade_no);
+        urlparams.put("nonce_str", nonce_str);
+        urlparams.put("sign_type", "MD5");
 
         String contactParams = EncryptUtil.contactParams(urlparams);
         contactParams += "key=" + wxPayConfiguration.getMchKey();
-        logger.info(String.format("param[%s]",contactParams));
+        logger.info(String.format("param[%s]", contactParams));
         String sign = EncryptUtil.encodeMD5String(contactParams);
 
         StringBuilder builder = new StringBuilder();
@@ -735,83 +739,83 @@ public class OrderServiceImpl implements IOrderService {
         builder.append("<sign_type>").append("MD5").append("</sign_type>").append("</xml>");
 
         logger.info("xml-->" + builder.toString());
-        Map<String,String> map = new HashMap<>();
-        map.put("xml",builder.toString());
-        String response = WxLoginUtil.sendPost("https://api.mch.weixin.qq.com/pay/orderquery",map);
+        Map<String, String> map = new HashMap<>();
+        map.put("xml", builder.toString());
+        String response = WxLoginUtil.sendPost("https://api.mch.weixin.qq.com/pay/orderquery", map);
         return response;
     }
 
     @Override
     public Map<String, String> cancelPayOrder(String accountid, String orderid) {
-        logger.info(String.format("用户[%s]取消订单[%s]的支付",accountid,orderid));
+        logger.info(String.format("用户[%s]取消订单[%s]的支付", accountid, orderid));
         Orders cancelOrder = new Orders();
         cancelOrder.setOrderid(orderid);
         cancelOrder.setIsvalid("0");
-        logger.info(String.format("更新用户[%s]的订单[%s]状态为无效",accountid,orderid));
+        logger.info(String.format("更新用户[%s]的订单[%s]状态为无效", accountid, orderid));
         ordersDao.updatePartOrderMsg(cancelOrder);
-        logger.info(String.format("更新订单运费表中[%s]的订单[%s]的运费明细为无效",accountid,orderid));
+        logger.info(String.format("更新订单运费表中[%s]的订单[%s]的运费明细为无效", accountid, orderid));
         OrderTransport orderTransport = new OrderTransport();
         orderTransport.setOrderid(orderid);
         orderTransport.setIsvalid("3");//支付取消
         orderTransportDao.updateRelationStateByOrderid(orderTransport);
-        logger.info(String.format("更新[%s]的订单[%s]的资金流水为失效",accountid,orderid));
+        logger.info(String.format("更新[%s]的订单[%s]的资金流水为失效", accountid, orderid));
         CapitalSerial capitalSerial = new CapitalSerial();
         capitalSerial.setOrderid(orderid);
         capitalSerial.setState("3");
         capitalSerial.setThirdpartmsg("用户取消支付");
         capitalSerial.setCapitaldatetime(StringUtil.currentDateTime());
         capitalSerialDao.updateCapitalSerialInfo(capitalSerial);
-        logger.info(String.format("更新用户[%s]的订单[%s]带来的收益关系为无效",accountid,orderid));
+        logger.info(String.format("更新用户[%s]的订单[%s]带来的收益关系为无效", accountid, orderid));
         RecommandIncome recommandIncome = new RecommandIncome();
         recommandIncome.setIncomedatetime(StringUtil.currentDateTime());
         recommandIncome.setAlreadydone("2");//支付取消，收益无效
         recommandIncome.setDescription("支付取消，收益无效");
         recommandIncome.setIncomeserialno(orderid);
         recommandIncomeDao.updateIncomeSerial(recommandIncome);
-        logger.info(String.format("还原用户[%s]在订单[%s]内下的库存",accountid,orderid));
-        Map<String,Object> map = new HashMap<>();
+        logger.info(String.format("还原用户[%s]在订单[%s]内下的库存", accountid, orderid));
+        Map<String, Object> map = new HashMap<>();
         OrderItems param = new OrderItems();
         param.setOrderid(orderid);
-        map.put("orderitem",param);
-        List<Map<String,Object>> orderItems = orderItemsDao.queryItemsByPager(map);
-        for(Map<String,Object> items : orderItems){
+        map.put("orderitem", param);
+        List<Map<String, Object>> orderItems = orderItemsDao.queryItemsByPager(map);
+        for (Map<String, Object> items : orderItems) {
             ProductBelong queryParam = new ProductBelong();
             queryParam.setProductid((String) items.get("productid"));
 //            queryParam.setSalestate();
             ProductBelong productBelong = productBelongDao.queryBelongByProductid(queryParam);
-            if(productBelong != null){
+            if (productBelong != null) {
                 queryParam.setRemaindernum(productBelong.getRemaindernum() + Integer.parseInt(String.valueOf(items.get("pronumber"))));
                 productBelongDao.updateProductBelongRemaindernum(queryParam);
-            }else {
-                throw new APIException(String.format("商品[%s]不存在",items.get("productid")));
+            } else {
+                throw new APIException(String.format("商品[%s]不存在", items.get("productid")));
             }
         }
 
-        Map<String,String> result = new HashMap<>();
-        result.put("falg","ok");
-        result.put("msg",String.format("订单[%s]取消支付成功",orderid));
+        Map<String, String> result = new HashMap<>();
+        result.put("falg", "ok");
+        result.put("msg", String.format("订单[%s]取消支付成功", orderid));
         return result;
     }
 
-    private String updateAccountBanlaceAsRecommander(String recommandserialid){
+    private String updateAccountBanlaceAsRecommander(String recommandserialid) {
         RecommandIncome recommandIncome = new RecommandIncome();
         recommandIncome.setIncomeserialno(recommandserialid);
-        Map<String,Object> param = new HashMap<>();
-        param.put("income",recommandIncome);
+        Map<String, Object> param = new HashMap<>();
+        param.put("income", recommandIncome);
         List<RecommandIncome> queryResult = recommandIncomeDao.queryRecommandIncomeByPager(param);
-        if( queryResult == null || queryResult.size() == 0) {
+        if (queryResult == null || queryResult.size() == 0) {
 //            该笔订单的下单人，是自己进来系统的，不是被人推荐，所以不存在他下单的时候有收益流水。
 //            但是没有流水的话还需要查询recommand表判断一下，该用户是否是真的不是被推荐进来的，如果还是没有，则返回"0"
             Account account = accountService.queryByOrderid(recommandserialid);
-            if(account == null){
-                throw new APIException(String.format("订单[%s]不存在，请联系管理员",recommandserialid));
+            if (account == null) {
+                throw new APIException(String.format("订单[%s]不存在，请联系管理员", recommandserialid));
             }
-            if("1".equals(account.getCusttype())){
-                throw new APIException(String.format("账户[%s]被VIP推荐，但是尚未找到该账户的订单流水[%],请联系管理员",account.getAccountid(),recommandserialid));
-            }else {
+            if ("1".equals(account.getCusttype())) {
+                throw new APIException(String.format("账户[%s]被VIP推荐，但是尚未找到该账户的订单流水[%],请联系管理员", account.getAccountid(), recommandserialid));
+            } else {
                 return "0";
             }
-        }else if(queryResult.size() == 1 && queryResult.get(0) != null) {
+        } else if (queryResult.size() == 1 && queryResult.get(0) != null) {
             RecommandIncome income = queryResult.get(0);
             String accountid = income.getAccountid();//下单时绑定的推荐者id
             String amount = income.getIncome();//下单时计算好的收益
@@ -836,11 +840,11 @@ public class OrderServiceImpl implements IOrderService {
 
             return amount;
         } else {
-            throw new APIException(String.format("关于订单的[%s]的推荐流水大于1条，请联系管理员",recommandserialid));
+            throw new APIException(String.format("关于订单的[%s]的推荐流水大于1条，请联系管理员", recommandserialid));
         }
     }
 
-//    private String caculateAmount(String accountid,String amount){
+    //    private String caculateAmount(String accountid,String amount){
 //        logger.info(String.format("查询账户[%s]的详细信息",accountid));
 //        Account account = accountService.queryByAccountid(accountid);
 //        String finalAmount;
@@ -869,7 +873,7 @@ public class OrderServiceImpl implements IOrderService {
         recommandIncome.setAlreadydone("1");
         recommandIncome.setDescription("微信支付成功，获取收益费率");
         recommandIncomeDao.updateIncomeSerial(recommandIncome);
-        logger.info(String.format("更新推荐收益[%s]信息成功[%s]",recommandIncome.getIncomeserialno(),recommandIncome));
+        logger.info(String.format("更新推荐收益[%s]信息成功[%s]", recommandIncome.getIncomeserialno(), recommandIncome));
     }
 
     private void changeAccountScore(String orderid) {
@@ -885,27 +889,27 @@ public class OrderServiceImpl implements IOrderService {
 //            Map<String,Object> product = productDao.queryByProductId(productid);
 //            totalScore += Integer.parseInt(String.valueOf(product.get("valuescore")));
 //        }
-        Map<String,Object> map = new HashMap<>();
+        Map<String, Object> map = new HashMap<>();
         Orders orderQuery = new Orders();
         orderQuery.setOrderid(orderid);
-        map.put("orders",orderQuery);
-        List<Map<String,String>> targetOrders = ordersDao.queryOrdersByPager(map);
+        map.put("orders", orderQuery);
+        List<Map<String, String>> targetOrders = ordersDao.queryOrdersByPager(map);
         String accountid = targetOrders.get(0).get("accountid");
 
         Account queryAccount = accountService.queryByAccountid(accountid);
         String oldScore = queryAccount.getScore();
-        logger.info(String.format("根据账户id[%s]查询到原先的积分信息[%s]",queryAccount.getAccountid(),oldScore));
+        logger.info(String.format("根据账户id[%s]查询到原先的积分信息[%s]", queryAccount.getAccountid(), oldScore));
 
         Account account = new Account();
         account.setAccountid(accountid);
-        account.setScore(StringUtil.addNumber(oldScore,targetOrders.get(0).get("amount")));
+        account.setScore(StringUtil.addNumber(oldScore, targetOrders.get(0).get("amount")));
         accountService.updateAccountInfo(account);
-        logger.info(String.format("账户[%s]积分更新成功[%s]",accountid,account));
+        logger.info(String.format("账户[%s]积分更新成功[%s]", accountid, account));
     }
 
-    private PayResult buildPayResult(Orders orders){
+    private PayResult buildPayResult(Orders orders) {
         PayResult payResult = new PayResult();
-        logger.info(String.format("客户[%s]使用账户余额支付成功",orders.getAccountid()));
+        logger.info(String.format("客户[%s]使用账户余额支付成功", orders.getAccountid()));
         payResult.setReturn_code("SUCCESS");
         payResult.setResult_code("SUCCESS");
         payResult.setAppid(wxPayConfiguration.getAppId());
@@ -919,10 +923,10 @@ public class OrderServiceImpl implements IOrderService {
         return payResult;
     }
 
-    private PayResult buildPayResult(WxPayUnifiedOrderResult result,Orders orders){
+    private PayResult buildPayResult(WxPayUnifiedOrderResult result, Orders orders) {
         PayResult payResult = new PayResult();
-        logger.info(String.format("与微信服务端通讯成功，接受返回信息[%s]",result));
-        if(!StringUtils.isEmpty(result.getReturnCode()) && AppConstants.RETURN_CODE.equals(result.getReturnCode())){
+        logger.info(String.format("与微信服务端通讯成功，接受返回信息[%s]", result));
+        if (!StringUtils.isEmpty(result.getReturnCode()) && AppConstants.RETURN_CODE.equals(result.getReturnCode())) {
             payResult.setReturn_code(result.getReturnCode());
             payResult.setResult_code(result.getResultCode());
             payResult.setAppid(result.getAppid());
@@ -930,14 +934,14 @@ public class OrderServiceImpl implements IOrderService {
             payResult.setSign(buildPaySignAfterPrePay(result, payResult));
             payResult.setErr_code(result.getErrCode());
             payResult.setErr_code_msg(result.getErrCodeDes());
-            if(!StringUtils.isEmpty(result.getResultCode()) && AppConstants.RESULT_CODE.equals(result.getResultCode())) {
+            if (!StringUtils.isEmpty(result.getResultCode()) && AppConstants.RESULT_CODE.equals(result.getResultCode())) {
                 logger.info(String.format("微信处理接受预支付订单[%s]成功", orders.getOrderid()));
                 payResult.setTrade_type(result.getTradeType());
                 payResult.setPrepay_id(result.getPrepayId());
-            }else{
-                logger.info(String.format("微信处理接受与支付订单[%s]异常，错误代码[%s]，错误原因[%s]",orders.getOrderid(),payResult.getErr_code(),payResult.getErr_code_msg()));
+            } else {
+                logger.info(String.format("微信处理接受与支付订单[%s]异常，错误代码[%s]，错误原因[%s]", orders.getOrderid(), payResult.getErr_code(), payResult.getErr_code_msg()));
             }
-        }else{
+        } else {
             payResult.setReturn_code(result.getReturnCode());
             payResult.setErr_code_msg(result.getReturnMsg());
         }
@@ -945,29 +949,29 @@ public class OrderServiceImpl implements IOrderService {
         return payResult;
     }
 
-    private String buildPaySignAfterPrePay(WxPayUnifiedOrderResult result, PayResult payResult){
-        Map<String,String> param = new TreeMap<>();
-        param.put("appId",wxPayConfiguration.getAppId());
+    private String buildPaySignAfterPrePay(WxPayUnifiedOrderResult result, PayResult payResult) {
+        Map<String, String> param = new TreeMap<>();
+        param.put("appId", wxPayConfiguration.getAppId());
         String timestamp = String.valueOf(System.currentTimeMillis());
-        param.put("timeStamp",timestamp);
+        param.put("timeStamp", timestamp);
         payResult.setTimestamp(timestamp);
         String nonce = StringUtil.randomStr(32);
-        param.put("nonceStr",nonce);
+        param.put("nonceStr", nonce);
         payResult.setNonce_str(nonce);
 //        param.put("nonceStr",result.getNonceStr());
-        param.put("package","prepay_id="+result.getPrepayId());
-        param.put("signType","MD5");
+        param.put("package", "prepay_id=" + result.getPrepayId());
+        param.put("signType", "MD5");
 
         String contactParams = EncryptUtil.contactParams(param);
-        logger.info(String.format("返回客户端之前需要签名的字段[%s]",contactParams));
+        logger.info(String.format("返回客户端之前需要签名的字段[%s]", contactParams));
         contactParams += "key=" + wxPayConfiguration.getMchKey();
         String sign = EncryptUtil.encodeMD5String(contactParams);
-        logger.info(String.format("预支付之后的sign[%s]",sign));
+        logger.info(String.format("预支付之后的sign[%s]", sign));
 
         return sign;
     }
 
-    private WxPayUnifiedOrderRequest assembelyOrderRequest(Map<String,Object> params){
+    private WxPayUnifiedOrderRequest assembelyOrderRequest(Map<String, Object> params) {
         WxPayUnifiedOrderRequest request = WxPayUnifiedOrderRequest.newBuilder().build();
         request.setAppid(wxPayConfiguration.getAppId());
         request.setMchId(wxPayConfiguration.getMchId());
@@ -980,29 +984,29 @@ public class OrderServiceImpl implements IOrderService {
         request.setSpbillCreateIp((String) params.get("clientip"));//客户端ip，小程序
         Orders orders = (Orders) params.get("orders");
         request.setOutTradeNo(orders.getOrderid());//商户订单号
-        request.setTotalFee((int) StringUtil.multiply(orders.getAmount(),"100"));//订单总金额
+        request.setTotalFee((int) StringUtil.multiply(orders.getAmount(), "100"));//订单总金额
         request.setTradeType(AppConstants.TRADE_TYPE);
         request.setSignType(AppConstants.SIGN_TYPE_MD5);
 
-        Map<String,String> urlparams = new TreeMap<>();
-        urlparams.put("appid",request.getAppid());
-        urlparams.put("attach",request.getAttach());
-        urlparams.put("body",request.getBody());
-        urlparams.put("mch_id",request.getMchId());
-        urlparams.put("detail",request.getDetail());
-        urlparams.put("nonce_str",request.getNonceStr());
-        urlparams.put("notify_url",request.getNotifyURL());
-        urlparams.put("openid",request.getOpenid());
-        urlparams.put("out_trade_no",request.getOutTradeNo());
-        urlparams.put("spbill_create_ip",request.getSpbillCreateIp());
-        urlparams.put("total_fee",String.valueOf(request.getTotalFee()));
-        urlparams.put("trade_type",request.getTradeType());
+        Map<String, String> urlparams = new TreeMap<>();
+        urlparams.put("appid", request.getAppid());
+        urlparams.put("attach", request.getAttach());
+        urlparams.put("body", request.getBody());
+        urlparams.put("mch_id", request.getMchId());
+        urlparams.put("detail", request.getDetail());
+        urlparams.put("nonce_str", request.getNonceStr());
+        urlparams.put("notify_url", request.getNotifyURL());
+        urlparams.put("openid", request.getOpenid());
+        urlparams.put("out_trade_no", request.getOutTradeNo());
+        urlparams.put("spbill_create_ip", request.getSpbillCreateIp());
+        urlparams.put("total_fee", String.valueOf(request.getTotalFee()));
+        urlparams.put("trade_type", request.getTradeType());
 
         String contactParams = EncryptUtil.contactParams(urlparams);
         contactParams += "key=" + wxPayConfiguration.getMchKey();
-        logger.info(String.format("param[%s]",contactParams));
+        logger.info(String.format("param[%s]", contactParams));
         request.setSign(EncryptUtil.encodeMD5String(contactParams));
 
-        return  request;
+        return request;
     }
 }
