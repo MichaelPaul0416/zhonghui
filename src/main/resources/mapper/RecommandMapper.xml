@@ -82,6 +82,6 @@
     </select>
 
     <select id="queryRecommandByAccountid" parameterType="java.lang.String" resultMap="relation">
-        select a.accountid,a.isvip,a.custtype,b.recommander from trecommand a,taccount b where a.accountid = b.accountid and a.accountid = #{_parameter}
+        select a.accountid,a.isvip,a.custtype,b.recommander from trecommand b,taccount a where a.accountid = b.accountid and a.accountid = #{_parameter}
     </select>
 </mapper>

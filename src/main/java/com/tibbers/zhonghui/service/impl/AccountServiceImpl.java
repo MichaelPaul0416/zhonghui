@@ -282,10 +282,14 @@ public class AccountServiceImpl implements IAccountService {
         logger.info(String.format("根据openid[%s]查询account信息",openid));
         Account account = accountServiceDao.queryAccountByOpenid(openid);
 
-        boolean accountName = !StringUtil.isEmpty(account.getAccountname());
-        boolean image = !StringUtil.isEmpty(account.getImagepath());
-        //都不为空才返回信息完整
-        return accountName && image;
+        if(account != null) {
+            boolean accountName = !StringUtil.isEmpty(account.getAccountname());
+            boolean image = !StringUtil.isEmpty(account.getImagepath());
+            //都不为空才返回信息完整
+            return accountName && image;
+        }else{
+            return false;
+        }
     }
 
 
