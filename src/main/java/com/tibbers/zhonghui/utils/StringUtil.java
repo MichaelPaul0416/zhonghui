@@ -145,7 +145,7 @@ public class StringUtil {
     }
 
     public static void main(String args[]){
-        System.out.println(caculteIncome(12.2,2));
+        System.out.println(caculteIncome(29.45,2));
     }
 }
 
