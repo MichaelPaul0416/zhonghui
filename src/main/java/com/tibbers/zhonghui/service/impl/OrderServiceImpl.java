@@ -330,9 +330,10 @@ public class OrderServiceImpl implements IOrderService {
 
     private double generateRecommandRelation(Orders orders, String paybybalance) {
         logger.info(String.format("开始查询推荐[%s]的账户", orders.getAccountid()));
-        Map<String, String> query = recommandDao.queryRecommandByAccountid(orders.getAccountid());
-        if (query != null && query.size() == 1 && "1".equals("custtype") && "0".equals(query.get("isvip"))) {//不是vip并且是被推荐用户才需要计算推荐收益费用
-            String recommander = query.get("recommander");
+        List<Map<String, String>> query = recommandDao.queryRecommandByAccountid(orders.getAccountid());
+        if (query != null && query.size() == 1 && "1".equals(query.get(0).get("custtype")) && "0".equals(query.get(0).get("isvip"))) {//不是vip并且是被推荐用户才需要计算推荐收益费用
+            Map<String,String> queryMap = query.get(0);
+            String recommander = queryMap.get("recommander");
             RecommandIncome recommandIncome = new RecommandIncome();
             recommandIncome.setIncomeserialno(orders.getOrderid());//关联订单
             recommandIncome.setAccountid(recommander);
@@ -811,7 +812,7 @@ public class OrderServiceImpl implements IOrderService {
                 throw new APIException(String.format("订单[%s]不存在，请联系管理员", recommandserialid));
             }
             if ("1".equals(account.getCusttype())) {
-                throw new APIException(String.format("账户[%s]被VIP推荐，但是尚未找到该账户的订单流水[%],请联系管理员", account.getAccountid(), recommandserialid));
+                throw new APIException(String.format("账户[%s]被VIP推荐，但是尚未找到该账户的订单流水[%s],请联系管理员", account.getAccountid(), recommandserialid));
             } else {
                 return "0";
             }
