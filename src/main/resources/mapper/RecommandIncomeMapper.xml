@@ -38,7 +38,7 @@
             <if test="income.accountid != null and !&quot;&quot;.equals(income.accountid)">and t1.accountid = #{income.accountid} </if>
             <if test="income.comefrom != null and !&quot;&quot;.equals(income.comefrom)">and t1.comefrom = #{income.comefrom} </if>
             <if test="income.description != null and !&quot;&quot;.equals(income.description)">and t1.description like '%' #{income.description} '%' </if>
-            <if test="income.alreadydone != null and !&quot;&quot;.equals(income.alreadydone)">and t1.alreadydone = #{income.alreadydone} '%' </if>
+            <if test="income.alreadydone != null and !&quot;&quot;.equals(income.alreadydone)">and t1.alreadydone = #{income.alreadydone} </if>
             <if test="income.reverse1 != null and !&quot;&quot;.equals(income.reverse1)"> and t1.reverse1 = #{income.reverse1}</if>
             <if test="income.reverse2 != null "> and t1.reverse2 = #{income.reverse2}</if>
         </if>
