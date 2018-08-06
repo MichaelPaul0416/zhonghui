@@ -53,7 +53,7 @@ public class WithDrawServiceImpl implements IWithDrawService{
                         update.setAccountid(accountid);
                         update.setAccobalance(String.valueOf(current));
                         logger.info(String.format("开始更新账户[%s]的账户余额",account.getAccountid()));
-                        accountServiceDao.updateAccountInfo(account);
+                        accountServiceDao.updateAccountInfo(update);
                         logger.info(String.format("冻结账户[%s]余额[%s]成功",account.getAccountid(),withDraw.getAmount()));
                     }
                 }else {
